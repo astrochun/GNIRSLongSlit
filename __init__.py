@@ -17,4 +17,4 @@ import GNIRSLongSlit
 
 import hdr_info
 
-
+reload(hdr_info)
