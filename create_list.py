@@ -16,7 +16,7 @@ from astropy.io import fits
 import numpy as np
 import glob
 
-from astropy.table import Table
+from astropy.table import Table, Column
 from astropy import log
 
 def main(path0, silent=False, verbose=True):
@@ -37,12 +37,23 @@ def main(path0, silent=False, verbose=True):
 	  
     Returns
     -------
+    ASCII files containing the filenames for each set
+     obj.lis      - List of science data frames
+     sky.lis      - List of science data frames to be used for sky-subtraction
+     arc.lis      - List of Arclamp data frames
+     flat.lis     - List of Flat data frames
+     telluric.lis - List of Telluric data frames
+
     tab0 : astropy.table.Table
-     Astropy ASCII table written to [path0]+'hdr_info.tbl'
+     Astropy ASCII table with QA flag written to [path0]+'hdr_info.QA.tbl'
 
     Notes
     -----
     Created by Chun Ly, 5 March 2017
+     - Later modified to output ASCII table (hdr_info.QA.tbl) containing a
+       column called 'QA' with information of how each FITS file was
+       classified. This is to enable quick check that each dataset if
+       properly classified
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -75,6 +86,7 @@ def main(path0, silent=False, verbose=True):
               ('H2_' not in filter2[ii] and 'H_' not in filter2[ii]))]
     i_sci = np.array(i_sci)
 
+    # Note: Assumes that dithering pattern is ABA'B'
     if len(i_sci) >0:
         i_obj = i_sci[np.arange(0,len(i_sci),2)]
         i_sky = i_sci[np.arange(1,len(i_sci),2)]
@@ -88,14 +100,26 @@ def main(path0, silent=False, verbose=True):
     index  = [i_arc, i_flat, i_tell, i_obj, i_sky]
     zip0   = zip(prefix, index)
 
+    QA = ['N/A'] * len0 # Later + on 05/03/2017
+
     for a,b in zip0:
+        for idx in b: QA[idx] = a
         outfile = path0+a+'.lis'
         if silent == False: log.info('## Writing : '+outfile)
         np.savetxt(outfile, tab0['filename'][b], fmt='%s')
         #asc.write will not work. Will not produce single column
         #asc.write(tab0[b], outfile, overwrite=True,
         #          format='no_header')
-        
+
+    # Later + on 05/03/2017
+    col0 = Column(QA, name='QA')
+    tab0.add_column(col0)
+
+    # Later + on 05/03/2017
+    outfile2 = infile.replace('.tbl', '.QA.tbl')
+    if silent == False: log.info('## Writing : '+outfile2)
+    asc.write(tab0, outfile2, format='fixed_width_two_line')
+
     if silent == False: log.info('### End main : '+systime())
 #enddef
 
