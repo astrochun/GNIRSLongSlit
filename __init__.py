@@ -16,5 +16,7 @@ import GNIRSLongSlit
 """
 
 import hdr_info
+import create_list
 
 reload(hdr_info)
+reload(create_list)

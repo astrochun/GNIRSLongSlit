@@ -45,6 +45,9 @@ def main(path0, silent=False, verbose=True):
     -----
     Created by Chun Ly, 4 March 2017
      - Later re-organized to check for file first
+    Modified by Chun Ly, 5 March 2017
+     - File exists warning always printed out
+     - Include AIRMASS
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -52,28 +55,31 @@ def main(path0, silent=False, verbose=True):
     outfile = path0 + 'hdr_info.tbl'
 
     # Mod later on 04/03/2017 to not overwrite file
+    # Mod on 05/03/2017 to always print out this warning
     if exists(outfile):
-        if silent == False:
-            log.warning('## File exists : '+outfile)
-            log.warning('## Not over-writing!!! ')
+        log.warning('## File exists : '+outfile)
+        log.warning('## Not over-writing!!! ')
     else:
         fits_files = glob.glob(path0+'N*fits')
         n_files = len(fits_files)
 
+        # Mod on 05/03/2017 to include airmass
         names0 = ('filename', 'datelabel', 'UT_date', 'obstype', 'object',
-                  'exptime', 'grating', 'gratwave', 'filter1', 'filter2',
-                  'slit')
+                  'exptime', 'airmass', 'grating', 'gratwave', 'filter1',
+                  'filter2', 'slit')
         dtype0 = ('S20', 'S30', 'S25', 'S8', 'S100',
-                  'f8', 'S15', 'f8', 'S10', 'S10', 'S20')
+                  'f8', 'f8', 'S15', 'f8', 'S10', 'S10', 'S20')
         tab0 = Table(names=names0, dtype=dtype0)
 
         for nn in xrange(n_files):
             basename = os.path.basename(fits_files[nn])
             if verbose == True: log.info('## Reading : '+basename)
             h0 = fits.getheader(fits_files[nn])
+            # Mod on 05/03/2017 to include airmass
             vec0 = [basename, h0['DATALAB'], h0['DATE-OBS']+'T'+h0['UT'],
-                    h0['OBSTYPE'], h0['OBJECT'], h0['EXPTIME'], h0['GRATING'],
-                    h0['GRATWAVE'], h0['FILTER1'], h0['FILTER2'], h0['SLIT']]
+                    h0['OBSTYPE'], h0['OBJECT'], h0['EXPTIME'], h0['AIRMASS'],
+                    h0['GRATING'], h0['GRATWAVE'], h0['FILTER1'],
+                    h0['FILTER2'], h0['SLIT']]
             tab0.add_row(vec0)
 
         if silent == False: log.info('## Writing : '+outfile)
