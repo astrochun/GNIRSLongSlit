@@ -43,6 +43,7 @@ def main(path0, silent=False, verbose=True):
      arc.lis      - List of Arclamp data frames
      flat.lis     - List of Flat data frames
      telluric.lis - List of Telluric data frames
+     all.lis      - List of all obj, sky, arc, flat, and telluric data frames
 
     tab0 : astropy.table.Table
      Astropy ASCII table with QA flag written to [path0]+'hdr_info.QA.tbl'
@@ -54,6 +55,8 @@ def main(path0, silent=False, verbose=True):
        column called 'QA' with information of how each FITS file was
        classified. This is to enable quick check that each dataset if
        properly classified
+     - Later modified to include all.lis output
+     - Later modified to define r0 (for slight speed improvement
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -67,20 +70,21 @@ def main(path0, silent=False, verbose=True):
     if silent == False: log.info('### Reading: '+infile)
     tab0 = asc.read(infile, format='fixed_width_two_line')
     len0 = len(tab0)
+    r0   = xrange(len0)
 
     obstype = tab0['obstype']
     object0 = tab0['object']
     filter2 = tab0['filter2']
 
-    i_arc  = [ii for ii in range(len0) if obstype[ii] == 'ARC']
-    i_flat = [ii for ii in range(len0) if obstype[ii] == 'FLAT']
+    i_arc  = [ii for ii in r0 if obstype[ii] == 'ARC']
+    i_flat = [ii for ii in r0 if obstype[ii] == 'FLAT']
 
-    i_tell = [ii for ii in range(len0) if
+    i_tell = [ii for ii in r0 if
               (obstype[ii] == 'OBJECT' and
                ('HIP' in object0[ii] or 'HD' in object0[ii]) and
                ('H2_' not in filter2[ii] and 'H_' not in filter2[ii]))]
 
-    i_sci = [ii for ii in range(len0) if
+    i_sci = [ii for ii in r0 if
              (obstype[ii] == 'OBJECT' and
               ('HIP' not in object0[ii] and 'HD' not in object0[ii]) and
               ('H2_' not in filter2[ii] and 'H_' not in filter2[ii]))]
@@ -112,13 +116,22 @@ def main(path0, silent=False, verbose=True):
         #          format='no_header')
 
     # Later + on 05/03/2017
+    i_all    = [ii for ii in r0 if QA[ii] != 'N/A']
+    outfile0 = path0+'all.lis'
+    if silent == False: log.info('## Writing : '+outfile0)
+    np.savetxt(outfile0, tab0['filename'][i_all], fmt='%s')
+
+    # Later + on 05/03/2017
     col0 = Column(QA, name='QA')
     tab0.add_column(col0)
 
     # Later + on 05/03/2017
     outfile2 = infile.replace('.tbl', '.QA.tbl')
-    if silent == False: log.info('## Writing : '+outfile2)
-    asc.write(tab0, outfile2, format='fixed_width_two_line')
+    if silent == False:
+        if not exists(outfile2):
+            log.info('## Writing : '+outfile2)
+        else: log.info('## Overwriting : '+outfile2)
+    asc.write(tab0, outfile2, format='fixed_width_two_line', overwrite=True)
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
