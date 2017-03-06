@@ -17,6 +17,9 @@ import GNIRSLongSlit
 
 import hdr_info
 import create_list
+import cleanir
+import QA_plot
 
 reload(hdr_info)
 reload(create_list)
+reload(QA_plot)
