@@ -2,7 +2,7 @@
 cleanir_script
 ====
 
-Provide description for code here.
+Creates UNIX-based .sh script to run cleanir.py
 """
 
 import sys, os
@@ -33,7 +33,7 @@ cmd0   = co_dir+'cleanir.py'
 def run(path0, clean_file='', out_script='', silent=False, verbose=True):
 
     '''
-    Run cleanir.py for a set of files
+    Create a .sh script to run cleanir.py for a set of files
 
     Parameters
     ----------
@@ -93,7 +93,7 @@ def zcalbase_gal_gemini_2017a():
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
 
-    targets0 = ['DEEP05', 'DEEP06', 'DEEP07'] #, 'Keck03', 'Keck27', 'MMT37']
+    targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
 
     for target in targets0:
         run(path0+target+'/', out_script=path0+'run_cleanir.'+target+'.sh')
