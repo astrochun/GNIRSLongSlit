@@ -61,7 +61,7 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
 
     Notes
     -----
-    Created by Chun Ly, 7 March 2017
+    Created by Chun Ly, 6 March 2017
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -111,11 +111,14 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
             txt0 += 'Date Label : '+tmp['datelabel']+'\n'
             txt0 += 'UT Date : '+tmp['UT_date']+'\n'
             txt0 += tmp['object']+'\n'
-            txt0 += 'EXPTIME=%.1f AIRMASS=%.3f \n' % (tmp['exptime'],tmp['airmass'])
-            txt0 += '%s %.3f %s' % (tmp['grating'],tmp['gratwave'],tmp['filter2'])
+            txt0 += 'EXPTIME=%.1f ' % tmp['exptime']
+            txt0 += 'AIRMASS=%.3f \n' % tmp['airmass']
+            txt0 += '%s %.3f %s' % (tmp['grating'],tmp['gratwave'],
+                                    tmp['filter2'])
 
-        gc.add_label(0.975, 0.115, txt0, color='red', relative=True, bbox=bbox_props,
-                     ha='right', va='bottom', weight='medium', size='medium')
+        gc.add_label(0.975, 0.115, txt0, color='red', relative=True, ha='right',
+                     va='bottom', weight='medium', size='medium',
+                     bbox=bbox_props, )
 
         gc.savefig(pp, format='pdf')
 
@@ -125,3 +128,29 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
     if silent == False: log.info('### End main : '+systime())
 #enddef
 
+def zcalbase_gal_gemini_2017a_raw():
+    '''
+    Function to run main() on each set of GNIRS 2017A observation set
+    to obtain PDF plots of each *raw* FITS image for visual examination
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Created by Chun Ly, 6 March 2017
+    '''
+
+    path0 = '/Users/cly/data/Observing/Gemini/Data/'
+
+    targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+
+    for target in targets0:
+        main('all.lis', path0=path0+target+'/', out_pdf='QA_plot.raw.pdf')
+
+#enddef
