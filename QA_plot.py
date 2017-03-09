@@ -185,7 +185,7 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
         fig = plt.figure(figsize=(16,8))
 
         gc1 = aplpy.FITSFigure(orig_file, figure=fig,
-                               subplot=[0.05,0.055,0.4675,0.94])
+                               subplot=[0.05,0.055,0.47,0.94])
         z1, z2 = zscale.get_limits(im1)
         gc1.show_grayscale(invert=True, vmin=z1, vmax=z2)
         gc1.set_tick_color('black')
@@ -197,7 +197,7 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
                       bbox=bbox_props)
 
         gc2 = aplpy.FITSFigure(files[nn], figure=fig,
-                               subplot=[0.525,0.055,0.4675,0.94])
+                               subplot=[0.525,0.055,0.47,0.94])
         z1, z2 = zscale.get_limits(im2)
         gc2.show_grayscale(invert=True, vmin=z1, vmax=z2)
         gc2.set_tick_color('black')
