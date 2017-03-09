@@ -54,7 +54,7 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
 
     verbose : boolean
       Turns on additional stdout messages. Default: True
-	  
+
     Returns
     -------
     multi-page PDF plot
@@ -118,7 +118,7 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
 
         gc.add_label(0.975, 0.115, txt0, color='red', relative=True, ha='right',
                      va='bottom', weight='medium', size='medium',
-                     bbox=bbox_props, )
+                     bbox=bbox_props)
 
         gc.savefig(pp, format='pdf')
 
@@ -126,6 +126,97 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
     pp.close()
 
     if silent == False: log.info('### End main : '+systime())
+#enddef
+
+def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
+    '''
+    Visually compare raw and cleanir-fixed FITS images
+
+    Parameters
+    ----------
+    path0 : str
+      Full path to where output PDF and inputs FITS file are located. Must end
+      with a '/'
+
+    out_pdf : str
+      Filename for output PDF. Do NOT include full path
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+    multi-page PDF plot
+
+    Notes
+    -----
+    Created by Chun Ly, 8 March 2017
+    '''
+
+    if silent == False: log.info('### Begin clean_QA : '+systime())
+
+    if out_pdf == '':
+        out_pdf = path0+'QA_plot.pdf'
+    else:
+        out_pdf = path0+out_pdf
+
+    files   = glob.glob(path0+'cN*fits')
+    n_files = len(files)
+
+    pp = PdfPages(out_pdf)
+
+    for nn in xrange(n_files):
+        if silent == False: log.info('## Reading : '+files[nn])
+        orig_file = files[nn].replace('cN','N')
+
+        im1 = fits.getdata(orig_file)
+        im2 = fits.getdata(files[nn])
+        #hdu1 = fits.open(orig_file)
+        #im1  = hdu1[1].data
+        #hdu1[1].header = hdu1[0].header # Copy WCS header over
+
+        #hdu2 = fits.open(files[nn])
+        #im2  = hdu2[1].data
+        #hdu2[1].header = hdu2[0].header # Copy WCS header over
+
+        fig = plt.figure(figsize=(16,8))
+
+        gc1 = aplpy.FITSFigure(orig_file, figure=fig,
+                               subplot=[0.05,0.055,0.4675,0.94])
+        z1, z2 = zscale.get_limits(im1)
+        gc1.show_grayscale(invert=True, vmin=z1, vmax=z2)
+        gc1.set_tick_color('black')
+        gc1.set_tick_yspacing('auto')
+        #gc1.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
+        #gc1.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
+        gc1.add_label(0.025, 0.975, orig_file, color='red', relative=True,
+                      ha='left', va='top', weight='medium', size='medium',
+                      bbox=bbox_props)
+
+        gc2 = aplpy.FITSFigure(files[nn], figure=fig,
+                               subplot=[0.525,0.055,0.4675,0.94])
+        z1, z2 = zscale.get_limits(im2)
+        gc2.show_grayscale(invert=True, vmin=z1, vmax=z2)
+        gc2.set_tick_color('black')
+        gc2.set_tick_yspacing('auto')
+        gc2.hide_ytick_labels()
+        gc2.hide_yaxis_label()
+        gc2.add_label(0.025, 0.975, files[nn], color='red', relative=True,
+                      ha='left', va='top', weight='medium', size='medium',
+                      bbox=bbox_props)
+
+        #gc2.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
+        #gc2.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
+
+        fig.savefig(pp, format='pdf')
+
+    if silent == False: log.info('## Reading : '+out_pdf)
+    pp.close()
+
+    if silent == False: log.info('### End clean_QA : '+systime())
 #enddef
 
 def zcalbase_gal_gemini_2017a_raw():
@@ -152,5 +243,32 @@ def zcalbase_gal_gemini_2017a_raw():
 
     for target in targets0:
         main('all.lis', path0=path0+target+'/', out_pdf='QA_plot.raw.pdf')
+
+#enddef
+
+def zcalbase_gal_gemini_2017a_cleanir():
+    '''
+    Function to run main() on each set of GNIRS 2017A observation set
+    to obtain PDF plots of each *raw* FITS image for visual examination
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Created by Chun Ly, 6 March 2017
+    '''
+
+    path0 = '/Users/cly/data/Observing/Gemini/Data/'
+
+    targets0 = ['DEEP05'] #, 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+
+    for target in targets0:
+        clean_QA(path0=path0+target+'/', out_pdf='QA_plot.clean.pdf')
 
 #enddef
