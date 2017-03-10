@@ -266,7 +266,7 @@ def zcalbase_gal_gemini_2017a_cleanir():
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
 
-    targets0 = ['DEEP05'] #, 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+    targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
 
     for target in targets0:
         clean_QA(path0=path0+target+'/', out_pdf='QA_plot.clean.pdf')
