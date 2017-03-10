@@ -27,6 +27,8 @@ from astropy.visualization import ZScaleInterval
 zscale = ZScaleInterval()
 import aplpy
 
+from astropy.stats import sigma_clipped_stats # + on 10/03/2017
+
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
 def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
@@ -147,6 +149,7 @@ def quadrant_bias_values(hdu, gc0):
     Notes
     -----
     Created by Chun Ly, 10 March 2017
+     - Later added to compute values using a sigma-clipping approach
     '''
     bad = -9.e6
 
@@ -176,15 +179,27 @@ def quadrant_bias_values(hdu, gc0):
     quad3 = quads[    0:qysize,       0:qxsize]
     quad4 = quads[    0:qysize,  qxsize:naxis1]
 
-    str0 = ''
+    str0 = 'CLEANIR Methodology\n'
+    str1 = 'Sigma-clipped Methodology\n'
+
     for qq,quad0 in zip(range(1,5),[quad1,quad2,quad3,quad4]):
         mean0 = np.mean(quad0)
         med0  = np.median(quad0)
         sig0  = np.std(quad0)
         str0 += 'Q%i mean=%.3f median=%.3f sigma=%.3f' % (qq,mean0,med0,sig0)
         if qq != 4: str0 += '\n'
-    gc0.add_label(0.99,0.055, str0, color='red', relative=True, ha='right',
+
+        # Later + on 10/03/2017
+        mean0, med0, sig0 = sigma_clipped_stats(quad0, sigma=2.0, iters=10)
+        str1 += 'Q%i mean=%.3f median=%.3f sigma=%.3f' % (qq,mean0,med0,sig0)
+        if qq != 4: str1 += '\n'
+
+    gc0.add_label(0.99,0.060, str0, color='red', relative=True, ha='right',
                   va='bottom', weight='medium', size='medium', bbox=bbox_props)
+    # Later + on 10/03/2017
+    gc0.add_label(0.99,0.200, str1, color='red', relative=True, ha='right',
+                  va='bottom', weight='medium', size='medium', bbox=bbox_props)
+
 #enddef
 
 def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
