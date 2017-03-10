@@ -128,6 +128,65 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
     if silent == False: log.info('### End main : '+systime())
 #enddef
 
+def quadrant_bias_values(hdu, gc0):
+    '''
+    Compute median, mean, and average and annotate subplots
+
+    Parameters
+    ----------
+    hdu : an `HDUList` object
+      `HDUList` containing all of the header data units in the file.
+
+    gc0 : aplpy FITSFigure
+      A pointer to the aplpy.FITSFigure class
+
+    Returns
+    -------
+    Annotates subplots through gc0
+
+    Notes
+    -----
+    Created by Chun Ly, 10 March 2017
+    '''
+    bad = -9.e6
+
+    next = len(hdu)
+    if ( next == 1 ):
+        sci = 0
+    elif ( next < 5 ):
+        sci = 1
+    else:
+        sci = 2
+
+    naxis1, naxis2 = hdu[sci].header['naxis1'], hdu[sci].header['naxis2']
+
+    qxsize = naxis1 / 2 # quadrant x size
+    qysize = naxis2 / 2 # quadrant y size
+
+    q1x1,q1x2, q1y1,q1y2 = 0,qxsize,      qysize,naxis2  # quad 1
+    q2x1,q2x2, q2y1,q2y2 = qxsize,naxis1, qysize,naxis2  # quad 2
+    q3x1,q3x2, q3y1,q3y2 = 0,qxsize,           0,qysize  # quad 3
+    q4x1,q4x2, q4y1,q4y2 = qxsize,naxis1,      0,qysize  # quad 4
+
+    im0 = np.array(hdu[sci].data)
+
+    quads = im0.copy()
+    quad1 = quads[qysize:naxis2,      0:qxsize]
+    quad2 = quads[qysize:naxis2, qxsize:naxis1]
+    quad3 = quads[    0:qysize,       0:qxsize]
+    quad4 = quads[    0:qysize,  qxsize:naxis1]
+
+    str0 = ''
+    for qq,quad0 in zip(range(1,5),[quad1,quad2,quad3,quad4]):
+        mean0 = np.mean(quad0)
+        med0  = np.median(quad0)
+        sig0  = np.std(quad0)
+        str0 += 'Q%i mean=%.3f median=%.3f sigma=%.3f' % (qq,mean0,med0,sig0)
+        if qq != 4: str0 += '\n'
+    gc0.add_label(0.99,0.055, str0, color='red', relative=True, ha='right',
+                  va='bottom', weight='medium', size='medium', bbox=bbox_props)
+#enddef
+
 def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
     '''
     Visually compare raw and cleanir-fixed FITS images
@@ -154,6 +213,8 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 8 March 2017
+    Modified by Chun Ly, 10 March 2017
+     - Call quadrant_bias_values()
     '''
 
     if silent == False: log.info('### Begin clean_QA : '+systime())
@@ -196,6 +257,8 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
                       ha='left', va='top', weight='medium', size='medium',
                       bbox=bbox_props)
 
+        quadrant_bias_values(fits.open(orig_file), gc1) # + on 10/03/2017
+
         gc2 = aplpy.FITSFigure(files[nn], figure=fig,
                                subplot=[0.525,0.055,0.47,0.94])
         z1, z2 = zscale.get_limits(im2)
@@ -207,6 +270,8 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
         gc2.add_label(0.025, 0.975, files[nn], color='red', relative=True,
                       ha='left', va='top', weight='medium', size='medium',
                       bbox=bbox_props)
+
+        quadrant_bias_values(fits.open(files[nn]), gc2) # + on 10/03/2017
 
         #gc2.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
         #gc2.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
