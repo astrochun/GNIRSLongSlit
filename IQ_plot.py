@@ -59,6 +59,8 @@ def compute_fwhm(im0):
     -----
     Created by Chun Ly, 10 March 2017
      - Later modified to shift each median profile and return the array
+    Modified by Chun Ly, 11 March 2017
+     - Fix interp1d failure when outside bound limits
     '''
 
     # First find the peak of the nearby star
@@ -90,7 +92,8 @@ def compute_fwhm(im0):
 
         # Later + on 10/03/2017
         x_shift = x - popt[2]
-        f = interp1d(x_shift, y)
+        # Mod on 11/03/2017
+        f = interp1d(x_shift, y, bounds_error=False, fill_value=0.0)
         y_shift = f(range(-25,25))
         stack0_shift[bb,:] = y_shift/max(y_shift)
 
