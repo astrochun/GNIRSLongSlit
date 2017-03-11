@@ -21,6 +21,7 @@ import QA_plot
 
 import cleanir
 import cleanir_script
+import IQ_plot
 
 reload(hdr_info)
 reload(create_list)
@@ -28,3 +29,4 @@ reload(QA_plot)
 
 reload(cleanir)
 reload(cleanir_script)
+reload(IQ_plot)
