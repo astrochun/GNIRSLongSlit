@@ -26,6 +26,9 @@ from astropy import log
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
 
+# + on 12/03/2017
+from . import gnirs_2017a #targets0
+
 pscale = 0.15 # arcseconds per pixel
 
 # From: https://www.gemini.edu/sciops/telescopes-and-sites/observing-condition-constraints
@@ -261,11 +264,14 @@ def zcalbase_gal_gemini_2017a_raw():
     Notes
     -----
     Created by Chun Ly, 10 March 2017
+    Modified by Chun Ly, 12 March 2017
+     - global gnirs_2017 use
     '''
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
 
-    targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+    targets0 = gnirs_2017a # Mod on 12/03/2017
+    #targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
 
     for target in targets0:
         main(path0=path0+target+'/', out_pdf='IQ_plot.raw.pdf')

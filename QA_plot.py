@@ -29,6 +29,9 @@ import aplpy
 
 from astropy.stats import sigma_clipped_stats # + on 10/03/2017
 
+# + on 12/03/2017
+from . import gnirs_2017a #targets0
+
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
 def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
@@ -315,11 +318,14 @@ def zcalbase_gal_gemini_2017a_raw():
     Notes
     -----
     Created by Chun Ly, 6 March 2017
+    Modified by Chun Ly, 12 March 2017
+     - global gnirs_2017 use
     '''
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
 
-    targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+    targets0 = gnirs_2017a # Mod on 12/03/2017
+    #targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
 
     for target in targets0:
         main('all.lis', path0=path0+target+'/', out_pdf='QA_plot.raw.pdf')
@@ -342,11 +348,14 @@ def zcalbase_gal_gemini_2017a_cleanir():
     Notes
     -----
     Created by Chun Ly, 6 March 2017
+    Modified by Chun Ly, 12 March 2017
+     - global gnirs_2017 use
     '''
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
 
-    targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+    targets0 = gnirs_2017a # Mod on 12/03/2017
+    #targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
 
     for target in targets0:
         clean_QA(path0=path0+target+'/', out_pdf='QA_plot.clean.pdf')

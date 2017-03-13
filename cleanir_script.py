@@ -26,6 +26,9 @@ from astropy import log
 
 import cleanir
 
+# + on 12/03/2017
+from . import gnirs_2017a #targets0
+
 co     = __file__
 co_dir = os.path.dirname(co)+'/'
 cmd0   = co_dir+'cleanir.py'
@@ -89,11 +92,14 @@ def zcalbase_gal_gemini_2017a():
     Notes
     -----
     Created by Chun Ly, 7 March 2017
+    Modified by Chun Ly, 12 March 2017
+     - global gnirs_2017 use
     '''
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
 
-    targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+    targets0 = gnirs_2017a # Mod on 12/03/2017
+    #targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
 
     for target in targets0:
         run(path0+target+'/', out_script=path0+'run_cleanir.'+target+'.sh')

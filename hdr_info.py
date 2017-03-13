@@ -19,6 +19,9 @@ import glob
 from astropy.table import Table
 from astropy import log
 
+# + on 12/03/2017
+from . import gnirs_2017a #targets0
+
 def main(path0, silent=False, verbose=True):
 
     '''
@@ -106,11 +109,14 @@ def zcalbase_gal_gemini_2017a():
     Notes
     -----
     Created by Chun Ly, 4 March 2017
+    Modified by Chun Ly, 12 March 2017
+     - global gnirs_2017 use
     '''
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
 
-    targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+    targets0 = gnirs_2017a # Mod on 12/03/2017
+    #targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
 
     for target in targets0:
         main(path0+target+'/')

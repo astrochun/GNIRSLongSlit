@@ -15,6 +15,11 @@ How to use:
 import GNIRSLongSlit
 """
 
+# + on 12/03/2017
+gnirs_2017a = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+
+__all__ = [gnirs_2017a]
+
 import hdr_info
 import create_list
 import QA_plot
