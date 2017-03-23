@@ -31,6 +31,25 @@ def get_files(path0, silent=False, verbose=True):
     '''
     Simple function to get names of raw files
 
+    Parameters
+    ----------
+    path0 : str
+     Path to raw FITS file. Must include '/' at the end
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+    files : list
+      List containing the filename for FITS raw files
+
+    n_files : int
+      Size of [files]
+
     Notes
     -----
     Created by Chun Ly, 22 March 2017
