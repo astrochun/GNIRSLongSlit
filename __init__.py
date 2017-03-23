@@ -22,16 +22,22 @@ __all__ = [gnirs_2017a]
 
 import hdr_info
 import create_list
-import QA_plot
+
 
 import cleanir
 import cleanir_script
+
+import QA_plot
 import IQ_plot
+
+import symlink
 
 reload(hdr_info)
 reload(create_list)
-reload(QA_plot)
 
 reload(cleanir)
 reload(cleanir_script)
+
+reload(QA_plot)
 reload(IQ_plot)
+reload(symlink)
