@@ -27,9 +27,53 @@ from astropy import log
 
 from . import gnirs_2017a
 
+def delete(path0, silent=False, verbose=True):
+    '''
+    Remove all symbolic links in given path containing the raw GNIRS data
+
+    Parameters
+    ----------
+    path0 : str
+     Path to raw FITS file. Must include '/' at the end
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+
+    Notes
+    -----
+    Created by Chun Ly, 22 March 2017
+    '''
+
+    if silent == False: print log.info('### Begin delete : '+systime())
+
+    infile0 = path0+'all.lis'
+    if silent == False:
+        log.info('## Reading : '+infile0)
+    files   = np.loadtxt(infile0, dtype=type(str)).tolist()
+    n_files = len(files)
+
+    for nn in xrange(n_files):
+        c_file = path0+'c'+files[nn]
+        if exists(c_file):
+            if os.path.islink(c_file) == True:
+                cmd0 = 'rm '+c_file
+                print cmd0
+                # os.system(cmd0)
+            else:
+                log.info('## File is from cleanir: '+c_file)
+
+    if silent == False: print log.info('### End delete : '+systime())
+#enddef
+
 def run(path0, silent=False, verbose=True):
     '''
-    Main function to run for a given path containing the raw data
+    Main function to run for a given path containing the raw GNIRS data
 
     Parameters
     ----------
@@ -81,14 +125,11 @@ def zcalbase_gal_gemini_2017a():
 
     Returns
     -------
-    info.tbl : astropy.table.Table
-      Astropy ASCII tables outputted to each path
+    None
 
     Notes
     -----
-    Created by Chun Ly, 4 March 2017
-    Modified by Chun Ly, 12 March 2017
-     - global gnirs_2017 use
+    Created by Chun Ly, 22 March 2017
     '''
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
