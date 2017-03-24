@@ -27,6 +27,8 @@ from astropy import log
 
 from . import gnirs_2017a
 
+import dir_check # + on 23/03/2017
+
 def get_files(path0, silent=False, verbose=True):
     '''
     Simple function to get names of raw files
@@ -55,15 +57,20 @@ def get_files(path0, silent=False, verbose=True):
     Created by Chun Ly, 22 March 2017
     '''
 
-    if silent == False: print log.info('### Begin get_files : '+systime())
+    if silent == False: log.info('### Begin get_files : '+systime())
 
     infile0 = path0+'all.lis'
+    if not exists(infile):
+        log.warn('### File does not exists!!! : '+infile0)
+        log.warn('### EXITING!!!')
+        return
+
     if silent == False:
         log.info('## Reading : '+infile0)
     files   = np.loadtxt(infile0, dtype=type(str)).tolist()
     n_files = len(files)
 
-    if silent == False: print log.info('### End get_files : '+systime())
+    if silent == False: log.info('### End get_files : '+systime())
 
     return files, n_files
 #enddef
@@ -93,7 +100,7 @@ def delete(path0, silent=False, verbose=True):
     Created by Chun Ly, 22 March 2017
     '''
 
-    if silent == False: print log.info('### Begin delete : '+systime())
+    if silent == False: log.info('### Begin delete : '+systime())
 
     files, n_files = get_files(path0, silent=silent, verbose=verbose)
 
@@ -107,7 +114,7 @@ def delete(path0, silent=False, verbose=True):
             else:
                 log.info('## File is from cleanir: '+c_file)
 
-    if silent == False: print log.info('### End delete : '+systime())
+    if silent == False: log.info('### End delete : '+systime())
 #enddef
 
 def run(path0, silent=False, verbose=True):
@@ -131,22 +138,32 @@ def run(path0, silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 22 March 2017
+    Modified by Chun Ly, 23 March 2017
+     - Call dir_check.main() to handle multiple date directories
     '''
     
-    if silent == False: print log.info('### Begin run : '+systime())
+    if silent == False: log.info('### Begin run : '+systime())
 
-    files, n_files = get_files(path0, silent=silent, verbose=verbose)
+    # + on 23/03/2017
+    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
-    for nn in xrange(n_files):
-        c_file = path0+'c'+files[nn]
-        if exists(c_file):
-            log.warn('File exists : '+c_file)
-        else:
-            cmd0 = 'ln -fs '+files[nn]+' '+c_file
-            if silent == False:
-                log.info(cmd0)
-            os.system(cmd0)
-    if silent == False: print log.info('### End run : '+systime())
+    # Mod on 23/03/2017
+    for path in list_path:
+        files, n_files = get_files(path, silent=silent, verbose=verbose)
+
+        for nn in xrange(n_files):
+            c_file = path+'c'+files[nn]
+            if exists(c_file):
+                log.warn('File exists : '+c_file)
+            else:
+                cmd0 = 'ln -fs '+files[nn]+' '+c_file
+                if silent == False:
+                    log.info(cmd0)
+                os.system(cmd0)
+        #endfor
+    #endfor
+
+    if silent == False: log.info('### End run : '+systime())
 #enddef
 
 def zcalbase_gal_gemini_2017a():
