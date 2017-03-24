@@ -67,68 +67,85 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 6 March 2017
+    Modified by Chun Ly, 23 March 2017
+     - Call dir_check.main() to handle multiple date directories
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
 
-    if silent == False: log.info('## Reading : '+path0+file_list)    
-    files   = np.loadtxt(path0+file_list, dtype=type(str)).tolist()
-    n_files = len(files)
+    # + on 23/03/2017
+    dir_list = dir_check.main(path0, silent=silent, verbose=verbose)
 
-    if out_pdf == '':
-        out_pdf = path0+'QA_plot.pdf'
+    # + on 23/03/2017
+    if len(dir_list) == 0:
+        if silent == False:
+            log.info('## No dir found')
+        list_path = [path0]
     else:
-        out_pdf = path0+out_pdf
+        if silent == False:
+            log.info('## The following date dir found: '+', '.join(dir_list))
+        list_path = [path0+a+'/' for a in dir_list]
 
-    hdr_info_file = path0+'hdr_info.tbl'
-    if exists(hdr_info_file):
-        if silent == False: log.info('## Reading : '+hdr_info_file)
-        tab0 = asc.read(hdr_info_file, format='fixed_width_two_line')
-        idx1, idx2 = match_nosort_str(files, tab0['filename'])
-        tab0 = tab0[idx2]
-    else:
-        if silent == False: log.warn('## File not found : '+hdr_info_file)
-            
-    pp = PdfPages(out_pdf)
+    # Mod on 23/03/2017
+    for path in list_path:
+        if silent == False: log.info('## Reading : '+path+file_list)
+        files   = np.loadtxt(path+file_list, dtype=type(str)).tolist()
+        n_files = len(files)
 
-    for nn in xrange(n_files):
-        if silent == False: log.info('## Reading : '+files[nn])    
-        # h0  = fits.getheader(path0+files[nn], 0)
-        # im0 = fits.getdata(path0+files[nn], 1)
-        hdu0 = fits.open(path0+files[nn])
-        im0  = hdu0[1].data
-        hdu0[1].header = hdu0[0].header # Copy WCS header over
+        if out_pdf == '':
+            out_pdf = path+'QA_plot.pdf'
+        else:
+            out_pdf = path+out_pdf
 
-        gc  = aplpy.FITSFigure(hdu0, hdu=1, figsize=(8,8))
-
-        z1, z2 = zscale.get_limits(im0)
-        gc.show_grayscale(invert=True, vmin=z1, vmax=z2)
-        gc.set_tick_color('black')
-
-        gc.set_tick_yspacing('auto')
-        gc.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
-        gc.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
-
-        txt0 = files[nn]
+        hdr_info_file = path+'hdr_info.tbl'
         if exists(hdr_info_file):
-            txt0 += '\n'
-            tmp   = tab0[nn]
-            txt0 += 'Date Label : '+tmp['datelabel']+'\n'
-            txt0 += 'UT Date : '+tmp['UT_date']+'\n'
-            txt0 += tmp['object']+'\n'
-            txt0 += 'EXPTIME=%.1f ' % tmp['exptime']
-            txt0 += 'AIRMASS=%.3f \n' % tmp['airmass']
-            txt0 += '%s %.3f %s' % (tmp['grating'],tmp['gratwave'],
-                                    tmp['filter2'])
+            if silent == False: log.info('## Reading : '+hdr_info_file)
+            tab0 = asc.read(hdr_info_file, format='fixed_width_two_line')
+            idx1, idx2 = match_nosort_str(files, tab0['filename'])
+            tab0 = tab0[idx2]
+        else:
+            if silent == False: log.warn('## File not found : '+hdr_info_file)
 
-        gc.add_label(0.975, 0.115, txt0, color='red', relative=True, ha='right',
-                     va='bottom', weight='medium', size='medium',
-                     bbox=bbox_props)
+        pp = PdfPages(out_pdf)
 
-        gc.savefig(pp, format='pdf')
+        for nn in xrange(n_files):
+            if silent == False: log.info('## Reading : '+files[nn])
+            # h0  = fits.getheader(path+files[nn], 0)
+            # im0 = fits.getdata(path+files[nn], 1)
+            hdu0 = fits.open(path+files[nn])
+            im0  = hdu0[1].data
+            hdu0[1].header = hdu0[0].header # Copy WCS header over
 
-    if silent == False: log.info('## Reading : '+out_pdf)
-    pp.close()
+            gc  = aplpy.FITSFigure(hdu0, hdu=1, figsize=(8,8))
+
+            z1, z2 = zscale.get_limits(im0)
+            gc.show_grayscale(invert=True, vmin=z1, vmax=z2)
+            gc.set_tick_color('black')
+
+            gc.set_tick_yspacing('auto')
+            gc.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
+            gc.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
+
+            txt0 = files[nn]
+            if exists(hdr_info_file):
+                txt0 += '\n'
+                tmp   = tab0[nn]
+                txt0 += 'Date Label : '+tmp['datelabel']+'\n'
+                txt0 += 'UT Date : '+tmp['UT_date']+'\n'
+                txt0 += tmp['object']+'\n'
+                txt0 += 'EXPTIME=%.1f ' % tmp['exptime']
+                txt0 += 'AIRMASS=%.3f \n' % tmp['airmass']
+                txt0 += '%s %.3f %s' % (tmp['grating'],tmp['gratwave'],
+                                        tmp['filter2'])
+
+                gc.add_label(0.975, 0.115, txt0, color='red', relative=True,
+                             ha='right', va='bottom', weight='medium',
+                             size='medium', bbox=bbox_props)
+
+                gc.savefig(pp, format='pdf')
+
+        if silent == False: log.info('## Reading : '+out_pdf)
+        pp.close()
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
@@ -233,71 +250,89 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
     Created by Chun Ly, 8 March 2017
     Modified by Chun Ly, 10 March 2017
      - Call quadrant_bias_values()
+    Modified by Chun Ly, 23 March 2017
+     - Call dir_check.main() to handle multiple date directories
     '''
 
     if silent == False: log.info('### Begin clean_QA : '+systime())
 
-    if out_pdf == '':
-        out_pdf = path0+'QA_plot.pdf'
+    # + on 23/03/2017
+    dir_list = dir_check.main(path0, silent=silent, verbose=verbose)
+
+    # + on 23/03/2017
+    if len(dir_list) == 0:
+        if silent == False:
+            log.info('## No dir found')
+        list_path = [path0]
     else:
-        out_pdf = path0+out_pdf
+        if silent == False:
+            log.info('## The following date dir found: '+', '.join(dir_list))
+        list_path = [path0+a+'/' for a in dir_list]
 
-    files   = glob.glob(path0+'cN*fits')
-    n_files = len(files)
+    # Mod on 23/03/2017
+    for path in list_path:
+        if out_pdf == '':
+            out_pdf = path+'QA_plot.pdf'
+        else:
+            out_pdf = path+out_pdf
 
-    pp = PdfPages(out_pdf)
+        files   = glob.glob(path0+'cN*fits')
+        n_files = len(files)
 
-    for nn in xrange(n_files):
-        if silent == False: log.info('## Reading : '+files[nn])
-        orig_file = files[nn].replace('cN','N')
+        pp = PdfPages(out_pdf)
 
-        im1 = fits.getdata(orig_file)
-        im2 = fits.getdata(files[nn])
-        #hdu1 = fits.open(orig_file)
-        #im1  = hdu1[1].data
-        #hdu1[1].header = hdu1[0].header # Copy WCS header over
+        for nn in xrange(n_files):
+            if silent == False: log.info('## Reading : '+files[nn])
+            orig_file = files[nn].replace('cN','N')
 
-        #hdu2 = fits.open(files[nn])
-        #im2  = hdu2[1].data
-        #hdu2[1].header = hdu2[0].header # Copy WCS header over
+            im1 = fits.getdata(orig_file)
+            im2 = fits.getdata(files[nn])
+            #hdu1 = fits.open(orig_file)
+            #im1  = hdu1[1].data
+            #hdu1[1].header = hdu1[0].header # Copy WCS header over
 
-        fig = plt.figure(figsize=(16,8))
+            #hdu2 = fits.open(files[nn])
+            #im2  = hdu2[1].data
+            #hdu2[1].header = hdu2[0].header # Copy WCS header over
 
-        gc1 = aplpy.FITSFigure(orig_file, figure=fig,
-                               subplot=[0.05,0.055,0.47,0.94])
-        z1, z2 = zscale.get_limits(im1)
-        gc1.show_grayscale(invert=True, vmin=z1, vmax=z2)
-        gc1.set_tick_color('black')
-        gc1.set_tick_yspacing('auto')
-        #gc1.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
-        #gc1.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
-        gc1.add_label(0.025, 0.975, orig_file, color='red', relative=True,
-                      ha='left', va='top', weight='medium', size='medium',
-                      bbox=bbox_props)
+            fig = plt.figure(figsize=(16,8))
 
-        quadrant_bias_values(fits.open(orig_file), gc1) # + on 10/03/2017
+            gc1 = aplpy.FITSFigure(orig_file, figure=fig,
+                                   subplot=[0.05,0.055,0.47,0.94])
+            z1, z2 = zscale.get_limits(im1)
+            gc1.show_grayscale(invert=True, vmin=z1, vmax=z2)
+            gc1.set_tick_color('black')
+            gc1.set_tick_yspacing('auto')
+            #gc1.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
+            #gc1.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
+            gc1.add_label(0.025, 0.975, orig_file, color='red', relative=True,
+                          ha='left', va='top', weight='medium', size='medium',
+                          bbox=bbox_props)
 
-        gc2 = aplpy.FITSFigure(files[nn], figure=fig,
-                               subplot=[0.525,0.055,0.47,0.94])
-        z1, z2 = zscale.get_limits(im2)
-        gc2.show_grayscale(invert=True, vmin=z1, vmax=z2)
-        gc2.set_tick_color('black')
-        gc2.set_tick_yspacing('auto')
-        gc2.hide_ytick_labels()
-        gc2.hide_yaxis_label()
-        gc2.add_label(0.025, 0.975, files[nn], color='red', relative=True,
-                      ha='left', va='top', weight='medium', size='medium',
-                      bbox=bbox_props)
+            quadrant_bias_values(fits.open(orig_file), gc1) # + on 10/03/2017
 
-        quadrant_bias_values(fits.open(files[nn]), gc2) # + on 10/03/2017
+            gc2 = aplpy.FITSFigure(files[nn], figure=fig,
+                                   subplot=[0.525,0.055,0.47,0.94])
+            z1, z2 = zscale.get_limits(im2)
+            gc2.show_grayscale(invert=True, vmin=z1, vmax=z2)
+            gc2.set_tick_color('black')
+            gc2.set_tick_yspacing('auto')
+            gc2.hide_ytick_labels()
+            gc2.hide_yaxis_label()
+            gc2.add_label(0.025, 0.975, files[nn], color='red', relative=True,
+                          ha='left', va='top', weight='medium', size='medium',
+                          bbox=bbox_props)
 
-        #gc2.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
-        #gc2.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
+            quadrant_bias_values(fits.open(files[nn]), gc2) # + on 10/03/2017
 
-        fig.savefig(pp, format='pdf')
+            #gc2.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
+            #gc2.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
 
-    if silent == False: log.info('## Reading : '+out_pdf)
-    pp.close()
+            fig.savefig(pp, format='pdf')
+
+        if silent == False: log.info('## Reading : '+out_pdf)
+        pp.close()
+    #endfor
 
     if silent == False: log.info('### End clean_QA : '+systime())
 #enddef
