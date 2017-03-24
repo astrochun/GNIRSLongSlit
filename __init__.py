@@ -23,12 +23,12 @@ __all__ = [gnirs_2017a]
 import hdr_info
 import create_list
 
-
 import cleanir
 import cleanir_script
 
 import QA_plot
 import IQ_plot
+import align_check
 
 import symlink
 import dir_check
@@ -41,5 +41,7 @@ reload(cleanir_script)
 
 reload(QA_plot)
 reload(IQ_plot)
+reload(align_check)
+
 reload(symlink)
 reload(dir_check)
