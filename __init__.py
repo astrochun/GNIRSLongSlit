@@ -31,6 +31,7 @@ import QA_plot
 import IQ_plot
 
 import symlink
+import dir_check
 
 reload(hdr_info)
 reload(create_list)
@@ -41,3 +42,4 @@ reload(cleanir_script)
 reload(QA_plot)
 reload(IQ_plot)
 reload(symlink)
+reload(dir_check)
