@@ -59,9 +59,10 @@ def main(path0, silent=False, verbose=True):
 
     if silent == False: log.info('### Begin main : '+systime())
 
-    # + on 23/02/2017
+    # + on 23/03/2017
     dir_list = dir_check.main(path0, silent=silent, verbose=verbose)
 
+    # + on 23/03/2017
     if len(dir_list) == 0:
         if silent == False:
             log.info('## No dir found')
@@ -71,6 +72,7 @@ def main(path0, silent=False, verbose=True):
             log.info('## The following date dir found: '+', '.join(dir_list))
         list_path = [path0+a+'/' for a in dir_list]
 
+    # Mod on 23/03/2017
     for path in list_path:
         outfile = path + 'hdr_info.tbl'
 
