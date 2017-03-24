@@ -17,6 +17,8 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from pylab import subplots_adjust
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 
 import glob
 
@@ -33,7 +35,13 @@ pos0   = (503, 437)
 def find_star(infile):
     im0, hdr0 = fits.getdata(infile, header=True)
 
-    # return xcen, ycen
+    cutout = Cutout2D(im0, pos0, size2d, mode='partial',
+                      fill_value=np.nan)
+    cutout = cutout.data
+
+    peak = np.where(cutout == np.max(cutout))
+    ycen, xcen = peak[0], peak[1]
+    return xcen, ycen
 #enddef
 
 def main(path0, out_pdf='', silent=False, verbose=True):
@@ -98,6 +106,9 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
             fig, ax_arr = plt.subplots(nrows=nrows, ncols=ncols)
 
+            # Later + on 24/03/2017
+            xcen, ycen = find_star(t_files[-1])
+
             for jj in xrange(len(t_idx)):
                 jj_idx = t_idx[jj]
 
@@ -127,7 +138,18 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                 txt0 += tab0['object'][jj_idx]
                 t_ax.annotate(txt0, [0.025, 0.95], xycoords='axes fraction',
                               ha='left', va='top')
-                              
+
+                # Plot inset | Later + on 24/03/2017
+                axins = zoomed_inset_axes(t_ax, 3, loc=4)
+                axins.imshow(cutout.data, cmap='Greys', origin='lower',
+                             norm=norm)
+                x1, x2, y1, y2 = xcen-20, xcen+20, ycen-20, ycen+20
+                axins.set_xlim([x1, x2])
+                axins.set_ylim([y1, y2])
+                axins.xaxis.set_ticklabels([])
+                axins.yaxis.set_ticklabels([])
+                mark_inset(t_ax, axins, loc1=1, loc2=3, fc="none", ec="k",
+                           ls='dashed', lw=0.5)
             #endfor
 
             subplots_adjust(left=0.02, bottom=0.02, top=0.95, right=0.98,
