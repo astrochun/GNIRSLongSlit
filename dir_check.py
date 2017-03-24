@@ -32,6 +32,8 @@ def main(path0, silent=False, verbose=True):
 
     Parameters
     ----------
+    path0 : str
+     Path to FITS file. Must include '/' at the end
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -42,7 +44,10 @@ def main(path0, silent=False, verbose=True):
     Returns
     -------
     dir_list : list
-     List of date directories in [path0]
+      List of date directories in [path0]
+
+    list_path : list
+      List containing full path for date directories
 
     Notes
     -----
@@ -61,7 +66,17 @@ def main(path0, silent=False, verbose=True):
         if chk:
             dir_list.append(t_date)
 
+    # Later + on 23/03/2017
+    if len(dir_list) == 0:
+        if silent == False:
+            log.info('## No dir found')
+        list_path = [path0]
+    else:
+        if silent == False:
+            log.info('## The following date dir found: '+', '.join(dir_list))
+        list_path = [path0+a+'/' for a in dir_list]
+
     if silent == False: log.info('### End main : '+systime())
-    return dir_list
+    return dir_list, list_path
 #enddef
 
