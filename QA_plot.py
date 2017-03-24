@@ -32,6 +32,7 @@ from astropy.stats import sigma_clipped_stats # + on 10/03/2017
 # + on 12/03/2017
 from . import gnirs_2017a #targets0
 
+import dir_check
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
 def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
@@ -85,6 +86,8 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
         if silent == False:
             log.info('## The following date dir found: '+', '.join(dir_list))
         list_path = [path0+a+'/' for a in dir_list]
+
+    out_pdf_default = out_pdf
 
     # Mod on 23/03/2017
     for path in list_path:
@@ -144,8 +147,10 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
 
                 gc.savefig(pp, format='pdf')
 
-        if silent == False: log.info('## Reading : '+out_pdf)
+        if silent == False: log.info('## Writing : '+out_pdf)
         pp.close()
+        out_pdf = out_pdf_default
+    #endfor
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
