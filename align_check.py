@@ -27,6 +27,7 @@ from astropy import log
 from astropy.nddata import Cutout2D
 from astropy.visualization.mpl_normalize import ImageNormalize
 
+from . import gnirs_2017a
 import dir_check
 
 size2d = u.Quantity((560, 770), u.pixel) # u.Quantity((150, 770), u.pixel)
@@ -72,6 +73,7 @@ def main(path0, out_pdf='', silent=False, verbose=True):
     
     dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
+    out_pdf_default = out_pdf
     for path in list_path:
         infile = path + 'hdr_info.QA.tbl'
         if not exists(infile):
@@ -141,15 +143,17 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
                 # Plot inset | Later + on 24/03/2017
                 axins = zoomed_inset_axes(t_ax, 3, loc=4)
+                norm2 = ImageNormalize(vmin=0.0, vmax=0.2*max0)
                 axins.imshow(cutout.data, cmap='Greys', origin='lower',
-                             norm=norm)
+                             norm=norm2)
+
                 x1, x2, y1, y2 = xcen-20, xcen+20, ycen-20, ycen+20
                 axins.set_xlim([x1, x2])
                 axins.set_ylim([y1, y2])
                 axins.xaxis.set_ticklabels([])
                 axins.yaxis.set_ticklabels([])
-                mark_inset(t_ax, axins, loc1=1, loc2=3, fc="none", ec="k",
-                           ls='dashed', lw=0.5)
+                mark_inset(t_ax, axins, loc1=1, loc2=3, fc="none", ec="b",
+                           ls='dotted', lw=0.5)
             #endfor
 
             subplots_adjust(left=0.02, bottom=0.02, top=0.95, right=0.98,
@@ -159,7 +163,33 @@ def main(path0, out_pdf='', silent=False, verbose=True):
         #endfor
 
         pp.close()
+        out_pdf = out_pdf_default
         
     if silent == False: log.info('### End main : '+systime())
 #enddef
 
+def zcalbase_gal_gemini_2017a():
+    '''
+    Function to run main() on each GNIRS 2017A observation set
+    to generate visualization of slit alignment on bright offset star
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Created by Chun Ly, 24 March 2017
+    '''
+
+    path0 = '/Users/cly/data/Observing/Gemini/Data/'
+
+    targets0 = gnirs_2017a
+
+    for target in targets0:
+        main(path0+target+'/')
+#enddef
