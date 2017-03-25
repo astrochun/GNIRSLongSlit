@@ -33,6 +33,37 @@ import dir_check
 size2d = u.Quantity((560, 770), u.pixel) # u.Quantity((150, 770), u.pixel)
 pos0   = (503, 437)
 
+def get_slit_trace(infile):
+    im0, hdr0 = fits.getdata(infile, header=True)
+
+    y_med0 = np.median(im0, axis=1)
+    cen0   = (np.where(y_med0 == np.max(y_med0))[0])[0]
+
+    im0_crop = im0[cen0-15:cen0+15,:]
+    y_idx, x_idx = np.where(im0_crop >= 0.25*np.max(im0_crop))
+
+    xmin, xmax = np.min(x_idx), np.max(x_idx)
+
+    dx = 2
+    x0 = np.arange(xmin, xmax, dx)
+
+    y0_lo = np.zeros(len(x0))
+    y0_hi = np.zeros(len(x0))
+
+    for xx in xrange(len(x0)):
+        im0_crop = im0[cen0-15:cen0+15,x0[xx]:x0[xx]+dx]
+        y_med    = np.median(im0_crop, axis=1)
+        edge_idx = np.where(y_med >= 0.1*np.max(y_med))[0]
+        if len(edge_idx) > 2:
+            y0_lo[xx] = cen0-15+edge_idx[0]
+            y0_hi[xx] = cen0-15+edge_idx[-1]
+        else:
+            y0_lo[xx] = np.nan
+            y0_hi[xx] = np.nan
+
+    return x0+dx/2.0, y0_lo, y0_hi
+#enddef
+
 def find_star(infile):
     im0, hdr0 = fits.getdata(infile, header=True)
 
@@ -111,6 +142,12 @@ def main(path0, out_pdf='', silent=False, verbose=True):
             # Later + on 24/03/2017
             xcen, ycen = find_star(t_files[-1])
 
+            slit_x0, slit_y0_lo, slit_y0_hi = get_slit_trace(t_files[0])
+            # Adjust values for offset that is applied
+            slit_x0    -= np.int64(pos0[0]-size2d[1].value/2.0)
+            slit_y0_lo -= pos0[1]-size2d[0].value/2.0
+            slit_y0_hi -= pos0[1]-size2d[0].value/2.0
+
             for jj in xrange(len(t_idx)):
                 jj_idx = t_idx[jj]
 
@@ -129,6 +166,10 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                             norm=norm)
                 #aplpy.FITSFigure(cutout)
 
+                # Draw trace of slit
+                t_ax.plot(slit_x0, slit_y0_lo, 'r-')
+                t_ax.plot(slit_x0, slit_y0_hi, 'r-')
+
                 t_ax.xaxis.set_ticklabels([])
                 t_ax.yaxis.set_ticklabels([])
 
@@ -146,6 +187,10 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                 norm2 = ImageNormalize(vmin=0.0, vmax=0.2*max0)
                 axins.imshow(cutout.data, cmap='Greys', origin='lower',
                              norm=norm2)
+
+                # Draw trace of slit
+                axins.plot(slit_x0, slit_y0_lo, 'r-')
+                axins.plot(slit_x0, slit_y0_hi, 'r-')
 
                 x1, x2, y1, y2 = xcen-20, xcen+20, ycen-20, ycen+20
                 axins.set_xlim([x1, x2])
