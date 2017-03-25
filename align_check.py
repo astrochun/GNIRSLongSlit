@@ -67,13 +67,15 @@ def get_slit_trace(infile):
 def find_star(infile):
     im0, hdr0 = fits.getdata(infile, header=True)
 
-    cutout = Cutout2D(im0, pos0, size2d, mode='partial',
+    find_size2d = u.Quantity((100, 770), u.pixel)
+    cutout = Cutout2D(im0, pos0, find_size2d, mode='partial',
                       fill_value=np.nan)
     cutout = cutout.data
 
     peak = np.where(cutout == np.max(cutout))
     ycen, xcen = peak[0], peak[1]
-    return xcen, ycen
+    return xcen+pos0[0]-find_size2d[1].value/2.0, \
+        ycen+pos0[1]-find_size2d[0].value/2.0
 #enddef
 
 def main(path0, out_pdf='', silent=False, verbose=True):
@@ -141,6 +143,9 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
             # Later + on 24/03/2017
             xcen, ycen = find_star(t_files[-1])
+            # Fix to get relative coordinaet for Cutout2D image
+            xcen -= pos0[0]-size2d[1].value/2.0
+            ycen -= pos0[1]-size2d[0].value/2.0
 
             slit_x0, slit_y0_lo, slit_y0_hi = get_slit_trace(t_files[0])
             # Adjust values for offset that is applied
