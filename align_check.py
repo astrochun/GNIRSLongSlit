@@ -30,6 +30,12 @@ from astropy.visualization.mpl_normalize import ImageNormalize
 from . import gnirs_2017a
 import dir_check
 
+# + on 30/03/2017
+co_filename = __file__
+bpm_file    = os.path.dirname(co_filename)+'/gnirsn_2012dec05_bpm.fits.gz'
+bpm_data    = fits.getdata(bpm_file)
+bpmy, bpmx  = np.where(bpm_data == 1)
+
 size2d = u.Quantity((560, 770), u.pixel) # u.Quantity((150, 770), u.pixel)
 pos0   = (503, 437)
 
@@ -62,6 +68,26 @@ def get_slit_trace(infile):
             y0_hi[xx] = np.nan
 
     return x0+dx/2.0, y0_lo, y0_hi
+#enddef
+
+def mask_bad_pixels(im0):
+    # + on 30/03/2017
+
+    im0[bpmy,bpmx] = np.nan
+    return im0
+
+def find_gnirs_window(im0):
+    # + on 30/03/2017
+
+    im0 = mask_bad_pixels(im0)
+
+    i_y, i_x = np.where((im0 > 50.0) & np.isfinite(im0))
+    med0 = np.median(im0[i_y,i_x])
+    print med0
+    print np.min(i_y), np.max(i_y), np.min(i_x), np.max(i_x)
+    print np.median(i_y), np.median(i_x)
+    # x_min =
+    return med0
 #enddef
 
 def find_star(infile):
