@@ -65,17 +65,23 @@ def get_slit_trace(infile):
 #enddef
 
 def find_star(infile):
+    ## Mod on 24/02/2017 to handle CRs (quick fix)
+
     im0, hdr0 = fits.getdata(infile, header=True)
 
-    find_size2d = u.Quantity((100, 770), u.pixel)
+    find_size2d = u.Quantity((25, 770), u.pixel)
     cutout = Cutout2D(im0, pos0, find_size2d, mode='partial',
                       fill_value=np.nan)
     cutout = cutout.data
 
     peak = np.where(cutout == np.max(cutout))
-    ycen, xcen = peak[0], peak[1]
-    return xcen+pos0[0]-find_size2d[1].value/2.0, \
-        ycen+pos0[1]-find_size2d[0].value/2.0
+    ycen, xcen = peak[0][0], peak[1][0]
+    print xcen, ycen
+
+    xcen += pos0[0]-find_size2d[1].value/2.0
+    ycen += pos0[1]-find_size2d[0].value/2.0
+    print xcen, ycen
+    return xcen, ycen
 #enddef
 
 def main(path0, out_pdf='', silent=False, verbose=True):
