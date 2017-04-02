@@ -78,18 +78,40 @@ def mask_bad_pixels(im0):
     im0[bpmy,bpmx] = np.nan
     return im0
 
-def find_gnirs_window(im0):
+def find_gnirs_window(infile):
     # + on 30/03/2017
+    # Mod on 01/04/2017 to figure out way to find GNIRS window
 
-    im0 = mask_bad_pixels(im0)
+    # Mod on 01/04/2017
+    log.info('## Reading : '+infile)
+    im0  = fits.getdata(infile)
+    hdr0 = fits.getheader(infile, ext=0)
 
-    i_y, i_x = np.where((im0 > 100.0) & np.isfinite(im0))
-    med0 = np.median(im0[i_y,i_x])
-    print med0
-    print np.min(i_y), np.max(i_y), np.min(i_x), np.max(i_x)
-    print np.median(i_y), np.median(i_x)
-    # x_min =
-    return med0
+    # Mod on 01/04/2017
+    im0_clean = cosmicray_lacosmic(im0, sigclip=10)
+    im0_clean = im0_clean[0]
+
+    im0_mask = mask_bad_pixels(im0_clean)
+
+    # + on 01/04/2017
+    if hdr0['NDAVGS'] == 1:  v_min = 10
+    if hdr0['NDAVGS'] == 16: v_min = 100
+
+    i_y, i_x = np.where((im0_mask > v_min) & np.isfinite(im0_mask))
+    print len(i_y)
+    med0 = np.median(im0_mask[i_y,i_x])
+
+    # + on 01/04/2017
+    y_min, y_max = np.min(i_y), np.max(i_y)
+    x_min, x_max = np.min(i_x), np.max(i_x)
+    x_cen, y_cen = np.average(i_x), np.average(i_y)
+
+    # + on 01/04/2017
+    info0  = '## med0=%.2f, x_min=%i, x_max=%i, y_min=%i, y_max=%i ' % \
+             (med0, x_min, x_max, y_min, y_max)
+    info0 += 'x_cen=%.2f, y_cen=%.2f' % (x_cen, y_cen)
+    log.info(info0)
+    return med0, x_min, x_max, y_min, y_max, x_cen, y_cen
 #enddef
 
 def find_star(infile):
@@ -180,6 +202,9 @@ def main(path0, out_pdf='', silent=False, verbose=True):
             ncols, nrows = np.int(ncols), np.int(nrows)
 
             fig, ax_arr = plt.subplots(nrows=nrows, ncols=ncols)
+
+            med0, x_min, x_max, y_min, \
+                y_max, x_cen, y_cen = find_gnirs_window(t_files[1])
 
             # Later + on 24/03/2017
             xcen, ycen = find_star(t_files[-1])
