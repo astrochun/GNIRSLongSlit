@@ -100,7 +100,8 @@ def find_gnirs_window_mean(infile):
     # + on 01/04/2017
     y_min, y_max = np.min(i_y), np.max(i_y)
     x_min, x_max = np.min(i_x), np.max(i_x)
-    x_cen, y_cen = np.average(i_x), np.average(i_y)
+    x_cen, y_cen = (x_max+x_min)/2.0, (y_max+y_min)/2.0 # Later mod on 04/04/2017
+    #x_cen, y_cen = np.average(i_x), np.average(i_y)
 
     # + on 01/04/2017
     info0  = 'x_min=%i, x_max=%i, y_min=%i, y_max=%i ' % \
@@ -146,17 +147,19 @@ def find_gnirs_window(infile):
     return med0, x_min, x_max, y_min, y_max, x_cen, y_cen
 #enddef
 
-def find_star(infile):
+def find_star(infile, pos=pos0, find_size2d=size2d):
     ## Mod on 24/02/2017 to handle CRs (quick fix)
     ## Mod on 01/04/2017 to handle CRs and bad pixels using cosmicrays_lacosmic
+    ## Mod on 04/04/2017 to pass pos and find_size2d keywords
 
     im0, hdr0 = fits.getdata(infile, header=True)
 
     # + on 01/04/2017
     im0_clean = cosmicray_lacosmic(im0, sigclip=10)
 
-    find_size2d = size2d #u.Quantity((25, 770), u.pixel)
-    cutout = Cutout2D(im0_clean[0], pos0, find_size2d, mode='partial',
+    # Mod on 04/04/2017
+    # find_size2d = size2d #u.Quantity((25, 770), u.pixel)
+    cutout = Cutout2D(im0_clean[0], pos, find_size2d, mode='partial',
                       fill_value=np.nan)
     cutout = cutout.data
 
@@ -164,8 +167,8 @@ def find_star(infile):
     ycen, xcen = peak[0][0], peak[1][0]
     print xcen, ycen
 
-    xcen += pos0[0]-find_size2d[1].value/2.0
-    ycen += pos0[1]-find_size2d[0].value/2.0
+    xcen += pos[0]-find_size2d[1].value/2.0
+    ycen += pos[1]-find_size2d[0].value/2.0
     print xcen, ycen
     return xcen, ycen
 #enddef
@@ -236,6 +239,10 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
             x_min, x_max, y_min, y_max, \
                 x_cen, y_cen = find_gnirs_window_mean(win_ref_file)
+            pos_cen  = (x_cen, y_cen)
+            new_size = u.Quantity((y_max-y_min, x_max-x_min), u.pixel)
+            print 'pos_cen : ', pos_cen
+            print 'new_size : ', new_size
 
         for ii in xrange(len(ID0)):
             t_idx = [tt for tt in xrange(len(tab0)) if
@@ -252,17 +259,17 @@ def main(path0, out_pdf='', silent=False, verbose=True):
             #med0, x_min, x_max, y_min, \
             #    y_max, x_cen, y_cen = find_gnirs_window(t_files[1])
 
-            # Later + on 24/03/2017
-            xcen, ycen = find_star(t_files[-1])
+            # Later + on 24/03/2017 | Mod on 04/04/2017
+            xcen, ycen = find_star(t_files[-1], pos=pos_cen, find_size2d=new_size)
             # Fix to get relative coordinate for Cutout2D image
-            xcen -= pos0[0]-size2d[1].value/2.0
-            ycen -= pos0[1]-size2d[0].value/2.0
+            #xcen -= pos_cen[0]-new_size[1].value/2.0
+            #ycen -= pos_cen[1]-new_size[0].value/2.0
 
             slit_x0, slit_y0_lo, slit_y0_hi = get_slit_trace(t_files[0])
             # Adjust values for offset that is applied
             slit_x0    -= np.int64(pos0[0]-size2d[1].value/2.0)
-            slit_y0_lo -= pos0[1]-size2d[0].value/2.0
-            slit_y0_hi -= pos0[1]-size2d[0].value/2.0
+            slit_y0_lo -= pos_cen[1]-size2d[0].value/2.0
+            slit_y0_hi -= pos_cen[1]-size2d[0].value/2.0
 
             for jj in xrange(len(t_idx)):
                 jj_idx = t_idx[jj]
@@ -272,8 +279,8 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                 # + 01/04/2017
                 im0_clean = cosmicray_lacosmic(im0, sigclip=10)
 
-                cutout = Cutout2D(im0_clean[0], pos0, size2d, mode='partial',
-                                  fill_value=np.nan)
+                cutout = Cutout2D(im0_clean[0], pos_cen, size2d,
+                                  mode='partial', fill_value=np.nan)
 
                 t_col, t_row = jj % ncols, jj / ncols
 
@@ -312,7 +319,10 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                 axins.plot(slit_x0, slit_y0_lo, 'r-')
                 axins.plot(slit_x0, slit_y0_hi, 'r-')
 
-                x1, x2, y1, y2 = xcen-20, xcen+20, ycen-20, ycen+20
+                # Mod on 04/04/2017 to get Cutout2d coordinates
+                c_xcen = xcen - (pos_cen[0]-size2d[1].value/2.0)
+                c_ycen = ycen - (pos_cen[1]-size2d[0].value/2.0)
+                x1, x2, y1, y2 = c_xcen-20, c_xcen+20, c_ycen-20, c_ycen+20
                 axins.set_xlim([x1, x2])
                 axins.set_ylim([y1, y2])
                 axins.xaxis.set_ticklabels([])
