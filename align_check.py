@@ -27,6 +27,10 @@ from astropy import log
 from astropy.nddata import Cutout2D
 from astropy.visualization.mpl_normalize import ImageNormalize
 
+# + on 04/04/2017 to handle bright stars
+from astropy.visualization import ZScaleInterval
+zscale = ZScaleInterval()
+
 from ccdproc import cosmicray_lacosmic # + on 01/04/2017
 
 from . import gnirs_2017a
@@ -284,10 +288,14 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
                 t_col, t_row = jj % ncols, jj / ncols
 
-                # med0 = np.absolute(np.median(cutout.data))
-                # print med0
+                # Mod on 04/04/2017 to handle bright and faint stars
                 max0 = np.max(cutout.data)
-                norm = ImageNormalize(vmin=0.0, vmax=0.1*max0)
+                if max0 > 50000:
+                    z1, z2 = zscale.get_limits(cutout.data)
+                else:
+                    z1, z2 = 0.0, 0.5*max0
+
+                norm = ImageNormalize(vmin=z1, vmax=z2)
                 t_ax = ax_arr[t_row,t_col]
                 t_ax.imshow(cutout.data, cmap='Greys', origin='lower',
                             norm=norm)
@@ -311,7 +319,7 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
                 # Plot inset | Later + on 24/03/2017
                 axins = zoomed_inset_axes(t_ax, 3, loc=4)
-                norm2 = ImageNormalize(vmin=0.0, vmax=0.2*max0)
+                norm2 = ImageNormalize(vmin=z1, vmax=z2)
                 axins.imshow(cutout.data, cmap='Greys', origin='lower',
                              norm=norm2)
 
