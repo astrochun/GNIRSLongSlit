@@ -78,6 +78,38 @@ def mask_bad_pixels(im0):
     im0[bpmy,bpmx] = np.nan
     return im0
 
+def find_gnirs_window_mean(infile):
+    # + on 04/04/2017
+    # Using a mean approach to get the GNIRS window
+
+    log.info('## Reading : '+infile)
+    im0  = fits.getdata(infile)
+    hdr0 = fits.getheader(infile, ext=0)
+
+    im0_clean = cosmicray_lacosmic(im0, sigclip=10)
+    im0_clean = im0_clean[0]
+
+    im0_mask = mask_bad_pixels(im0_clean)
+
+    mean_y = np.nanmean(im0_mask, axis=1)
+    mean_x = np.nanmean(im0_mask, axis=0)
+
+    i_y = np.where(mean_y > 0)[0]
+    i_x = np.where(mean_x > 0)[0]
+
+    # + on 01/04/2017
+    y_min, y_max = np.min(i_y), np.max(i_y)
+    x_min, x_max = np.min(i_x), np.max(i_x)
+    x_cen, y_cen = np.average(i_x), np.average(i_y)
+
+    # + on 01/04/2017
+    info0  = 'x_min=%i, x_max=%i, y_min=%i, y_max=%i ' % \
+             (x_min, x_max, y_min, y_max)
+    info0 += 'x_cen=%.2f, y_cen=%.2f' % (x_cen, y_cen)
+    log.info(info0)
+    return x_min, x_max, y_min, y_max, x_cen, y_cen
+#enddef
+
 def find_gnirs_window(infile):
     # + on 30/03/2017
     # Mod on 01/04/2017 to figure out way to find GNIRS window
@@ -162,6 +194,8 @@ def main(path0, out_pdf='', silent=False, verbose=True):
     Created by Chun Ly, 24 March 2017
     Modified by Chun Ly, 01 April 2017
      - Handle CRs and bad pixels using cosmicrays_lacosmic
+    Modified by Chun Ly, 04 April 2017
+     - Use find_gnirs_window_mean to find center
     '''
     
     if silent == False: log.info('### Begin main : '+systime())
@@ -191,6 +225,18 @@ def main(path0, out_pdf='', silent=False, verbose=True):
         if silent == False:
             log.info('## Sources found : '+', '.join(ID0))
 
+        # + on 04/04/2017
+        win_ref_idx  = [tt for tt in xrange(len(tab0)) if
+                        (tab0['QA'][tt] == 'N/A') and ('Acq' in tab0['slit'][tt]) and
+                        ('HIP' not in tab0['object'][tt]) and
+                        ('HD' not in tab0['object'][tt])]
+        if len(win_ref_idx) > 0:
+            win_ref_file = path + tab0['filename'][win_ref_idx[0]]
+            log.info('## Reference image for finding GNIRS window : '+win_ref_file)
+
+            x_min, x_max, y_min, y_max, \
+                x_cen, y_cen = find_gnirs_window_mean(win_ref_file)
+
         for ii in xrange(len(ID0)):
             t_idx = [tt for tt in xrange(len(tab0)) if
                      (tab0['object'][tt] == ID0[ii] and
@@ -203,8 +249,8 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
             fig, ax_arr = plt.subplots(nrows=nrows, ncols=ncols)
 
-            med0, x_min, x_max, y_min, \
-                y_max, x_cen, y_cen = find_gnirs_window(t_files[1])
+            #med0, x_min, x_max, y_min, \
+            #    y_max, x_cen, y_cen = find_gnirs_window(t_files[1])
 
             # Later + on 24/03/2017
             xcen, ycen = find_star(t_files[-1])
