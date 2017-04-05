@@ -47,14 +47,19 @@ pos0   = (503, 437)
 
 def get_slit_trace(infile): #, xmin, xmax):
     # Mod on 04/04/2017, aesthetics, fix bug
+    # Mod on 04/04/2017, handle CRs affecting trace
 
     im0, hdr0 = fits.getdata(infile, header=True)
 
-    y_med0 = np.median(im0, axis=1)
+    # + on 04/04/2017
+    im0_clean = cosmicray_lacosmic(im0, sigclip=10)
+    im0_clean = im0_clean[0]
+
+    y_med0 = np.median(im0_clean, axis=1) # Mod on 04/04/2017
     cen0   = (np.where(y_med0 == np.max(y_med0))[0])[0]
 
     dy = 20 # + on 04/04/2017
-    im0_crop = im0[cen0-dy:cen0+dy,:]
+    im0_crop = im0_clean[cen0-dy:cen0+dy,:] # Mod on 04/04/2017
 
     y_idx, x_idx = np.where(im0_crop >= 0.25*np.max(im0_crop))
     xmin, xmax   = np.min(x_idx), np.max(x_idx)
@@ -66,7 +71,7 @@ def get_slit_trace(infile): #, xmin, xmax):
     y0_hi = np.zeros(len(x0))
 
     for xx in xrange(len(x0)):
-        im0_crop = im0[cen0-dy:cen0+dy,x0[xx]:x0[xx]+dx]
+        im0_crop = im0_clean[cen0-dy:cen0+dy,x0[xx]:x0[xx]+dx] # Mod on 04/04/2017
         y_med    = np.median(im0_crop, axis=1)
         edge_idx = np.where(y_med >= 0.1*np.max(y_med))[0]
         if len(edge_idx) > 2:
