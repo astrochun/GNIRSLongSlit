@@ -211,6 +211,10 @@ def main(path0, out_pdf='', silent=False, verbose=True):
      - Handle CRs and bad pixels using cosmicrays_lacosmic
     Modified by Chun Ly, 04 April 2017
      - Use find_gnirs_window_mean to find center
+    Modified by Chun Ly, 04-05 April 2017
+     - Adjust greyscale limits to handle slit image (make it black),
+       and faint sources
+     Use find_gnirs_window_mean to find center
     '''
     
     if silent == False: log.info('### Begin main : '+systime())
@@ -290,19 +294,34 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                 im0, hdr0 = fits.getdata(t_files[jj], header=True)
 
                 # + 01/04/2017
-                im0_clean = cosmicray_lacosmic(im0, sigclip=10)
+                im0_clean = cosmicray_lacosmic(im0, sigclip=10)[0]
 
-                cutout = Cutout2D(im0_clean[0], pos_cen, size2d,
+                cutout = Cutout2D(im0_clean, pos_cen, size2d,
                                   mode='partial', fill_value=np.nan)
 
                 t_col, t_row = jj % ncols, jj / ncols
 
                 # Mod on 04/04/2017 to handle bright and faint stars
                 max0 = np.max(cutout.data)
+
+                # Compute median within GNIRS window
+                # + on 04-05/04/2017
+                temp       = im0_clean[-50:-1,:]
+                bgd0, sig0 = np.median(temp), np.std(temp)
+                idx_y, idx_x = np.where(im0_clean > (bgd0 + 5*sig0))
+                med0 = np.median(im0_clean[idx_y,idx_x])
+                print '## max0 : ', max0, ' med0 : ', med0
                 if max0 > 50000:
                     z1, z2 = zscale.get_limits(cutout.data)
+                    z2 = max0 # Change for better stretch for telluric star
                 else:
-                    z1, z2 = 0.0, 0.5*max0
+                    if ('Acq_' not in tab0['slit'][jj_idx]) and \
+                       (tab0['exptime'][jj_idx] == 3):
+                        # First frame that will show the longslit
+                        z1, z2 = 0.0, 0.5*max0
+                    else:
+                        # This should handle faint and bright stars
+                        z1, z2 = 0.5*med0, max0
 
                 norm = ImageNormalize(vmin=z1, vmax=z2)
                 t_ax = ax_arr[t_row,t_col]
@@ -327,7 +346,7 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                               ha='left', va='top')
 
                 # Plot inset | Later + on 24/03/2017
-                axins = zoomed_inset_axes(t_ax, 3, loc=4)
+                axins = zoomed_inset_axes(t_ax, 4, loc=4)
                 norm2 = ImageNormalize(vmin=z1, vmax=z2)
                 axins.imshow(cutout.data, cmap='Greys', origin='lower',
                              norm=norm2)
