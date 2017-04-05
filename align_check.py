@@ -267,6 +267,7 @@ def main(path0, out_pdf='', silent=False, verbose=True):
      Use find_gnirs_window_mean to find center
     Modified by Chun Ly, 05 April 2017
      - Handle alignment sequences with more than just 4 frames
+     - Handle excess subplots for individual PDF pages (remove axes)
     '''
     
     if silent == False: log.info('### Begin main : '+systime())
@@ -427,6 +428,14 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
                 # Write each page separately | + on 05/04/2017
                 if len(t_idx) > (nrows*ncols):
+                    # Mod later on 05/04/2017 to handle excess subplots
+                    if jj == len(t_idx)-1:
+                        rem0 = len(t_idx) % (nrows*ncols) # remainder
+                        if rem0 != 0:
+                            for rr in range(rem0,nrows*ncols,1):
+                                t_col, t_row = rr % ncols, (rr / ncols) % nrows
+                                ax_arr[t_row,t_col].axis('off')
+
                     if (jj % (nrows * ncols) == nrows*ncols-1) or \
                        (jj == len(t_idx)-1):
                         subplots_adjust(left=0.02, bottom=0.02, top=0.95,
@@ -437,6 +446,11 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
             # Mod on 05/04/2017
             if len(t_idx) <= nrows * ncols:
+                # Mod later on 05/04/2017 to handle excess subplots
+                for rr in range(len(t_idx),nrows*ncols):
+                    t_col, t_row = rr % ncols, (rr / ncols) % nrows
+                    ax_arr[t_row,t_col].axis('off')
+
                 subplots_adjust(left=0.02, bottom=0.02, top=0.95, right=0.98,
                                 wspace=0.02, hspace=0.02)
                 fig.set_size_inches(11,8)
