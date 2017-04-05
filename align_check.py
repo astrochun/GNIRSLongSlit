@@ -33,6 +33,10 @@ zscale = ZScaleInterval()
 
 from ccdproc import cosmicray_lacosmic # + on 01/04/2017
 
+# + on 05/04/2017 to group index together
+from itertools import groupby
+from operator import itemgetter
+
 from . import gnirs_2017a
 import dir_check
 
@@ -44,6 +48,48 @@ bpmy, bpmx  = np.where(bpm_data == 1)
 
 size2d = u.Quantity((560, 770), u.pixel) # u.Quantity((150, 770), u.pixel)
 pos0   = (503, 437)
+
+def group_index(index0, find_max=False):
+
+    '''
+    Function to group sets of index
+
+    Parameters
+    ----------
+    index0 : list or numpy array
+      List or numpy array containing the index
+
+    find_max : bool
+      Keyword flag for whether to return the index array with the maximum
+      size or the full list
+
+    Returns
+    -------
+    list0 : list
+      List of numpy arrays with each entry a different group index
+
+    list0[m0] : numpy array
+      Array containing the largest number of indexes
+
+    Notes
+    -----
+    Created by Chun Ly, 5 Apri 2017
+    '''
+
+    count0 = list()
+    list0  = list()
+    for k, g in groupby(enumerate(index0), lambda (i, x): i-x):
+        temp = np.array(map(itemgetter(1), g))
+        list0.append(temp)
+        count0.append(len(temp))
+
+    if find_max == False:
+        return list0
+    else:
+        m0 = np.where(count0 == np.max(count0))[0][0]
+        return list0[m0]
+
+#enddef
 
 def get_slit_trace(infile): #, xmin, xmax):
     # Mod on 04/04/2017, aesthetics, fix bug
@@ -109,9 +155,13 @@ def find_gnirs_window_mean(infile):
     i_y = np.where(mean_y > 0)[0]
     i_x = np.where(mean_x > 0)[0]
 
-    # + on 01/04/2017
-    y_min, y_max = np.min(i_y), np.max(i_y)
-    x_min, x_max = np.min(i_x), np.max(i_x)
+    # + on 05/04/2017
+    i_y_grp = group_index(i_y, find_max=True)
+    i_x_grp = group_index(i_x, find_max=True)
+
+    # + on 01/04/2017, Mod on 05/04/2017
+    y_min, y_max = np.min(i_y_grp), np.max(i_y_grp)
+    x_min, x_max = np.min(i_x_grp), np.max(i_x_grp)
     x_cen, y_cen = (x_max+x_min)/2.0, (y_max+y_min)/2.0 # Later mod on 04/04/2017
     #x_cen, y_cen = np.average(i_x), np.average(i_y)
 
