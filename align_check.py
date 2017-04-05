@@ -45,16 +45,19 @@ bpmy, bpmx  = np.where(bpm_data == 1)
 size2d = u.Quantity((560, 770), u.pixel) # u.Quantity((150, 770), u.pixel)
 pos0   = (503, 437)
 
-def get_slit_trace(infile):
+def get_slit_trace(infile): #, xmin, xmax):
+    # Mod on 04/04/2017, aesthetics, fix bug
+
     im0, hdr0 = fits.getdata(infile, header=True)
 
     y_med0 = np.median(im0, axis=1)
     cen0   = (np.where(y_med0 == np.max(y_med0))[0])[0]
 
-    im0_crop = im0[cen0-15:cen0+15,:]
-    y_idx, x_idx = np.where(im0_crop >= 0.25*np.max(im0_crop))
+    dy = 20 # + on 04/04/2017
+    im0_crop = im0[cen0-dy:cen0+dy,:]
 
-    xmin, xmax = np.min(x_idx), np.max(x_idx)
+    y_idx, x_idx = np.where(im0_crop >= 0.25*np.max(im0_crop))
+    xmin, xmax   = np.min(x_idx), np.max(x_idx)
 
     dx = 2
     x0 = np.arange(xmin, xmax, dx)
@@ -63,12 +66,12 @@ def get_slit_trace(infile):
     y0_hi = np.zeros(len(x0))
 
     for xx in xrange(len(x0)):
-        im0_crop = im0[cen0-15:cen0+15,x0[xx]:x0[xx]+dx]
+        im0_crop = im0[cen0-dy:cen0+dy,x0[xx]:x0[xx]+dx]
         y_med    = np.median(im0_crop, axis=1)
         edge_idx = np.where(y_med >= 0.1*np.max(y_med))[0]
         if len(edge_idx) > 2:
-            y0_lo[xx] = cen0-15+edge_idx[0]
-            y0_hi[xx] = cen0-15+edge_idx[-1]
+            y0_lo[xx] = cen0-dy+edge_idx[0]
+            y0_hi[xx] = cen0-dy+edge_idx[-1]
         else:
             y0_lo[xx] = np.nan
             y0_hi[xx] = np.nan
@@ -269,9 +272,10 @@ def main(path0, out_pdf='', silent=False, verbose=True):
             #xcen -= pos_cen[0]-new_size[1].value/2.0
             #ycen -= pos_cen[1]-new_size[0].value/2.0
 
-            slit_x0, slit_y0_lo, slit_y0_hi = get_slit_trace(t_files[0])
+            slit_x0, slit_y0_lo, slit_y0_hi = get_slit_trace(t_files[0]) #, x_min, x_max)
             # Adjust values for offset that is applied
-            slit_x0    -= np.int64(pos0[0]-size2d[1].value/2.0)
+            # Bug: Mod on 04/04/2017 to get proper coordinate
+            slit_x0    -= np.int64(pos_cen[0]-size2d[1].value/2.0)
             slit_y0_lo -= pos_cen[1]-size2d[0].value/2.0
             slit_y0_hi -= pos_cen[1]-size2d[0].value/2.0
 
