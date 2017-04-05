@@ -265,6 +265,8 @@ def main(path0, out_pdf='', silent=False, verbose=True):
      - Adjust greyscale limits to handle slit image (make it black),
        and faint sources
      Use find_gnirs_window_mean to find center
+    Modified by Chun Ly, 05 April 2017
+     - Handle alignment sequences with more than just 4 frames
     '''
     
     if silent == False: log.info('### Begin main : '+systime())
@@ -317,10 +319,12 @@ def main(path0, out_pdf='', silent=False, verbose=True):
 
             t_files = [path+a for a in tab0['filename'][t_idx]]
             ncols = 2.0
-            nrows = np.ceil(len(t_idx)/ncols)
+            nrows = 2 # np.ceil(len(t_idx)/ncols)
             ncols, nrows = np.int(ncols), np.int(nrows)
 
-            fig, ax_arr = plt.subplots(nrows=nrows, ncols=ncols)
+            # Mod on 05/04/2017
+            if len(t_idx) <= nrows * ncols:
+                fig, ax_arr = plt.subplots(nrows=nrows, ncols=ncols)
 
             #med0, x_min, x_max, y_min, \
             #    y_max, x_cen, y_cen = find_gnirs_window(t_files[1])
@@ -341,6 +345,11 @@ def main(path0, out_pdf='', silent=False, verbose=True):
             for jj in xrange(len(t_idx)):
                 jj_idx = t_idx[jj]
 
+                # + on 05/04/2017
+                if len(t_idx) > (nrows*ncols):
+                    if jj % (nrows * ncols) == 0:
+                        fig, ax_arr = plt.subplots(nrows=nrows, ncols=ncols)
+
                 im0, hdr0 = fits.getdata(t_files[jj], header=True)
 
                 # + 01/04/2017
@@ -349,7 +358,7 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                 cutout = Cutout2D(im0_clean, pos_cen, size2d,
                                   mode='partial', fill_value=np.nan)
 
-                t_col, t_row = jj % ncols, jj / ncols
+                t_col, t_row = jj % ncols, (jj / ncols) % nrows
 
                 # Mod on 04/04/2017 to handle bright and faint stars
                 max0 = np.max(cutout.data)
@@ -396,7 +405,7 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                               ha='left', va='top')
 
                 # Plot inset | Later + on 24/03/2017
-                axins = zoomed_inset_axes(t_ax, 4, loc=4)
+                axins = zoomed_inset_axes(t_ax, 6, loc=4)
                 norm2 = ImageNormalize(vmin=z1, vmax=z2)
                 axins.imshow(cutout.data, cmap='Greys', origin='lower',
                              norm=norm2)
@@ -415,12 +424,23 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                 axins.yaxis.set_ticklabels([])
                 mark_inset(t_ax, axins, loc1=1, loc2=3, fc="none", ec="b",
                            ls='dotted', lw=0.5)
+
+                # Write each page separately | + on 05/04/2017
+                if len(t_idx) > (nrows*ncols):
+                    if (jj % (nrows * ncols) == nrows*ncols-1) or \
+                       (jj == len(t_idx)-1):
+                        subplots_adjust(left=0.02, bottom=0.02, top=0.95,
+                                        right=0.98, wspace=0.02, hspace=0.02)
+                        fig.set_size_inches(11,8)
+                        fig.savefig(pp, format='pdf')
             #endfor
 
-            subplots_adjust(left=0.02, bottom=0.02, top=0.95, right=0.98,
-                            wspace=0.02, hspace=0.02)
-            fig.set_size_inches(11,8)
-            fig.savefig(pp, format='pdf')
+            # Mod on 05/04/2017
+            if len(t_idx) <= nrows * ncols:
+                subplots_adjust(left=0.02, bottom=0.02, top=0.95, right=0.98,
+                                wspace=0.02, hspace=0.02)
+                fig.set_size_inches(11,8)
+                fig.savefig(pp, format='pdf')
         #endfor
 
         pp.close()
