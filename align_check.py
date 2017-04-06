@@ -42,6 +42,9 @@ from MMTtools.mmtcam import gauss2d
 import scipy.optimize as opt
 f_s = 2*np.sqrt(2*np.log(2)) # sigma-FWHM conversion
 
+# + on 06/04/2017
+from scipy.interpolate import interp1d
+
 from . import gnirs_2017a
 import dir_check
 
@@ -96,7 +99,7 @@ def group_index(index0, find_max=False):
 
 #enddef
 
-def gauss2d_fit(im0, hdr0, t_ax):
+def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi):
     '''
     Execute 2-D Gaussian fit on image
 
@@ -111,12 +114,23 @@ def gauss2d_fit(im0, hdr0, t_ax):
     t_ax : matplotlib axis pointer
       To indicate which panel to annotate text
 
+    c_slit_x0: array
+      Contains arrays of x values
+
+    c_slit_y0_lo: array
+      Contains arrays of y values for the base of the slit
+
+    c_slit_y0_hi: array
+      Contains arrays of y values for the top of the slit
+
     Returns
     -------
 
     Notes
     -----
     Created by Chun Ly, 5 April 2017
+    Modified by Chun Ly, 6 April 2017
+     - Determine how far source is from slit center
     '''
     sigG = 3.0
     max0 = np.nanmax(im0)
@@ -146,7 +160,16 @@ def gauss2d_fit(im0, hdr0, t_ax):
         FWHMx = popt[3] * f_s * pscale
         FWHMy = popt[4] * f_s * pscale
 
-        str0  = 'Centroid: x=%.2f"  y=%.2f"\n' % (popt[1]*pscale, popt[2]*pscale)
+        # Determine how off from slit center | + on 06/04/2017
+        f_lo = interp1d(c_slit_x0, c_slit_y0_lo)
+        f_hi = interp1d(c_slit_x0, c_slit_y0_hi)
+        s_lo = f_lo(popt[1])-y_sz0
+        s_hi = f_hi(popt[1])-y_sz0
+        slit_off = (popt[2] - (s_lo+s_hi)/2.0) * pscale
+        print '## slit_off(arcsec) : ', slit_off
+        str0  = 'Slit offset : %.2f"\n' % slit_off
+
+        str0 += 'Centroid: x=%.2f"  y=%.2f"\n' % (popt[1]*pscale, popt[2]*pscale)
         str0 += 'FWHM: x=%.2f"  y=%.2f"\n'   % (FWHMx, FWHMy)
         str0 += r'$\theta$ = %.2f$^{\circ}$' % (popt[5]*180.0/np.pi)
     else:
@@ -295,11 +318,11 @@ def find_star(infile, pos=pos0, find_size2d=size2d):
 
     peak = np.where(cutout == np.max(cutout))
     ycen, xcen = peak[0][0], peak[1][0]
-    print xcen, ycen
+    # print xcen, ycen
 
     xcen += pos[0]-find_size2d[1].value/2.0
     ycen += pos[1]-find_size2d[0].value/2.0
-    print xcen, ycen
+    # print xcen, ycen
     return xcen, ycen
 #enddef
 
@@ -337,6 +360,8 @@ def main(path0, out_pdf='', silent=False, verbose=True):
      - Handle alignment sequences with more than just 4 frames
      - Handle excess subplots for individual PDF pages (remove axes)
      - Compute seeing FWHM for acquisition images
+    Modified by Chun Ly, 06 April 2017
+     - Get coordinates for slit in cutout
     '''
     
     if silent == False: log.info('### Begin main : '+systime())
@@ -501,10 +526,15 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                    (tab0['exptime'][jj_idx] == 3):
                     log.info('## No source in slit : '+tab0['filename'][jj_idx])
                 else:
-                    im0_crop = Cutout2D(cutout.data, (c_xcen,c_ycen),
-                                        u.Quantity((40, 40), u.pixel),
+                    # + on 06/04/2017
+                    c_size2d     = u.Quantity((40, 40), u.pixel)
+                    c_slit_x0    = slit_x0 - (c_xcen-c_size2d[1].value/2.0)
+                    c_slit_y0_lo = slit_y0_lo - (c_ycen-c_size2d[0].value/2.0)
+                    c_slit_y0_hi = slit_y0_hi - (c_ycen-c_size2d[0].value/2.0)
+                    im0_crop = Cutout2D(cutout.data, (c_xcen,c_ycen), c_size2d,
                                         mode='partial', fill_value=np.nan)
-                    gauss2d_fit(im0_crop.data, hdr0, t_ax)
+                    gauss2d_fit(im0_crop.data, hdr0, t_ax, c_slit_x0,
+                                c_slit_y0_lo, c_slit_y0_hi) # Mod on 06/04/2017
 
                 # Write each page separately | + on 05/04/2017
                 if len(t_idx) > (nrows*ncols):
