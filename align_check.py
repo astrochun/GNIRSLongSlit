@@ -37,6 +37,11 @@ from ccdproc import cosmicray_lacosmic # + on 01/04/2017
 from itertools import groupby
 from operator import itemgetter
 
+# For 2-D gaussian fitting | + on 05/04/2017
+from MMTtools.mmtcam import gauss2d
+import scipy.optimize as opt
+f_s = 2*np.sqrt(2*np.log(2)) # sigma-FWHM conversion
+
 from . import gnirs_2017a
 import dir_check
 
@@ -89,6 +94,67 @@ def group_index(index0, find_max=False):
         m0 = np.where(count0 == np.max(count0))[0][0]
         return list0[m0]
 
+#enddef
+
+def gauss2d_fit(im0, hdr0, t_ax):
+    '''
+    Execute 2-D Gaussian fit on image
+
+    Parameters
+    ----------
+    im0 : numpy array
+      Cropped out image for fitting
+
+    hdr0 : FITS header
+      FITS header containing WCS information for pixel scale
+
+    t_ax : matplotlib axis pointer
+      To indicate which panel to annotate text
+
+    Returns
+    -------
+
+    Notes
+    -----
+    Created by Chun Ly, 5 April 2017
+    '''
+    sigG = 3.0
+    max0 = np.nanmax(im0)
+
+    shape0 = im0.shape
+    x_sz0, y_sz0 = shape0[0]/2.0, shape0[1]/2.0
+
+    if max0 < 50000:
+        pscale = np.sqrt(hdr0['CD1_1']**2 + hdr0['CD2_1']**2)*3600.0*u.arcsec
+        pscale = pscale.to(u.arcsec).value
+
+        gx     = np.linspace(0,shape0[0]-1,shape0[0]) - x_sz0
+        gy     = np.linspace(0,shape0[1]-1,shape0[1]) - y_sz0
+        gx, gy = np.meshgrid(gx, gy)
+
+        im0_re = im0.reshape(shape0[0]*shape0[1])
+
+        m_idx = np.where(im0 == max0)
+        x_cen, y_cen = m_idx[1][0]-x_sz0, m_idx[0][0]-y_sz0
+        print '## cen : ', x_cen, y_cen
+        ini_guess = (max0, x_cen, y_cen, sigG, sigG, 0.0, 0.0)
+        bounds = ((     0, -x_sz0, -y_sz0,    0,    0,       0, 0),
+                  (np.inf,  x_sz0,  y_sz0, 10.0, 10.0, 2*np.pi, np.inf))
+        popt, pcov = opt.curve_fit(gauss2d, (gx, gy), im0_re, ini_guess,
+                                   bounds=bounds)
+
+        FWHMx = popt[3] * f_s * pscale
+        FWHMy = popt[4] * f_s * pscale
+
+        str0  = 'Centroid: x=%.2f"  y=%.2f"\n' % (popt[1]*pscale, popt[2]*pscale)
+        str0 += 'FWHM: x=%.2f"  y=%.2f"\n'   % (FWHMx, FWHMy)
+        str0 += r'$\theta$ = %.2f$^{\circ}$' % (popt[5]*180.0/np.pi)
+    else:
+        str0 = 'FWHM: saturated'
+
+    t_ax.annotate(str0, [0.05,0.05], xycoords='axes fraction',
+                  ha='left', va='bottom', fontsize=12)
+    # print '## FWHM : ', FWHMx, FWHMy
 #enddef
 
 def get_slit_trace(infile): #, xmin, xmax):
@@ -268,6 +334,7 @@ def main(path0, out_pdf='', silent=False, verbose=True):
     Modified by Chun Ly, 05 April 2017
      - Handle alignment sequences with more than just 4 frames
      - Handle excess subplots for individual PDF pages (remove axes)
+     - Compute seeing FWHM for acquisition images
     '''
     
     if silent == False: log.info('### Begin main : '+systime())
@@ -351,7 +418,8 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                     if jj % (nrows * ncols) == 0:
                         fig, ax_arr = plt.subplots(nrows=nrows, ncols=ncols)
 
-                im0, hdr0 = fits.getdata(t_files[jj], header=True)
+                im0  = fits.getdata(t_files[jj])
+                hdr0 = fits.getheader(t_files[jj], ext=0) # Get WCS header
 
                 # + 01/04/2017
                 im0_clean = cosmicray_lacosmic(im0, sigclip=10)[0]
@@ -425,6 +493,13 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                 axins.yaxis.set_ticklabels([])
                 mark_inset(t_ax, axins, loc1=1, loc2=3, fc="none", ec="b",
                            ls='dotted', lw=0.5)
+
+                # Compute FWHM of alignment star | + on 05/04/2017
+                if 'Acq_' in tab0['slit'][jj_idx]:
+                    im0_crop = Cutout2D(cutout.data, (c_xcen,c_ycen),
+                                        u.Quantity((40, 40), u.pixel),
+                                        mode='partial', fill_value=np.nan)
+                    gauss2d_fit(im0_crop.data, hdr0, t_ax)
 
                 # Write each page separately | + on 05/04/2017
                 if len(t_idx) > (nrows*ncols):
