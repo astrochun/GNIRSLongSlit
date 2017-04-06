@@ -160,6 +160,7 @@ def gauss2d_fit(im0, hdr0, t_ax):
 def get_slit_trace(infile): #, xmin, xmax):
     # Mod on 04/04/2017, aesthetics, fix bug
     # Mod on 04/04/2017, handle CRs affecting trace
+    # Mod on 06/04/2017. Slit trace can be lost in median. Using average
 
     im0, hdr0 = fits.getdata(infile, header=True)
 
@@ -167,8 +168,9 @@ def get_slit_trace(infile): #, xmin, xmax):
     im0_clean = cosmicray_lacosmic(im0, sigclip=10)
     im0_clean = im0_clean[0]
 
-    y_med0 = np.median(im0_clean, axis=1) # Mod on 04/04/2017
-    cen0   = (np.where(y_med0 == np.max(y_med0))[0])[0]
+    # Bug: Mod on 06/04/2017
+    y_avg0 = np.average(im0_clean, axis=1) # Mod on 04/04/2017
+    cen0   = (np.where(y_avg0 == np.max(y_avg0))[0])[0]
 
     dy = 20 # + on 04/04/2017
     im0_crop = im0_clean[cen0-dy:cen0+dy,:] # Mod on 04/04/2017
