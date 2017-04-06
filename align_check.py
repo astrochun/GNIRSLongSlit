@@ -495,7 +495,10 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                            ls='dotted', lw=0.5)
 
                 # Compute FWHM of alignment star | + on 05/04/2017
-                if 'Acq_' in tab0['slit'][jj_idx]:
+                if ('Acq_' not in tab0['slit'][jj_idx]) and \
+                   (tab0['exptime'][jj_idx] == 3):
+                    log.info('## No source in slit : '+tab0['filename'][jj_idx])
+                else:
                     im0_crop = Cutout2D(cutout.data, (c_xcen,c_ycen),
                                         u.Quantity((40, 40), u.pixel),
                                         mode='partial', fill_value=np.nan)
