@@ -64,6 +64,8 @@ def main(path0, silent=False, verbose=True):
      - Later modified to define r0 (for slight speed improvement
     Modified by Chun Ly, 23 March 2017
      - Call dir_check.main() to handle multiple date directories
+    Modified by Chun Ly, 10 April 2017
+     - Handle cases when arc, flat, telluric, and sci data are not available
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -107,13 +109,34 @@ def main(path0, silent=False, verbose=True):
             i_obj = i_sci[np.arange(0,len(i_sci),2)]
             i_sky = i_sci[np.arange(1,len(i_sci),2)]
 
-        if len(i_arc)  == 0: log.warn('## No ARC data found!')
-        if len(i_flat) == 0: log.warn('## No FLAT data found!')
-        if len(i_tell) == 0: log.warn('## No Telluric data found!')
-        if len(i_sci)  == 0: log.warn('## No science data found!')
+        # Mod on 10/04/2017
+        prefix, index = [], []
+        if len(i_arc)  == 0:
+            log.warn('## No ARC data found!')
+        else:
+            prefix.append('arc')
+            index.append(i_arc)
 
-        prefix = ['arc', 'flat', 'telluric', 'obj', 'sky']
-        index  = [i_arc, i_flat, i_tell, i_obj, i_sky]
+        if len(i_flat) == 0:
+            log.warn('## No FLAT data found!')
+        else:
+            prefix.append('flat')
+            index.append(i_flat)
+
+        if len(i_tell) == 0:
+            log.warn('## No Telluric data found!')
+        else:
+            prefix.append('telluric')
+            index.append(i_tell)
+
+        if len(i_sci)  == 0:
+            log.warn('## No science data found!')
+        else:
+            prefix.append('obj')
+            prefix.append('sky')
+            index.append(i_obj)
+            index.append(i_sky)
+
         zip0   = zip(prefix, index)
 
         QA = ['N/A'] * len0 # Later + on 05/03/2017
