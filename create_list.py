@@ -66,6 +66,9 @@ def main(path0, silent=False, verbose=True):
      - Call dir_check.main() to handle multiple date directories
     Modified by Chun Ly, 10 April 2017
      - Handle cases when arc, flat, telluric, and sci data are not available
+    Modified by Chun Ly, 11 April 2017
+     - Handle case when no data for all.lis are available
+       (i.e., the observing sequence was canceled)
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -150,11 +153,13 @@ def main(path0, silent=False, verbose=True):
             #asc.write(tab0[b], outfile, overwrite=True,
             #          format='no_header')
 
-        # Later + on 05/03/2017
+        # Later + on 05/03/2017 | Mod on 11/04/2017
         i_all    = [ii for ii in r0 if QA[ii] != 'N/A']
-        outfile0 = path+'all.lis'
-        if silent == False: log.info('## Writing : '+outfile0)
-        np.savetxt(outfile0, tab0['filename'][i_all], fmt='%s')
+        if len(i_all) > 0:
+            outfile0 = path+'all.lis'
+            if silent == False: log.info('## Writing : '+outfile0)
+            np.savetxt(outfile0, tab0['filename'][i_all], fmt='%s')
+        else: log.warn('Will not write all.lis!!')
 
         # Later + on 05/03/2017
         col0 = Column(QA, name='QA')
