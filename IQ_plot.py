@@ -29,6 +29,8 @@ from scipy.interpolate import interp1d
 # + on 12/03/2017
 from . import gnirs_2017a #targets0
 
+import dir_check # + on 11/04/2017
+
 pscale = 0.15 # arcseconds per pixel
 
 # From: https://www.gemini.edu/sciops/telescopes-and-sites/observing-condition-constraints
@@ -134,115 +136,124 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True):
     Created by Chun Ly, 10 March 2017
      - Later modified to include check_quality keyword option
      - Later modified to include inset that shows the stacked line profile
+    Modified by Chun Ly, 11 April 2017
+     - Call dir_check.main() to handle multiple date directories
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
 
-    files = []
-    file_lis = ['obj.lis','sky.lis','telluric.lis']
-    for file0 in file_lis:
-        if silent == False: log.info('## Reading : '+path0+file0)    
-        t_files = np.loadtxt(path0+file0, dtype=type(str)).tolist()
-        files += t_files
-    files.sort()
-    
-    n_files = len(files)
+    # + on 11/04/2017
+    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
-    out_pdf = path0+'IQ_plot.pdf' if out_pdf == '' else path0+out_pdf
+    out_pdf_default = out_pdf
 
-    pp = PdfPages(out_pdf)
+    # Mod on 11/04/2017
+    for path in list_path:
+        files = []
+        file_lis = ['obj.lis','sky.lis','telluric.lis']
+        for file0 in file_lis:
+            if silent == False: log.info('## Reading : '+path+file0)
+            t_files = np.loadtxt(path+file0, dtype=type(str)).tolist()
+            files += t_files
+        files.sort()
 
-    for nn in xrange(n_files):
-        if silent == False: log.info('## Reading : '+files[nn])    
-        hdr0 = fits.getheader(path0+files[nn])
-        im0  = fits.getdata(path0+files[nn])
+        n_files = len(files)
 
-        bins, fwhm0, stack0_shift = compute_fwhm(im0)
+        out_pdf = path+'IQ_plot.pdf' if out_pdf == '' else path+out_pdf
+        pp      = PdfPages(out_pdf)
 
-        # if nn == 0: fits.writeto(path0+'stack0_shift.fits', stack0_shift)
+        for nn in xrange(n_files):
+            if silent == False: log.info('## Reading : '+files[nn])
+            hdr0 = fits.getheader(path+files[nn])
+            im0  = fits.getdata(path+files[nn])
 
-        row = nn % 2
-        if row == 0: fig, ax0 = plt.subplots(2, 1)
+            bins, fwhm0, stack0_shift = compute_fwhm(im0)
 
-        good = np.where(fwhm0 >0)[0]
-        ax0[row].plot(bins[good], fwhm0[good], marker='o', alpha=0.5,
-                      mec='none', mfc='b', linestyle='none', zorder=2)
+            # if nn == 0: fits.writeto(path0+'stack0_shift.fits', stack0_shift)
 
-        # Compute average line profile from stack0_shift
-        # Later + on 10/03/2017
-        avg_stack = np.average(stack0_shift, axis=0)
-        x0_avg    = np.arange(-25,25)
-        if row == 0: axi = fig.add_axes([0.60,0.81,0.25,0.15])
-        if row == 1: axi = fig.add_axes([0.60,0.36,0.25,0.15])
-        axi.plot(x0_avg*pscale, avg_stack, 'k-')
-        axi.set_ylim([-0.4,1.1])
-        axi.set_xlim([-2.0,2.0])
-        axi.set_xticks(range(-2,2,1))
-        axi.set_xlabel('X [arcsec]', fontsize=8)
-        axi.tick_params(labelsize=8)
-        axi.minorticks_on()
-        p0 = [0.0, 1.0, 0.0, 2.0]
-        popt, pcov = curve_fit(gauss1d, x0_avg, avg_stack, p0=p0)
-        avg_fwhm0 = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
-        axi.plot(x0_avg*pscale, gauss1d(x0_avg, *popt), 'r--')
-        axi.annotate('FWHM = %.3f"' % avg_fwhm0, [0.50,0.025],
-                     xycoords='axes fraction', ha='center', va='bottom')
-        ax0[row].axhline(y=avg_fwhm0, linewidth=2, color='r',
-                         linestyle='--', zorder=1)
+            row = nn % 2
+            if row == 0: fig, ax0 = plt.subplots(2, 1)
 
-        # Median FWHM | Later + on 10/03/2017
-        med_fwhm0 = np.median(fwhm0[good])
-        ax0[row].axhline(y=med_fwhm0, linewidth=2, color='g',
-                         linestyle='--', zorder=1)
+            good = np.where(fwhm0 >0)[0]
+            ax0[row].plot(bins[good], fwhm0[good], marker='o', alpha=0.5,
+                          mec='none', mfc='b', linestyle='none', zorder=2)
 
-        # Axes labeling
-        ax0[row].set_ylabel('FWHM [arcsec]')
-        if row == 1:
-            ax0[row].set_xlabel('Y [PIXELS]')
-        else:
-            ax0[row].set_xticklabels([])
+            # Compute average line profile from stack0_shift
+            # Later + on 10/03/2017
+            avg_stack = np.average(stack0_shift, axis=0)
+            x0_avg    = np.arange(-25,25)
+            if row == 0: axi = fig.add_axes([0.60,0.81,0.25,0.15])
+            if row == 1: axi = fig.add_axes([0.60,0.36,0.25,0.15])
+            axi.plot(x0_avg*pscale, avg_stack, 'k-')
+            axi.set_ylim([-0.4,1.1])
+            axi.set_xlim([-2.0,2.0])
+            axi.set_xticks(range(-2,2,1))
+            axi.set_xlabel('X [arcsec]', fontsize=8)
+            axi.tick_params(labelsize=8)
+            axi.minorticks_on()
+            p0 = [0.0, 1.0, 0.0, 2.0]
+            popt, pcov = curve_fit(gauss1d, x0_avg, avg_stack, p0=p0)
+            avg_fwhm0 = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
+            axi.plot(x0_avg*pscale, gauss1d(x0_avg, *popt), 'r--')
+            axi.annotate('FWHM = %.3f"' % avg_fwhm0, [0.50,0.025],
+                         xycoords='axes fraction', ha='center', va='bottom')
+            ax0[row].axhline(y=avg_fwhm0, linewidth=2, color='r',
+                             linestyle='--', zorder=1)
 
-        # Annotation
-        txt0 = files[nn]+'\nTarget: '+hdr0['OBJECT'] #.split(' ')[0]
-        ax0[row].annotate(txt0, [0.025,0.95], xycoords='axes fraction',
-                          ha='left', va='top')
+            # Median FWHM | Later + on 10/03/2017
+            med_fwhm0 = np.median(fwhm0[good])
+            ax0[row].axhline(y=med_fwhm0, linewidth=2, color='g',
+                             linestyle='--', zorder=1)
 
-        # Later + on 10/03/2017
-        if check_quality:
-            req = hdr0['REQIQ'].replace('-percentile','%')
-            raw = hdr0['RAWIQ'].replace('-percentile','%')
-
-            i_raw = [ii for ii in range(len(FWHM_IQ_C)) if
-                     raw in FWHM_IQ_C[ii]][0]
-            i_req = [ii for ii in range(len(FWHM_IQ_C)) if
-                     raw in FWHM_IQ_C[ii]][0]
-
-            txt0  = 'Req. IQ: %s [%.2f"]\n' % (req, FWHM_IQ_J[i_req])
-            txt0 += 'Raw IQ: %s [%.2f"]\n'  % (raw, FWHM_IQ_J[i_raw])
-            if med_fwhm0 <= FWHM_IQ_J[i_raw]:
-                txt0 += 'PASS'
+            # Axes labeling
+            ax0[row].set_ylabel('FWHM [arcsec]')
+            if row == 1:
+                ax0[row].set_xlabel('Y [PIXELS]')
             else:
-                if med_fwhm0 <= FWHM_IQ_J[i_raw]*1.25:
-                    txt0 += 'USABLE'
-                if med_fwhm0 > FWHM_IQ_J[i_raw]*1.25:
-                    txt0 += 'FAIL'
+                ax0[row].set_xticklabels([])
 
-            ax0[row].annotate(txt0, [0.975,0.05], xycoords='axes fraction',
-                              ha='right', va='bottom')
+            # Annotation
+            txt0 = files[nn]+'\nTarget: '+hdr0['OBJECT'] #.split(' ')[0]
+            ax0[row].annotate(txt0, [0.025,0.95], xycoords='axes fraction',
+                              ha='left', va='top')
 
-        # Aesthetics
-        ax0[row].set_xlim([0,1050])
-        ax0[row].set_ylim([min(fwhm0)-0.025,max(fwhm0)+0.075])
-        ax0[row].minorticks_on()
+            # Later + on 10/03/2017
+            if check_quality:
+                req = hdr0['REQIQ'].replace('-percentile','%')
+                raw = hdr0['RAWIQ'].replace('-percentile','%')
 
-        if row == 1 or nn == n_files-1:
-            subplots_adjust(left=0.10, bottom=0.10, top=0.975, right=0.975,
-                            wspace=0.03, hspace=0.05)
-            fig.savefig(pp, format='pdf')
+                i_raw = [ii for ii in range(len(FWHM_IQ_C)) if
+                         raw in FWHM_IQ_C[ii]][0]
+                i_req = [ii for ii in range(len(FWHM_IQ_C)) if
+                         raw in FWHM_IQ_C[ii]][0]
+
+                txt0  = 'Req. IQ: %s [%.2f"]\n' % (req, FWHM_IQ_J[i_req])
+                txt0 += 'Raw IQ: %s [%.2f"]\n'  % (raw, FWHM_IQ_J[i_raw])
+                if med_fwhm0 <= FWHM_IQ_J[i_raw]:
+                    txt0 += 'PASS'
+                else:
+                    if med_fwhm0 <= FWHM_IQ_J[i_raw]*1.25:
+                        txt0 += 'USABLE'
+                    if med_fwhm0 > FWHM_IQ_J[i_raw]*1.25:
+                        txt0 += 'FAIL'
+
+                ax0[row].annotate(txt0, [0.975,0.05], xycoords='axes fraction',
+                                  ha='right', va='bottom')
+
+            # Aesthetics
+            ax0[row].set_xlim([0,1050])
+            ax0[row].set_ylim([min(fwhm0)-0.025,max(fwhm0)+0.075])
+            ax0[row].minorticks_on()
+
+            if row == 1 or nn == n_files-1:
+                subplots_adjust(left=0.10, bottom=0.10, top=0.975, right=0.975,
+                                wspace=0.03, hspace=0.05)
+                fig.savefig(pp, format='pdf')
+        #endfor
+        if silent == False: log.info('## Reading : '+out_pdf)
+        pp.close()
+        out_pdf = out_pdf_default
     #endfor
-
-    if silent == False: log.info('## Reading : '+out_pdf)
-    pp.close()
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
