@@ -138,6 +138,8 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True):
      - Later modified to include inset that shows the stacked line profile
     Modified by Chun Ly, 11 April 2017
      - Call dir_check.main() to handle multiple date directories
+    Modified by Chun Ly, 13 April 2017
+     - Minor bug: Check if file exists first
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -152,9 +154,14 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True):
         files = []
         file_lis = ['obj.lis','sky.lis','telluric.lis']
         for file0 in file_lis:
-            if silent == False: log.info('## Reading : '+path+file0)
-            t_files = np.loadtxt(path+file0, dtype=type(str)).tolist()
-            files += t_files
+            # Mod on 13/04/2017
+            if exists(path+file0):
+                if silent == False: log.info('## Reading : '+path+file0)
+                t_files = np.loadtxt(path+file0, dtype=type(str)).tolist()
+                files += t_files
+            else:
+                if silent == False: log.info('## File not found : '+path+file0)
+
         files.sort()
 
         n_files = len(files)
@@ -250,7 +257,7 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True):
                                 wspace=0.03, hspace=0.05)
                 fig.savefig(pp, format='pdf')
         #endfor
-        if silent == False: log.info('## Reading : '+out_pdf)
+        if silent == False: log.info('## Writing : '+out_pdf)
         pp.close()
         out_pdf = out_pdf_default
     #endfor
