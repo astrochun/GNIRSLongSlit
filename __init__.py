@@ -16,12 +16,14 @@ import GNIRSLongSlit
 """
 
 # + on 12/03/2017
-gnirs_2017a = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
+gnirs_2017a = ['DEEP05', 'DEEP06', 'DEEP07', 'DEEP10', 'DEEP14',
+               'Keck03', 'Keck27', 'MMT08', 'MMT37']
 
 __all__ = [gnirs_2017a]
 
 import hdr_info
 import create_list
+import create_obs_summary_table
 
 import cleanir
 import cleanir_script
@@ -33,8 +35,10 @@ import align_check
 import symlink
 import dir_check
 
+
 reload(hdr_info)
 reload(create_list)
+reload(create_obs_summary_table)
 
 reload(cleanir)
 reload(cleanir_script)

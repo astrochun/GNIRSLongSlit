@@ -22,7 +22,36 @@ import dir_check
 from astropy.table import Table
 from astropy import log
 
-def main(path0, targets, silent=False, verbose=True):
+def get_telluric_info(QA_tab, t_idx, t_names):
+    ## + on 25/04/2017
+
+    if len(t_idx) == 1:
+        telstar   = QA_tab['object'][t_idx][0]
+        t_exptime = QA_tab['exptime'][t_idx][0]
+        telset    = str(len(t_idx))+'x'+str(t_exptime)+'s'
+
+        AM0   = QA_tab['airmass'][t_idx]
+        telAM = '%.3f-%.3f' % (np.min(AM0),np.max(AM0))
+    else:
+        telset = []
+        telAM  = []
+        for nn in range(len(t_names)):
+            idx2      = [xx for xx in range(len(QA_tab)) if
+                         (t_names[nn] in QA_tab['object'][xx])]
+            nidx      = list(set(t_idx) & set(idx2))
+            t_exptime = QA_tab['exptime'][nidx][0]
+            telset.append(str(len(nidx))+'x'+str(t_exptime)+'s')
+
+            AM0   = QA_tab['airmass'][nidx]
+            telAM.append('%.3f-%.3f' % (np.min(AM0),np.max(AM0)))
+
+        telstar = ','.join(t_names)
+        telset  = ','.join(telset)
+        telAM   = ','.join(telAM)
+    return telstar, telset, telAM
+#enddef
+
+def main(path0, targets, outfile=None, silent=False, verbose=True):
 
     '''
     Generate ASCII file summarizing observations
@@ -50,46 +79,63 @@ def main(path0, targets, silent=False, verbose=True):
 
     Targets, ObsDate, ObsSet = [], [], []
     TotalTime, gratwave, Airmass = [], [], []
-    TellStar, TellSet = [], []
-    
+    TellStar, TellSet, TellAM = [], [], [] # Later Mod on 25/04/2017
+
     for tt in range(len(targets)):
         tt_path = path0+targets[tt]+'/'
         dir_list, list_path = dir_check.main(tt_path, silent=True,
                                              verbose=False)
 
+        cnt = 0
         for path in list_path:
-            Targets.append(targets[tt])
+            # Mod on 25/04/2017
+            txt = targets[tt] if cnt == 0 else '...'
+            Targets.append(txt) #targets[tt])
 
             QA_file = path+'/hdr_info.QA.tbl'
             QA_tab  = asc.read(QA_file, format='fixed_width_two_line')
+
+            # All science targets
             idx = [xx for xx in range(len(QA_tab)) if
                    ('obj' in QA_tab['QA'][xx]) or ('sky' in QA_tab['QA'][xx])]
 
-            t_date = QA_tab['UT_date'][idx][0].split('T')[0]
-            ObsDate.append(t_date)
+            # Later Mod on 25/04/2017
+            tab_ref = QA_tab[idx][0]
+            t_date  = tab_ref['UT_date'].split('T')[0]
+            exptime = tab_ref['exptime']
 
-            gratwave.append(QA_tab['gratwave'][idx][0])
-            exptime = QA_tab['exptime'][idx][0]
+            ObsDate.append(t_date)
+            gratwave.append(tab_ref['gratwave'])
+
             ObsSet.append(str(len(idx))+'x'+str(exptime)+'s')
             TotalTime.append('%.2f' % (len(idx)*exptime/60.0))
+
             AM0 = QA_tab['airmass'][idx]
             Airmass.append('%.3f-%.3f' % (np.min(AM0),np.max(AM0)))
 
             t_idx = [xx for xx in range(len(QA_tab)) if
                      ('telluric' in QA_tab['QA'][xx])]
             t_names = list(set(QA_tab['object'][t_idx]))
-            print t_names
-            t_exptime = QA_tab['exptime'][t_idx][0]
-            TellStar.append(QA_tab['object'][t_idx][0])
-            TellSet.append(str(len(t_idx))+'x'+str(t_exptime)+'s')
+
+            telstar, telset, telAM = get_telluric_info(QA_tab, t_idx, t_names)
+            TellStar.append(telstar)
+            TellSet.append(telset)
+            TellAM.append(telAM) # Later + on 25/04/2017
+            cnt += 1
+        #endfor
+    #endfor
 
     arr0   = [Targets, ObsDate, ObsSet, TotalTime, gratwave,
-              Airmass, TellStar, TellSet]
+              Airmass, TellStar, TellSet, TellAM]
     names0 = ('Name', 'UT_Date', 'Sequence', 'Int_Time', 'Grating_Wave',
-              'Airmass', 'Telluric_Star', 'Tell_Seq')
+              'Airmass', 'Telluric_Star', 'Telluric_Seq', 'Telluric_AM')
     tab0 = Table(arr0, names=names0)
 
     print tab0
+
+    if outfile == None: outfile = path0+'obs_summary.txt'
+    if silent == False: log.info('Writing : '+outfile)
+    asc.write(tab0, output=outfile, format='fixed_width_two_line')
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
