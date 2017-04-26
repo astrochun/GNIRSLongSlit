@@ -6,13 +6,15 @@ Python 2.7 codes to reduce longslit data from Gemini-N/GNIRS
 This code has been tested with X- and J-band spectra with the 111/mm grating
 
 Requirements:
- astropy    >=v1.3
- chun_codes
+ aplpy      >= v1.1.1
+ astropy    >= v1.3
+ ccdproc    >= v1.2.0
+ chun_codes (https://github.com/astrochun/chun_codes)
  matplotlib >= v1.5.3
  numpy      >= v1.11.1
 
 How to use:
-import GNIRSLongSlit
+import GNIRSLongSlit as gnirsls
 """
 
 # + on 12/03/2017
@@ -35,6 +37,7 @@ import align_check
 import symlink
 import dir_check
 
+import reduce
 
 reload(hdr_info)
 reload(create_list)
@@ -49,3 +52,4 @@ reload(align_check)
 
 reload(symlink)
 reload(dir_check)
+reload(reduce)
