@@ -249,34 +249,28 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
      - Call dir_check.main() to handle multiple date directories
     Modified by Chun Ly, 25 April 2017
      - Check cN*fits files if symlink.
+    Modified by Chun Ly, 26 April 2017
+     - Fix bug with call to dir_check()
+     - Change out_pdf default name (include clean suffix)
+     - Fix handling of symlink files; Check for False, not True
     '''
 
     if silent == False: log.info('### Begin clean_QA : '+systime())
 
-    # + on 23/03/2017
-    dir_list = dir_check.main(path0, silent=silent, verbose=verbose)
-
-    # + on 23/03/2017
-    if len(dir_list) == 0:
-        if silent == False:
-            log.info('## No dir found')
-        list_path = [path0]
-    else:
-        if silent == False:
-            log.info('## The following date dir found: '+', '.join(dir_list))
-        list_path = [path0+a+'/' for a in dir_list]
+    # + on 23/03/2017 | Mod on 26/04/2017
+    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
     # Mod on 23/03/2017
     for path in list_path:
         if out_pdf == '':
-            out_pdf = path+'QA_plot.pdf'
+            out_pdf = path+'QA_plot.clean.pdf'
         else:
             out_pdf = path+out_pdf
 
         files   = glob.glob(path0+'cN*fits')
 
         # Limit to non-symlinked files | + on 25/04/2017
-        files   = [file for file in files if os.path.islink(file) == True]
+        files   = [file for file in files if os.path.islink(file) == False]
         n_files = len(files)
 
         pp = PdfPages(out_pdf)
