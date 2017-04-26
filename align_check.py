@@ -38,7 +38,9 @@ from itertools import groupby
 from operator import itemgetter
 
 # For 2-D gaussian fitting | + on 05/04/2017
-from MMTtools.mmtcam import gauss2d
+# Mod on 26/04/2017 to use chun_codes instead
+from chun_codes import gauss2d
+#MMTtools.mmtcam import gauss2d
 import scipy.optimize as opt
 f_s = 2*np.sqrt(2*np.log(2)) # sigma-FWHM conversion
 
