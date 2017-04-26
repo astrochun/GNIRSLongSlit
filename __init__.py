@@ -37,6 +37,7 @@ import align_check
 import symlink
 import dir_check
 
+import iraf_get_subset
 import reduce
 
 reload(hdr_info)
@@ -52,4 +53,6 @@ reload(align_check)
 
 reload(symlink)
 reload(dir_check)
+
+reload(iraf_get_subset)
 reload(reduce)
