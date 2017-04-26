@@ -63,12 +63,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     -----
     Created by Chun Ly, 21 March 2017
     Modified by Chun Ly, 26 April 2017
-     - Add code to run nsprepare
+     - Add code to run nsprepare (step1)
      - Check for cN*fits files (cleanir or symlink files)
      - Load in iraf_get_subset package
      - Fix path bug when calling nsprepare
      - Add warning if not all nsprepare files are available
      - Define logfile for GNIRS
+     - Add code to compute statistics (step2)
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -124,6 +125,16 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             #                     bpm=bpm, shiftx="INDEF", shifty="INDEF",
             #                     fl_forcewcs=fl_forcewcs)
     #endelse
+
+    # Step 2 - Create flat | + on 26/04/2017
+    tmpflat = rawdir+'tmpflat'
+    if not exists(tmpflat):
+        flats      = np.loadtxt(rawdir+'flat.lis', dtype=type(str))
+        flat_files = [rawdir+'nc'+file0 for file0 in flats]
+        if silent == False: log.info('## Writing : '+tmpflat)
+        np.savetxt(tmpflat, flat_files, fmt='%s')
+    else:
+        if silent == False: log.warn('## File exists!!! : '+tmpflat)
 
     if silent == False: log.info('### End run : '+systime())
 #enddef
