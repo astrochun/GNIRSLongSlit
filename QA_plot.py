@@ -247,6 +247,8 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
      - Call quadrant_bias_values()
     Modified by Chun Ly, 23 March 2017
      - Call dir_check.main() to handle multiple date directories
+    Modified by Chun Ly, 25 April 2017
+     - Check cN*fits files if symlink.
     '''
 
     if silent == False: log.info('### Begin clean_QA : '+systime())
@@ -272,6 +274,9 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
             out_pdf = path+out_pdf
 
         files   = glob.glob(path0+'cN*fits')
+
+        # Limit to non-symlinked files | + on 25/04/2017
+        files   = [file for file in files if os.path.islink(file) == True]
         n_files = len(files)
 
         pp = PdfPages(out_pdf)
