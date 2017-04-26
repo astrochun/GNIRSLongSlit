@@ -68,11 +68,16 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Load in iraf_get_subset package
      - Fix path bug when calling nsprepare
      - Add warning if not all nsprepare files are available
+     - Define logfile for GNIRS
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
     iraf.gemini.nsheaders("gnirs")
+
+    # + on 26/04/2017
+    timestamp = systime()
+    iraf.gemini.gnirs.logfile = rawdir+'gnirs_'+timestamp+'.log'
 
     log.info("## Raw data is located in %s" % rawdir)
 
@@ -99,7 +104,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     else:
         fl_forcewcs = yes
         if n_nc == 0:
-            # Mod on 26/04/2017 - Most specify full path
+            # Mod on 26/04/2017 - Must specify full path
             inimages  = "c@"+rawdir+"all.lis"
             outimages = "nc@"+rawdir+"all.lis"
             iraf.gnirs.nsprepare(inimages=inimages, rawpath=rawdir,
