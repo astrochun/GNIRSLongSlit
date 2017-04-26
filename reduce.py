@@ -64,11 +64,20 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Created by Chun Ly, 21 March 2017
     Modified by Chun Ly, 26 April 2017
      - Add code to run nsprepare
+     - Check for cN*fits files (cleanir or symlink files)
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
     log.info("## Raw data is located in %s" % rawdir)
+
+    # Check for cleanir files first | Later + on 26/04/2017
+    c_files = glob.glob(rawdir+'cN*fits')
+    if len(c_files) == 0:
+        log.warn("## No cleanir files (cN*fits) available")
+        log.warn("## ABORTING!!!")
+        return
+    #endif
 
     # + on 26/04/2017
     all_lis = np.loadtxt(rawdir+'all.lis', dtype=type(str))
