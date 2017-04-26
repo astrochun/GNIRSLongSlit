@@ -32,10 +32,10 @@ iraf.gemini.unlearn()
 iraf.gemini.gemtools.unlearn()
 iraf.gemini.gnirs.unlearn()
 
-iraf.gemini.nsheaders("gnirs")
-
 # Set the display
 iraf.set(stdimage="imt4096")
+
+import iraf_get_subset # + on 26/04/2017
 
 yes, no = 'yes', 'no' # + on 26/04/2017
 
@@ -65,9 +65,14 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 26 April 2017
      - Add code to run nsprepare
      - Check for cN*fits files (cleanir or symlink files)
+     - Load in iraf_get_subset package
+     - Fix path bug when calling nsprepare
+     - Add warning if not all nsprepare files are available
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
+
+    iraf.gemini.nsheaders("gnirs")
 
     log.info("## Raw data is located in %s" % rawdir)
 
@@ -83,22 +88,36 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     all_lis = np.loadtxt(rawdir+'all.lis', dtype=type(str))
     n_all   = len(all_lis)
     
-    # Step 1 | + on 26/04/2017
+    # Step 1 - Prepare GNIRS data | + on 26/04/2017
     log.info("## Preparing GNIRS data")
 
     nc_files = glob.glob(rawdir+'ncN*fits')
     n_nc     =  len(nc_files)
 
     if n_nc == n_all:
-        log.warn("## File exists. Will not run nsprepare")
+        log.warn("## Files exist! Will not run nsprepare!!")
     else:
         fl_forcewcs = yes
         if n_nc == 0:
-            iraf.gnirs.nsprepare(inimages="c@all.lis", rawpath=rawdir,
-                                 bpm=bpm, shiftx=INDEF, shifty=INDEF,
+            # Mod on 26/04/2017 - Most specify full path
+            inimages  = "c@"+rawdir+"all.lis"
+            outimages = "nc@"+rawdir+"all.lis"
+            iraf.gnirs.nsprepare(inimages=inimages, rawpath=rawdir,
+                                 outimages=outimages, bpm=bpm,
+                                 shiftx="INDEF", shifty="INDEF",
                                  fl_forcewcs=fl_forcewcs)
         else:
-            print 'blah'
+            '''
+            Warns if files do not exist. Need to implement a way to run
+            nsprepare for a subset of data (need to include certain frames)
+            '''
+            log.warn("## The following files do not exist: ")
+            iraf_get_subset.main(rawdir, 'nc', all_lis=all_lis, silent=True)
+            #outfile = 'nc_sub.lis'
+            #iraf_get_subset.main(rawdir, 'nc', outfile, all_lis=all_lis)
+            #iraf.gnirs.nsprepare(inimages="c@"+outfile, rawpath=rawdir,
+            #                     bpm=bpm, shiftx="INDEF", shifty="INDEF",
+            #                     fl_forcewcs=fl_forcewcs)
     #endelse
 
     if silent == False: log.info('### End run : '+systime())
