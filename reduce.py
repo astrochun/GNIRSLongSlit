@@ -70,6 +70,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Add warning if not all nsprepare files are available
      - Define logfile for GNIRS
      - Add code to compute statistics (step2)
+    Modified by Chun Ly, 4 May 2017
+     - Compute statistics on flats and use the most reliable ones
+       (exclude outliers)
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -127,14 +130,34 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     #endelse
 
     # Step 2 - Create flat | + on 26/04/2017
+    flats = np.loadtxt(rawdir+'flat.lis', dtype=type(str))
     tmpflat = rawdir+'tmpflat'
     if not exists(tmpflat):
-        flats      = np.loadtxt(rawdir+'flat.lis', dtype=type(str))
-        flat_files = [rawdir+'nc'+file0 for file0 in flats]
+        flat_files = [rawdir+'nc'+file0+'[SCI,1]' for file0 in flats]
         if silent == False: log.info('## Writing : '+tmpflat)
         np.savetxt(tmpflat, flat_files, fmt='%s')
     else:
         if silent == False: log.warn('## File exists!!! : '+tmpflat)
+
+    # Compute stats on flat; Use reliable ones + on 04/05/2017
+    flat_sig = iraf.imstatistic(images='@'+tmpflat, lower=0, nclip=5,
+                                fields="image,npix,mean,stddev,min,max",
+                                format='no', Stderr=1)
+    npix = [int(str0.split('  ')[1])   for str0 in flat_sig]
+    mean = [float(str0.split('  ')[2]) for str0 in flat_sig]
+    std  = [float(str0.split('  ')[3]) for str0 in flat_sig]
+
+    avg  = np.average(mean)
+    rat0 = 100.0*np.absolute(1-mean/avg)
+    good = np.where(rat0 <= 0.5)
+    flat_rev = rawdir+'flat_rev.lis'
+    if len(good) > 0:
+        log.info('## Flat files to use : ')
+        log.info('\n'.join(flats[good]))
+        np.savetxt(flat_rev, flats[good], fmt='%s')
+
+    iraf.gnirs.nsreduce('nc@'+flats_rev, fl_sky=no, fl_cut=yes,
+                        fl_flat=no, fl_dark=no, fl_nsappwave=no)
 
     if silent == False: log.info('### End run : '+systime())
 #enddef
