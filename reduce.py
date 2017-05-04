@@ -73,6 +73,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 4 May 2017
      - Compute statistics on flats and use the most reliable ones
        (exclude outliers)
+     - Run nsreduce on flats
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -150,14 +151,17 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     avg  = np.average(mean)
     rat0 = 100.0*np.absolute(1-mean/avg)
     good = np.where(rat0 <= 0.5)
-    flat_rev = rawdir+'flat_rev.lis'
+    flats_rev = rawdir+'flat_rev.lis'
     if len(good) > 0:
         log.info('## Flat files to use : ')
         log.info('\n'.join(flats[good]))
-        np.savetxt(flat_rev, flats[good], fmt='%s')
+        np.savetxt(flats_rev, flats[good], fmt='%s')
 
-    iraf.gnirs.nsreduce('nc@'+flats_rev, fl_sky=no, fl_cut=yes,
-                        fl_flat=no, fl_dark=no, fl_nsappwave=no)
+    # + on 04/05/2017
+    iraf.gnirs.nsreduce(rawdir+'nc@'+flats_rev,
+                        outimages=rawdir+'rnc@'+flats_rev, outprefix='',
+                        fl_sky=no, fl_cut=yes, fl_flat=no, fl_dark=no,
+                        fl_nsappwave=no)
 
     if silent == False: log.info('### End run : '+systime())
 #enddef
