@@ -74,6 +74,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Compute statistics on flats and use the most reliable ones
        (exclude outliers)
      - Run nsreduce on flats
+    Modified by Chun Ly, 5 May 2017
+     - Check for rnc (nsreduce) files for flats
+     - Run nsflat on flats
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -150,18 +153,31 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     avg  = np.average(mean)
     rat0 = 100.0*np.absolute(1-mean/avg)
-    good = np.where(rat0 <= 0.5)
+    good = np.where(rat0 <= 0.5) # If difference is more than 0.5%
     flats_rev = rawdir+'flat_rev.lis'
     if len(good) > 0:
         log.info('## Flat files to use : ')
         log.info('\n'.join(flats[good]))
         np.savetxt(flats_rev, flats[good], fmt='%s')
 
-    # + on 04/05/2017
-    iraf.gnirs.nsreduce(rawdir+'nc@'+flats_rev,
-                        outimages=rawdir+'rnc@'+flats_rev, outprefix='',
-                        fl_sky=no, fl_cut=yes, fl_flat=no, fl_dark=no,
-                        fl_nsappwave=no)
+    # + on 04/05/2017 | Mod on 05/05/2017
+    rnc_files = glob.glob(rawdir+'rncN*fits')
+    n_rnc      =  len(rnc_files)
+    if n_nc >= len(good):
+        log.warn("## Files exist! Will not run nsreduce!!")
+    else:
+        iraf.gnirs.nsreduce(rawdir+'nc@'+flats_rev, outprefix='',
+                            outimages=rawdir+'rnc@'+flats_rev, fl_sky=no,
+                            fl_cut=yes, fl_flat=no, fl_dark=no, fl_nsappwave=no)
+
+    # + on 05/05/2017
+    flatfile = rawdir+'final_flat.fits'
+    if not exists(flatfile):
+        iraf.gnirs.nsflat(rawdir+'rnc@'+flats_rev, flatfile=flatfile)
+    else:
+        if silent == False:
+            log.warn('## File exists!!! : '+flatfile)
+            log.warn('## Will not run nsflat')
 
     if silent == False: log.info('### End run : '+systime())
 #enddef
