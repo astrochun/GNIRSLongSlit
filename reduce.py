@@ -81,6 +81,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Run nsflat on flats
      - Add code to run nsreduce on arcs (step3)
      - Save reduce.py for each execution of reduce.run()
+    Modified by Chun Ly, 6 May 2017
+     - Add code to run nswavelength on arcs (step4)
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -205,6 +207,19 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     else:
         log.warn('## File exists!!! : '+flatfile)
         log.warn('## Will not run nsreduce on arc data')
+
+    # Step 4 : Perform wavelength calibration | + on 05/05/2017
+    do_run = iraf_get_subset.check_prefix(rawdir, 'wrnc', arc_list)
+    if do_run:
+        iraf.gnirs.nswavelength(rawdir+'rnc@'+rawdir+arc_list, outprefix='',
+                                outspectra=rawdir+'wrnc@'+rawdir+arc_list,
+                                coordlist="gnirs$data/lowresargon.dat",
+                                database=rawdir+'database/',
+                                fl_inter=no, cradius=20, threshold=50.0,
+                                order=2)
+    else:
+        log.warn('## Files exist!!!')
+        log.warn('## Will not run nswavelength on rnc arc data')
 
     if silent == False: log.info('### End run : '+systime())
 #enddef
