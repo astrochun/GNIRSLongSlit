@@ -37,6 +37,8 @@ iraf.set(stdimage="imt4096")
 
 import iraf_get_subset # + on 26/04/2017
 
+co_filename = __file__ # + on 05/05/2017
+
 yes, no = 'yes', 'no' # + on 26/04/2017
 
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
@@ -78,6 +80,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Check for rnc (nsreduce) files for flats
      - Run nsflat on flats
      - Add code to run nsreduce on arcs (step3)
+     - Save reduce.py for each execution of reduce.run()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -86,14 +89,23 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # + on 26/04/2017
     timestamp = systime()
-    iraf.gemini.gnirs.logfile = rawdir+'gnirs_'+timestamp+'.log'
+    logfile   = rawdir+'gnirs_'+timestamp+'.log'
+    iraf.gemini.gnirs.logfile = logfile
 
-    log.info("## Raw data is located in %s" % rawdir)
+    log.info("## Raw data is located in : %s" % rawdir)
+
+    log.info("## GNIRS logfile : "+logfile) # + on 05/05/2017
+
+    # Save reduce.py for each run | + on 05/05/2017
+    reduce_file = rawdir+'reduce_'+timestamp+'.py'
+    log.info("## GNIRSLongSlit.reduce script : " + reduce_file)
+    os.system('cp -a '+co_filename+' '+reduce_file)
 
     # Check for cleanir files first | Later + on 26/04/2017
     c_files = glob.glob(rawdir+'cN*fits')
     if len(c_files) == 0:
         log.warn("## No cleanir files (cN*fits) available")
+        log.warn("## Need to execute symlink.run()") # + on 05/05/2017
         log.warn("## ABORTING!!!")
         return
     #endif
@@ -142,7 +154,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         if silent == False: log.info('## Writing : '+tmpflat)
         np.savetxt(tmpflat, flat_files, fmt='%s')
     else:
-        if silent == False: log.warn('## File exists!!! : '+tmpflat)
+        log.warn('## File exists!!! : '+tmpflat)
 
     # Compute stats on flat; Use reliable ones + on 04/05/2017
     flat_sig = iraf.imstatistic(images='@'+tmpflat, lower=0, nclip=5,
@@ -158,7 +170,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     flats_rev = rawdir+'flat_rev.lis'
     if len(good) > 0:
         log.info('## Flat files to use : ')
-        log.info('\n'.join(flats[good]))
+        log.info(', '.join(flats[good]))
         np.savetxt(flats_rev, flats[good], fmt='%s')
 
     # + on 04/05/2017 | Mod on 05/05/2017
@@ -176,9 +188,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     if not exists(flatfile):
         iraf.gnirs.nsflat(rawdir+'rnc@'+flats_rev, flatfile=flatfile)
     else:
-        if silent == False:
-            log.warn('## File exists!!! : '+flatfile)
-            log.warn('## Will not run nsflat')
+        log.warn('## File exists!!! : '+flatfile)
+        log.warn('## Will not run nsflat')
 
 
     # Step 3 : Reduce arcs | + on 05/05/2017
