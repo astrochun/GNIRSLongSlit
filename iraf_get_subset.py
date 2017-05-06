@@ -66,3 +66,58 @@ def main(path, final_prefix, outfile='', all_lis=[], all_file='',
     if silent == False: log.info('### End main : '+systime())
 #enddef
 
+def check_prefix(path, final_prefix, input_lis, silent=False, verbose=True):
+    '''
+    Check if specific files from an input list exist with given prefix
+
+    Parameters
+    ----------
+    path : str
+      Full path to list. Must include '/' at the end
+
+    final_prefix : str
+      Files with specific prefix to search for ('rnc', etc).
+      This will be added before the filenames in [input_lis]
+
+    input_lis : str
+      Filename for input list to check ('arc.lis', 'flat.lis', etc.)
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+    do_run : int
+      0 - Not all files available
+      1 - All files available
+
+    Notes
+    -----
+    Created by Chun Ly, 5 May 2017
+    '''
+
+    if silent == False: log.info('### Begin check_prefix : '+systime())
+
+    input_lis0 = path+input_lis
+    if silent == False: log.info('### Reading : '+input_lis0)
+    files = np.loadtxt(input_lis0, dtype=type(str))
+
+    f_exist = [file0 for file0 in files if
+               exists(path+final_prefix+file0) == True]
+    f_noexist = [file0 for file0 in files if
+                 exists(path+final_prefix+file0) == False]
+
+    do_run = 0
+    if len(f_exist) != len(files):
+        log.warn('### Some files do not exist!')
+        log.warn(', '.join(f_noexist))
+    else:
+        log.info('### All files exist!!!')
+        do_run = 1
+
+    if silent == False: log.info('### End check_prefix : '+systime())
+    return do_run
+#enddef
