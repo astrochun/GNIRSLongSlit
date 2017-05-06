@@ -77,6 +77,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 5 May 2017
      - Check for rnc (nsreduce) files for flats
      - Run nsflat on flats
+     - Add code to run nsreduce on arcs (step3)
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -178,6 +179,21 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         if silent == False:
             log.warn('## File exists!!! : '+flatfile)
             log.warn('## Will not run nsflat')
+
+
+    # Step 3 : Reduce arcs | + on 05/05/2017
+    arc_list = 'arc.lis'
+    arcs     = np.loadtxt(rawdir+arc_list, dtype=type(str))
+
+    do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', arc_list)
+    if do_run:
+        iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+arc_list, outprefix='',
+                            outimages=rawdir+'rnc@'+rawdir+arc_list,
+                            fl_sky=no, fl_cut=yes, fl_flat=no,
+                            fl_dark=no) #fl_nsappwave=no)
+    else:
+        log.warn('## File exists!!! : '+flatfile)
+        log.warn('## Will not run nsreduce on arc data')
 
     if silent == False: log.info('### End run : '+systime())
 #enddef
