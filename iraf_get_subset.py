@@ -111,12 +111,16 @@ def check_prefix(path, final_prefix, input_lis, silent=False, verbose=True):
                  exists(path+final_prefix+file0) == False]
 
     do_run = 0
-    if len(f_exist) != len(files):
-        log.warn('### Some files do not exist!')
-        log.warn(', '.join(f_noexist))
-    else:
-        log.info('### All files exist!!!')
+
+    if len(f_exist) == 0:
+        log.warn('### No files exist')
         do_run = 1
+    else:
+        if len(f_exist) != len(files):
+            log.warn('### Some files do not exist!')
+            log.warn(', '.join(f_noexist))
+        else:
+            log.info('### All files exist!!!')
 
     if silent == False: log.info('### End check_prefix : '+systime())
     return do_run
