@@ -73,6 +73,7 @@ def main(path0, targets, outfile=None, silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 25 April 2017
+    Modified by Chun Ly, 5 May 2017
     '''
     
     if silent == False: log.info('### Begin main : '+systime())
@@ -134,8 +135,12 @@ def main(path0, targets, outfile=None, silent=False, verbose=True):
     print tab0
 
     if outfile == None: outfile = path0+'obs_summary.txt'
-    if silent == False: log.info('Writing : '+outfile)
-    asc.write(tab0, output=outfile, format='fixed_width_two_line')
+
+    # Mod on 06/05/2017
+    if silent == False:
+        stat0 = 'Overwriting : ' if exists(outfile) else 'Writing : '
+        log.info(stat0+outfile)
+    asc.write(tab0, output=outfile, format='fixed_width_two_line', overwrite=True)
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
