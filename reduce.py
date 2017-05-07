@@ -83,9 +83,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Save reduce.py for each execution of reduce.run()
     Modified by Chun Ly, 6 May 2017
      - Add code to run nswavelength on arcs (step4)
+     - Execution within rawdir rather than in parent directory
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
+
+    cdir = os.getcwd() # + on 06/05/2017
 
     iraf.gemini.nsheaders("gnirs")
 
@@ -96,6 +99,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     log.info("## Raw data is located in : %s" % rawdir)
 
+    os.chdir(rawdir) # + on 06/05/2017
+
     log.info("## GNIRS logfile : "+logfile) # + on 05/05/2017
 
     # Save reduce.py for each run | + on 05/05/2017
@@ -104,7 +109,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     os.system('cp -a '+co_filename+' '+reduce_file)
 
     # Check for cleanir files first | Later + on 26/04/2017
-    c_files = glob.glob(rawdir+'cN*fits')
+    c_files = glob.glob('cN*fits') # Mod on 06/05/2017
     if len(c_files) == 0:
         log.warn("## No cleanir files (cN*fits) available")
         log.warn("## Need to execute symlink.run()") # + on 05/05/2017
@@ -113,13 +118,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     #endif
 
     # + on 26/04/2017
-    all_lis = np.loadtxt(rawdir+'all.lis', dtype=type(str))
+    all_lis = np.loadtxt('all.lis', dtype=type(str)) # Mod on 06/05/2017
     n_all   = len(all_lis)
     
     # Step 1 - Prepare GNIRS data | + on 26/04/2017
     log.info("## Preparing GNIRS data")
 
-    nc_files = glob.glob(rawdir+'ncN*fits')
+    nc_files = glob.glob('ncN*fits') # Mod on 06/05/2017
     n_nc     =  len(nc_files)
 
     if n_nc == n_all:
@@ -128,9 +133,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         fl_forcewcs = yes
         if n_nc == 0:
             # Mod on 26/04/2017 - Must specify full path
-            inimages  = "c@"+rawdir+"all.lis"
-            outimages = "nc@"+rawdir+"all.lis"
-            iraf.gnirs.nsprepare(inimages=inimages, rawpath=rawdir,
+            # Mod on 06/05/2017
+            inimages  = "c@all.lis"
+            outimages = "nc@all.lis"
+            iraf.gnirs.nsprepare(inimages=inimages, #rawpath=rawdir,
                                  outimages=outimages, bpm=bpm,
                                  shiftx="INDEF", shifty="INDEF",
                                  fl_forcewcs=fl_forcewcs)
@@ -149,10 +155,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     #endelse
 
     # Step 2 - Create flat | + on 26/04/2017
-    flats = np.loadtxt(rawdir+'flat.lis', dtype=type(str))
-    tmpflat = rawdir+'tmpflat'
+    flats = np.loadtxt('flat.lis', dtype=type(str)) # Mod on 06/05/2017
+    tmpflat = 'tmpflat'
     if not exists(tmpflat):
-        flat_files = [rawdir+'nc'+file0+'[SCI,1]' for file0 in flats]
+        flat_files = ['nc'+file0+'[SCI,1]' for file0 in flats] # Mod on 06/05/2017
         if silent == False: log.info('## Writing : '+tmpflat)
         np.savetxt(tmpflat, flat_files, fmt='%s')
     else:
@@ -169,26 +175,27 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     avg  = np.average(mean)
     rat0 = 100.0*np.absolute(1-mean/avg)
     good = np.where(rat0 <= 0.5) # If difference is more than 0.5%
-    flats_rev = rawdir+'flat_rev.lis'
+    flats_rev = 'flat_rev.lis' # Mod on 06/05/2017
     if len(good) > 0:
         log.info('## Flat files to use : ')
         log.info(', '.join(flats[good]))
         np.savetxt(flats_rev, flats[good], fmt='%s')
 
     # + on 04/05/2017 | Mod on 05/05/2017
-    rnc_files = glob.glob(rawdir+'rncN*fits')
+    rnc_files = glob.glob('rncN*fits') # Mod on 06/05/2017
     n_rnc      =  len(rnc_files)
     if n_nc >= len(good):
         log.warn("## Files exist! Will not run nsreduce!!")
     else:
-        iraf.gnirs.nsreduce(rawdir+'nc@'+flats_rev, outprefix='',
-                            outimages=rawdir+'rnc@'+flats_rev, fl_sky=no,
+        # Mod on 06/05/2017
+        iraf.gnirs.nsreduce('nc@'+flats_rev, outprefix='',
+                            outimages='rnc@'+flats_rev, fl_sky=no,
                             fl_cut=yes, fl_flat=no, fl_dark=no, fl_nsappwave=no)
 
     # + on 05/05/2017
-    flatfile = rawdir+'final_flat.fits'
+    flatfile = 'final_flat.fits' # Mod on 06/05/2017
     if not exists(flatfile):
-        iraf.gnirs.nsflat(rawdir+'rnc@'+flats_rev, flatfile=flatfile)
+        iraf.gnirs.nsflat('rnc@'+flats_rev, flatfile=flatfile) # Mod on 06/05/2017
     else:
         log.warn('## File exists!!! : '+flatfile)
         log.warn('## Will not run nsflat')
@@ -196,12 +203,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 3 : Reduce arcs | + on 05/05/2017
     arc_list = 'arc.lis'
-    arcs     = np.loadtxt(rawdir+arc_list, dtype=type(str))
+    arcs     = np.loadtxt(arc_list, dtype=type(str)) # Mod on 06/05/2017
 
     do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', arc_list)
     if do_run:
-        iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+arc_list, outprefix='',
-                            outimages=rawdir+'rnc@'+rawdir+arc_list,
+        # Mod on 06/05/2017
+        iraf.gnirs.nsreduce('nc@'+arc_list, outprefix='',
+                            outimages='rnc@'+arc_list,
                             fl_sky=no, fl_cut=yes, fl_flat=no,
                             fl_dark=no) #fl_nsappwave=no)
     else:
@@ -211,15 +219,18 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     # Step 4 : Perform wavelength calibration | + on 05/05/2017
     do_run = iraf_get_subset.check_prefix(rawdir, 'wrnc', arc_list)
     if do_run:
-        iraf.gnirs.nswavelength(rawdir+'rnc@'+rawdir+arc_list, outprefix='',
-                                outspectra=rawdir+'wrnc@'+rawdir+arc_list,
+        # Mod on 06/05/2017
+        iraf.gnirs.nswavelength('rnc@'+arc_list, outprefix='',
+                                outspectra='wrnc@'+arc_list,
                                 coordlist="gnirs$data/lowresargon.dat",
-                                database=rawdir+'database/',
+                                database='database/',
                                 fl_inter=no, cradius=20, threshold=50.0,
                                 order=2)
     else:
         log.warn('## Files exist!!!')
         log.warn('## Will not run nswavelength on rnc arc data')
+
+    os.chdir(cdir) # + on 06/05/2017
 
     if silent == False: log.info('### End run : '+systime())
 #enddef
