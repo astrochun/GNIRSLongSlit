@@ -84,6 +84,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 6 May 2017
      - Add code to run nswavelength on arcs (step4)
      - Execution within rawdir rather than in parent directory
+     - Use iraf_get_subset.check_prefix to check flats_rev files
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -155,8 +156,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     #endelse
 
     # Step 2 - Create flat | + on 26/04/2017
-    flats = np.loadtxt('flat.lis', dtype=type(str)) # Mod on 06/05/2017
-    tmpflat = 'tmpflat'
+    flat_list = 'flat.lis'
+    flats     = np.loadtxt(flat_list, dtype=type(str)) # Mod on 06/05/2017
+    tmpflat   = 'tmpflat'
     if not exists(tmpflat):
         flat_files = ['nc'+file0+'[SCI,1]' for file0 in flats] # Mod on 06/05/2017
         if silent == False: log.info('## Writing : '+tmpflat)
@@ -182,15 +184,15 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         np.savetxt(flats_rev, flats[good], fmt='%s')
 
     # + on 04/05/2017 | Mod on 05/05/2017
-    rnc_files = glob.glob('rncN*fits') # Mod on 06/05/2017
-    n_rnc      =  len(rnc_files)
-    if n_nc >= len(good):
-        log.warn("## Files exist! Will not run nsreduce!!")
-    else:
+    # Mod on 06/05/2017
+    do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', flats_rev)
+    if do_run:
         # Mod on 06/05/2017
         iraf.gnirs.nsreduce('nc@'+flats_rev, outprefix='',
                             outimages='rnc@'+flats_rev, fl_sky=no,
                             fl_cut=yes, fl_flat=no, fl_dark=no, fl_nsappwave=no)
+    else:
+        log.warn("## Files exist! Will not run nsreduce!!")
 
     # + on 05/05/2017
     flatfile = 'final_flat.fits' # Mod on 06/05/2017
