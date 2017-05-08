@@ -36,6 +36,7 @@ iraf.gemini.gnirs.unlearn()
 iraf.set(stdimage="imt4096")
 
 import iraf_get_subset # + on 26/04/2017
+import file_handling # + on 07/05/2017
 
 co_filename = __file__ # + on 05/05/2017
 
@@ -94,11 +95,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        Problem seems to stem from the tmpext file being placed in the rawdir
        but iraf thinks it's in the directory before os.chdir()
        Reverting back so no os.chdir()
+     - Modify call to nswavelength to get things to work within
+       cdir (no need to change directory. Require copying files around
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
-    cdir = os.getcwd() # + on 06/05/2017
+    cdir = os.getcwd()+'/' # + on 06/05/2017
 
     iraf.gemini.nsheaders("gnirs")
 
@@ -231,13 +234,18 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     # Step 4 : Perform wavelength calibration | + on 05/05/2017
     do_run = iraf_get_subset.check_prefix(rawdir, 'wrnc', arc_list)
     if do_run:
+        file_handling.cp_files(cdir, rawdir, 'rnc', rawdir+arc_list) # + on 07/05/2017
+
         # Mod on 06/05/2017
-        iraf.gnirs.nswavelength('rnc@'+arc_list, outprefix='',
-                                outspectra='wrnc@'+arc_list,
+        iraf.gnirs.nswavelength('rnc@'+rawdir+arc_list, outprefix='',
+                                outspectra='wrnc@'+rawdir+arc_list,
                                 coordlist="gnirs$data/lowresargon.dat",
-                                database='database/',
+                                database=rawdir+'database/',
                                 fl_inter=no, cradius=20, threshold=50.0,
                                 order=2)
+        file_handling.cp_files(rawdir, cdir, 'wrnc', rawdir+arc_list) # + on 07/05/2017
+        file_handling.rm_files(rawdir, 'wrnc', arc_list)
+        file_handling.rm_files(rawdir, 'rnc', arc_list)
     else:
         log.warn('## Files exist!!!')
         log.warn('## Will not run nswavelength on rnc arc data')
