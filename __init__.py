@@ -38,6 +38,7 @@ import symlink
 import dir_check
 
 import iraf_get_subset
+import file_handling
 import reduce
 
 reload(hdr_info)
@@ -55,4 +56,5 @@ reload(symlink)
 reload(dir_check)
 
 reload(iraf_get_subset)
+reload(file_handling)
 reload(reduce)
