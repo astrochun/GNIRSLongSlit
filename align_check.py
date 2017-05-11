@@ -364,6 +364,8 @@ def main(path0, out_pdf='', silent=False, verbose=True):
      - Compute seeing FWHM for acquisition images
     Modified by Chun Ly, 06 April 2017
      - Get coordinates for slit in cutout
+    Modified by Chun Ly, 11 May 2017
+     - Use slit image to find center when telluric data is only available
     '''
     
     if silent == False: log.info('### Begin main : '+systime())
@@ -398,16 +400,27 @@ def main(path0, out_pdf='', silent=False, verbose=True):
                         (tab0['QA'][tt] == 'N/A') and ('Acq' in tab0['slit'][tt]) and
                         ('HIP' not in tab0['object'][tt]) and
                         ('HD' not in tab0['object'][tt])]
+
+        # Mod on 11/05/2017
         if len(win_ref_idx) > 0:
             win_ref_file = path + tab0['filename'][win_ref_idx[0]]
             log.info('## Reference image for finding GNIRS window : '+win_ref_file)
 
             x_min, x_max, y_min, y_max, \
                 x_cen, y_cen = find_gnirs_window_mean(win_ref_file)
-            pos_cen  = (x_cen, y_cen)
-            new_size = u.Quantity((y_max-y_min, x_max-x_min), u.pixel)
-            print 'pos_cen : ', pos_cen
-            print 'new_size : ', new_size
+        else:
+            log.info('## Using telluric image as reference')
+            win_ref_file = path+tab0['filename'][0]
+            slit_x0, slit_y0_lo, slit_y0_hi = get_slit_trace(win_ref_file)
+            x_min, x_max = min(slit_x0), max(slit_x0)
+            x_cen = (x_min + x_max)/2.0
+            y_cen = (np.median(slit_y0_lo)+np.median(slit_y0_hi))/2.0
+            y_min, y_max = y_cen-size2d[0].value/2.0, y_cen+size2d[0].value/2.0
+
+        pos_cen  = (x_cen, y_cen)
+        new_size = u.Quantity((y_max-y_min, x_max-x_min), u.pixel)
+        print 'pos_cen : ', pos_cen
+        print 'new_size : ', new_size
 
         for ii in xrange(len(ID0)):
             t_idx = [tt for tt in xrange(len(tab0)) if
