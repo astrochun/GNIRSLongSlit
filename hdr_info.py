@@ -55,6 +55,8 @@ def main(path0, silent=False, verbose=True):
      - Include AIRMASS
     Modified by Chun Ly, 23 March 2017
      - Call dir_check.main() to handle multiple date directories
+    Modified by Chun Ly, 11 May 2017
+     - Handle longer filter1 and filter2 FITS values
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -80,7 +82,7 @@ def main(path0, silent=False, verbose=True):
                       'exptime', 'airmass', 'grating', 'gratwave', 'filter1',
                       'filter2', 'slit')
             dtype0 = ('S20', 'S30', 'S25', 'S8', 'S100',
-                      'f8', 'f8', 'S15', 'f8', 'S10', 'S10', 'S20')
+                      'f8', 'f8', 'S15', 'f8', 'S15', 'S15', 'S20')
             tab0 = Table(names=names0, dtype=dtype0)
 
             for nn in xrange(n_files):
