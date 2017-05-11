@@ -66,6 +66,8 @@ def compute_fwhm(im0):
      - Later modified to shift each median profile and return the array
     Modified by Chun Ly, 11 March 2017
      - Fix interp1d failure when outside bound limits
+    Modified by Chun Ly, 11 May 2017
+     - Handle RuntimeError with curve_fit
     '''
 
     # First find the peak of the nearby star
@@ -92,8 +94,14 @@ def compute_fwhm(im0):
         x = np.arange(len(cols))
         y = stack0[bb,:].reshape(len(cols))
         p0 = [0.0, max(y), np.where(y == np.max(y))[0][0], 2.0]
-        popt, pcov = curve_fit(gauss1d, x, y, p0=p0)
-        fwhm0[bb] = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
+
+        # Mod on 11/05/2017 to fix RuntimeError bug
+        try:
+            popt, pcov = curve_fit(gauss1d, x, y, p0=p0)
+            fwhm0[bb] = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
+        except RuntimeError:
+            log.warn('## Optimal parameters not found from curve_fit, %i' % bb)
+            fwhm0[bb] = np.nan
 
         # Later + on 10/03/2017
         x_shift = x - popt[2]
