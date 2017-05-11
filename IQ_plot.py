@@ -140,6 +140,9 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True):
      - Call dir_check.main() to handle multiple date directories
     Modified by Chun Ly, 13 April 2017
      - Minor bug: Check if file exists first
+    Modified by Chun Ly, 10 May 2017
+     - Minor bug: When .lis file contains only one entry, problem for
+       appending to list
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -158,6 +161,8 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True):
             if exists(path+file0):
                 if silent == False: log.info('## Reading : '+path+file0)
                 t_files = np.loadtxt(path+file0, dtype=type(str)).tolist()
+                # Bug fix - 10/05/2017
+                if type(t_files) == str: t_files = [t_files]
                 files += t_files
             else:
                 if silent == False: log.info('## File not found : '+path+file0)
