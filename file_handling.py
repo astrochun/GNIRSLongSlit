@@ -45,6 +45,7 @@ def cp_files(outdir, path, final_prefix, input_lis, silent=False, verbose=True):
 
     input_lis : str
       Filename for input list to check ('arc.lis', 'flat.lis', etc.)
+      Full path need to be provided here.
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -115,4 +116,55 @@ def rm_files(path, final_prefix, input_lis, silent=False, verbose=True):
     os.system(cmd0)
 
     if silent == False: log.info('### End rm_files : '+systime())
+#enddef
+
+def mv_files(outdir, final_prefix, input_lis, path='', silent=False,
+             verbose=True):
+
+    '''
+    Move files into outdir for certain IRAF files
+
+    Parameters
+    ----------
+    outdir : str
+      Full path for where files are temporarily stored.
+      Must include '/' at the end
+
+    final_prefix : str
+      Files with specific prefix to search for ('rnc', etc).
+      This will be added before the filenames in [input_lis]
+
+    input_lis : str
+      Filename for input list to check ('arc.lis', 'flat.lis', etc.)
+      Full path need to be provided here.
+
+    path : str
+      Optional - Full path to list. Must include '/' at the end
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+
+    Notes
+    -----
+    Created by Chun Ly, 15 May 2017
+    '''
+
+    if silent == False: log.info('### Begin mv_files : '+systime())
+
+    if silent == False: log.info('### Reading : '+input_lis)
+    files = np.loadtxt(input_lis, dtype=type(str))
+
+    files0 = [path+final_prefix+file0 for file0 in files]
+
+    cmd0 = 'mv '.join(files0)+' '+outdir
+    if silent == False: log.info('### '+cmd0)
+    os.system(cmd0)
+
+    if silent == False: log.info('### End mv_files : '+systime())
 #enddef
