@@ -99,6 +99,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        cdir (no need to change directory. Require copying files around
     Modified by Chun Ly, 15 May 2017
      - Use file_handling.mv_files instead of cp_files()
+     - Simplify arc_list to include full path
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -217,14 +218,15 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
 
     # Step 3 : Reduce arcs | + on 05/05/2017
-    arc_list = 'arc.lis'
-    arcs     = np.loadtxt(rawdir+arc_list, dtype=type(str)) # Mod on 06/05/2017
+    arc_list   = 'arc.lis'
+    r_arc_list = rawdir+arc_list
+    arcs       = np.loadtxt(r_arc_list, dtype=type(str)) # Mod on 06/05/2017
 
     do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', arc_list)
     if do_run:
         # Mod on 06/05/2017
-        iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+arc_list, outprefix='',
-                            outimages=rawdir+'rnc@'+rawdir+arc_list,
+        iraf.gnirs.nsreduce(rawdir+'nc@'+r_arc_list, outprefix='',
+                            outimages=rawdir+'rnc@'+r_arc_list,
                             fl_sky=no, fl_cut=yes, fl_flat=no,
                             fl_dark=no) #fl_nsappwave=no)
     else:
@@ -236,17 +238,17 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     # Step 4 : Perform wavelength calibration | + on 05/05/2017
     do_run = iraf_get_subset.check_prefix(rawdir, 'wrnc', arc_list)
     if do_run:
-        file_handling.cp_files(cdir, rawdir, 'rnc', rawdir+arc_list) # + on 07/05/2017
+        file_handling.cp_files(cdir, rawdir, 'rnc', r_arc_list) # + on 07/05/2017
 
         # Mod on 06/05/2017
-        iraf.gnirs.nswavelength('rnc@'+rawdir+arc_list, outprefix='',
-                                outspectra='wrnc@'+rawdir+arc_list,
+        iraf.gnirs.nswavelength('rnc@'+r_arc_list, outprefix='',
+                                outspectra='wrnc@'+r_arc_list,
                                 coordlist="gnirs$data/lowresargon.dat",
                                 database=rawdir+'database/',
                                 fl_inter=no, cradius=20, threshold=50.0,
                                 order=2)
         # Mod on 15/05/2017
-        file_handling.mv_files(rawdir, 'wrnc', rawdir+arc_list) # + on 07/05/2017
+        file_handling.mv_files(rawdir, 'wrnc', r_arc_list) # + on 07/05/2017
         file_handling.rm_files(rawdir, 'rnc', arc_list)
     else:
         log.warn('## Files exist!!!')
