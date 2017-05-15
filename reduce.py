@@ -97,6 +97,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        Reverting back so no os.chdir()
      - Modify call to nswavelength to get things to work within
        cdir (no need to change directory. Require copying files around
+    Modified by Chun Ly, 15 May 2017
+     - Use file_handling.mv_files instead of cp_files()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -243,8 +245,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                 database=rawdir+'database/',
                                 fl_inter=no, cradius=20, threshold=50.0,
                                 order=2)
-        file_handling.cp_files(rawdir, cdir, 'wrnc', rawdir+arc_list) # + on 07/05/2017
-        file_handling.rm_files(rawdir, 'wrnc', arc_list)
+        # Mod on 15/05/2017
+        file_handling.mv_files(rawdir, 'wrnc', rawdir+arc_list) # + on 07/05/2017
         file_handling.rm_files(rawdir, 'rnc', arc_list)
     else:
         log.warn('## Files exist!!!')
