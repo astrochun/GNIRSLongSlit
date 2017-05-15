@@ -100,6 +100,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 15 May 2017
      - Use file_handling.mv_files instead of cp_files()
      - Simplify arc_list to include full path
+     - Changes to call of file_handling.rm_files
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -249,7 +250,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                 order=2)
         # Mod on 15/05/2017
         file_handling.mv_files(rawdir, 'wrnc', r_arc_list) # + on 07/05/2017
-        file_handling.rm_files(rawdir, 'rnc', arc_list)
+        file_handling.rm_files('rnc', arc_list) # Mod on 15/05/2017
     else:
         log.warn('## Files exist!!!')
         log.warn('## Will not run nswavelength on rnc arc data')

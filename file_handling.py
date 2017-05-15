@@ -75,7 +75,7 @@ def cp_files(outdir, path, final_prefix, input_lis, silent=False, verbose=True):
     if silent == False: log.info('### End cp_files : '+systime())
 #enddef
 
-def rm_files(path, final_prefix, input_lis, silent=False, verbose=True):
+def rm_files(final_prefix, input_lis, silent=False, verbose=True):
 
     '''
     Delete files in the current directory
@@ -101,13 +101,14 @@ def rm_files(path, final_prefix, input_lis, silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 7 May 2017
+    Modified by Chun Ly, 15 May 2017
+     - Got rid of [path] array
     '''
     
     if silent == False: log.info('### Begin rm_files : '+systime())
     
-    input_lis0 = path+input_lis
-    if silent == False: log.info('### Reading : '+input_lis0)
-    files = np.loadtxt(input_lis0, dtype=type(str))
+    if silent == False: log.info('### Reading : '+input_lis)
+    files = np.loadtxt(input_lis, dtype=type(str))
 
     files0 = [final_prefix+file0 for file0 in files]
 
