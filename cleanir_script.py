@@ -28,6 +28,7 @@ import cleanir
 
 # + on 12/03/2017
 from . import gnirs_2017a #targets0
+import dir_check # + on 15/05/2017
 
 co     = __file__
 co_dir = os.path.dirname(co)+'/'
@@ -53,24 +54,44 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 7 March 2017
+    Modified by Chun Ly, 15 May 2017
+     - Call dir_check.main() to handle multiple date directories
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
     if clean_file == '': clean_file = 'clean.lis'
-    
-    if silent == False: log.info('## Reading : '+path0+clean_file)
-    files = np.loadtxt(path0+clean_file, dtype=type(str)).tolist()
 
-    if out_script == '': out_script = path0+'run_cleanir.sh'
+    # + on 15/05/2017
+    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
-    if silent == False: log.info('## Writing : '+out_script)
-    f = open(out_script, 'w')
-    for ii in xrange(len(files)):
-        cmd1 = cmd0+' -afqo '+path0+'c'+files[ii]+' '+path0+files[ii]
-        f.write(cmd1+'\n')
+    # Mod on 15/05/2017
+    for date,path in zip(dir_list,list_path):
+        clean_file0 = path+clean_file
+        if not exists(clean_file0):
+            log.warn('### File does not exist!!!')
+            log.info('### '+clean_file0)
+        else:
+            if silent == False: log.info('## Reading : '+clean_file0)
+            files = np.loadtxt(clean_file0, dtype=type(str)).tolist()
 
-    f.close()
+            out_script0 = path+'run_cleanir.sh' if out_script == '' \
+                          else out_script
+
+            if len(dir_list) != 0:
+                out_script0 = out_script0.replace('.sh', '.'+date+'.sh')
+
+            if silent == False:
+                stat0 = 'Overwriting' if exists(out_script0) else 'Writing'
+                log.info('## '+stat0+' : '+out_script0)
+            f = open(out_script0, 'w')
+            for ii in xrange(len(files)):
+                cmd1 = cmd0+' -afqo '+path+'c'+files[ii]+' '+path+files[ii]
+                f.write(cmd1+'\n')
+
+            f.close()
+        #endelse
+    #endfor
 
     if silent == False: log.info('### End run : '+systime())
 #enddef
