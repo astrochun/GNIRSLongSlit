@@ -107,12 +107,18 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Add code to run skysub on telluric data with nsreduce (step5a)
      - Add code to run skysub on science data with nsreduce (step5b)
      - Add optional input keywords to run separate steps
+
+     - Minor bug fix for tot0
+     - Define all input list filenames at the beginning of this function
+     - Switch input list filenames to include rawdir
+     - Remove rawdir in multiple lines calling input list
+     - Modify all calls to iraf_get_subset.check_prefix()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
     # + on 16/05/2017
-    tot0 = sum([prepare,flat,arcs,wave_cal,skysub])
+    tot0 = sum([prepare,do_flat,do_arcs,wave_cal,skysub])
     if tot0 == 0:
         log.warn('## No GNIRS functions are being called!!!')
         log.warn('## Run with either of these keywords set to 1 : ')
@@ -150,8 +156,18 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         return
     #endif
 
+    # Moved up on 16/05/2017
+    all_list  = rawdir+'all.lis'
+    flat_list = rawdir+'flat.lis'
+    flats_rev = rawdir+'flat_rev.lis'
+    arc_list  = rawdir+'arc.lis'
+    tell_list = rawdir+'telluric.lis'
+    obj_list  = rawdir+'obj.lis'
+    sky_list  = rawdir+'sky.lis'
+    flatfile  = rawdir+'final_flat.fits'
+
     # + on 26/04/2017
-    all_lis = np.loadtxt(rawdir+'all.lis', dtype=type(str)) # Mod on 06/05/2017
+    all_lis = np.loadtxt(all_list, dtype=type(str)) # Mod on 06/05/2017
     n_all   = len(all_lis)
     
     # Step 1 - Prepare GNIRS data | + on 26/04/2017
@@ -168,8 +184,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             if n_nc == 0:
                 # Mod on 26/04/2017 - Must specify full path
                 # Mod on 06/05/2017
-                inimages  = "c@"+rawdir+"all.lis"
-                outimages = rawdir+"nc@"+rawdir+"all.lis"
+                inimages  = "c@"+all_list
+                outimages = rawdir+"nc@"+all_list
                 iraf.gnirs.nsprepare(inimages=inimages, rawpath=rawdir,
                                      outprefix='', outimages=outimages,
                                      bpm=bpm, shiftx="INDEF", shifty="INDEF",
@@ -191,18 +207,17 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 2 - Create flat | + on 26/04/2017
     if do_flat:
-        flat_list = 'flat.lis'
-        flats     = np.loadtxt(rawdir+flat_list, dtype=type(str)) # Mod on 06/05/2017
-        tmpflat   = 'tmpflat'
+        flats     = np.loadtxt(flat_list, dtype=type(str)) # Mod on 06/05/2017
+        tmpflat   = rawdir+'tmpflat'
         if not exists(tmpflat):
             flat_files = ['nc'+file0+'[SCI,1]' for file0 in flats] # Mod on 06/05/2017
             if silent == False: log.info('## Writing : '+tmpflat)
-            np.savetxt(rawdir+tmpflat, flat_files, fmt='%s')
+            np.savetxt(tmpflat, flat_files, fmt='%s')
         else:
             log.warn('## File exists!!! : '+tmpflat)
 
         # Compute stats on flat; Use reliable ones + on 04/05/2017
-        flat_sig = iraf.imstatistic(images=rawdir+'@'+rawdir+tmpflat,
+        flat_sig = iraf.imstatistic(images=rawdir+'@'+tmpflat,
                                     lower=0, nclip=5,format='no',
                                     fields="image,npix,mean,stddev,min,max",
                                     Stderr=1)
@@ -214,44 +229,40 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         avg  = np.average(mean)
         rat0 = 100.0*np.absolute(1-mean/avg)
         good = np.where(rat0 <= 0.5) # If difference is more than 0.5%
-        flats_rev = 'flat_rev.lis' # Mod on 06/05/2017
         if len(good) > 0:
             log.info('## Flat files to use : ')
             log.info(', '.join(flats[good]))
-            np.savetxt(rawdir+flats_rev, flats[good], fmt='%s')
+            np.savetxt(flats_rev, flats[good], fmt='%s')
 
         # + on 04/05/2017 | Mod on 05/05/2017
         # Mod on 06/05/2017
-        do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', flats_rev)
+        do_run = iraf_get_subset.check_prefix('rnc', flats_rev)
         if do_run:
             # Mod on 06/05/2017
-            iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+flats_rev, outprefix='',
-                                outimages=rawdir+'rnc@'+rawdir+flats_rev,
+            iraf.gnirs.nsreduce(rawdir+'nc@'+flats_rev, outprefix='',
+                                outimages=rawdir+'rnc@'+flats_rev,
                                 fl_sky=no, fl_cut=yes, fl_flat=no, fl_dark=no,
                                 fl_nsappwave=no)
         else:
             log.warn("## Files exist! Will not run nsreduce!!")
 
         # + on 05/05/2017
-        flatfile = rawdir+'final_flat.fits' # Mod on 06/05/2017
         if not exists(flatfile):
-            iraf.gnirs.nsflat(rawdir+'rnc@'+rawdir+flats_rev, flatfile=flatfile) # Mod on 06/05/2017
+            iraf.gnirs.nsflat(rawdir+'rnc@'+flats_rev, flatfile=flatfile) # Mod on 06/05/2017
         else:
             log.warn('## File exists!!! : '+flatfile)
             log.warn('## Will not run nsflat')
     #end do_flat
 
     # Step 3 : Reduce arcs | + on 05/05/2017
-    if do_arcs:
-        arc_list   = 'arc.lis'
-        r_arc_list = rawdir+arc_list
-        arcs       = np.loadtxt(r_arc_list, dtype=type(str)) # Mod on 06/05/2017
+    arcs = np.loadtxt(arc_list, dtype=type(str)) # Mod on 06/05/2017
 
-        do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', arc_list)
+    if do_arcs:
+        do_run = iraf_get_subset.check_prefix('rnc', arc_list)
         if do_run:
             # Mod on 06/05/2017
-            iraf.gnirs.nsreduce(rawdir+'nc@'+r_arc_list, outprefix='',
-                                outimages=rawdir+'rnc@'+r_arc_list,
+            iraf.gnirs.nsreduce(rawdir+'nc@'+arc_list, outprefix='',
+                                outimages=rawdir+'rnc@'+arc_list,
                                 fl_sky=no, fl_cut=yes, fl_flat=no,
                                 fl_dark=no) #fl_nsappwave=no)
         else:
@@ -263,19 +274,19 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 4 : Perform wavelength calibration | + on 05/05/2017
     if wave_cal:
-        do_run = iraf_get_subset.check_prefix(rawdir, 'wrnc', arc_list)
+        do_run = iraf_get_subset.check_prefix('wrnc', arc_list)
         if do_run:
-            file_handling.cp_files(cdir, rawdir, 'rnc', r_arc_list) # + on 07/05/2017
+            file_handling.cp_files(cdir, rawdir, 'rnc', arc_list) # + on 07/05/2017
 
             # Mod on 06/05/2017
-            iraf.gnirs.nswavelength('rnc@'+r_arc_list, outprefix='',
-                                    outspectra='wrnc@'+r_arc_list,
+            iraf.gnirs.nswavelength('rnc@'+arc_list, outprefix='',
+                                    outspectra='wrnc@'+arc_list,
                                     coordlist="gnirs$data/lowresargon.dat",
                                     database=rawdir+'database/',
                                     fl_inter=no, cradius=20, threshold=50.0,
                                     order=2)
             # Mod on 15/05/2017
-            file_handling.mv_files(rawdir, 'wrnc', r_arc_list) # + on 07/05/2017
+            file_handling.mv_files(rawdir, 'wrnc', arc_list) # + on 07/05/2017
             file_handling.rm_files('rnc', arc_list) # Mod on 15/05/2017
         else:
             log.warn('## Files exist!!!')
@@ -283,11 +294,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
     if skysub:
-        tell_list = 'telluric.lis'
-        do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', tell_list)
+        do_run = iraf_get_subset.check_prefix('rnc', tell_list)
         if do_run:
-            iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+tell_list, outprefix='',
-                                outimages=rawdir+'rnc@'+rawdir+tell_list,
+            iraf.gnirs.nsreduce(rawdir+'nc@'+tell_list, outprefix='',
+                                outimages=rawdir+'rnc@'+tell_list,
                                 fl_nsappwave=no, fl_sky=yes, fl_flat=yes,
                                 flatimage=flatfile)
         else:
@@ -295,22 +305,20 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Will not run nsreduce on nc telluric data')
 
         # Step 5b : Sky subtract science data | + on 16/05/2017
-        obj_list = 'obj.lis'
-        sky_list = 'sky.lis'
-        do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', obj_list)
+        do_run = iraf_get_subset.check_prefix('rnc', obj_list)
         if do_run:
-            iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+obj_list, outprefix='',
-                                outimages=rawdir+'rnc@'+rawdir+obj_list,
+            iraf.gnirs.nsreduce(rawdir+'nc@'+obj_list, outprefix='',
+                                outimages=rawdir+'rnc@'+obj_list,
                                 fl_nsappwave=no, fl_sky=yes,
-                                skyimages=rawdir+'nc@'+rawdir+sky_list,
+                                skyimages=rawdir+'nc@'+sky_list,
                                 fl_flat=yes, flatimage=flatfile)
 
-        do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', sky_list)
+        do_run = iraf_get_subset.check_prefix('rnc', sky_list)
         if do_run:
-            iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+sky_list, outprefix='',
-                                outimages=rawdir+'rnc@'+rawdir+sky_list,
+            iraf.gnirs.nsreduce(rawdir+'nc@'+sky_list, outprefix='',
+                                outimages=rawdir+'rnc@'+sky_list,
                                 fl_nsappwave=no, fl_sky=yes,
-                                skyimages=rawdir+'nc@'+rawdir+obj_list,
+                                skyimages=rawdir+'nc@'+obj_list,
                                 fl_flat=yes, flatimage=flatfile)
         else:
             log.warn('## Files exist!!!')
