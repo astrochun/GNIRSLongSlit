@@ -66,21 +66,24 @@ def main(path, final_prefix, outfile='', all_lis=[], all_file='',
     if silent == False: log.info('### End main : '+systime())
 #enddef
 
-def check_prefix(path, final_prefix, input_lis, silent=False, verbose=True):
+def check_prefix(final_prefix, input_lis, path='', silent=False, verbose=True):
     '''
     Check if specific files from an input list exist with given prefix
 
     Parameters
     ----------
-    path : str
-      Full path to list. Must include '/' at the end
-
     final_prefix : str
       Files with specific prefix to search for ('rnc', etc).
       This will be added before the filenames in [input_lis]
 
     input_lis : str
       Filename for input list to check ('arc.lis', 'flat.lis', etc.)
+      If full path is included, do not provide [path]
+
+    path : str (Optional)
+      Full path to list if list does not contain full path.
+      Must include '/' at the end
+
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -97,6 +100,8 @@ def check_prefix(path, final_prefix, input_lis, silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 5 May 2017
+    Modified by Chun Ly, 16 May 2017
+     - Switch path to an optional keyword
     '''
 
     if silent == False: log.info('### Begin check_prefix : '+systime())
