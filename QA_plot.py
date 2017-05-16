@@ -260,6 +260,8 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
     # + on 23/03/2017 | Mod on 26/04/2017
     dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
+    out_pdf_default = out_pdf # + on 15/05/2017
+
     # Mod on 23/03/2017
     for path in list_path:
         if out_pdf == '':
@@ -267,7 +269,7 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
         else:
             out_pdf = path+out_pdf
 
-        files   = glob.glob(path0+'cN*fits')
+        files   = glob.glob(path+'cN*fits')
 
         # Limit to non-symlinked files | + on 25/04/2017
         files   = [file for file in files if os.path.islink(file) == False]
@@ -324,8 +326,9 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
 
             fig.savefig(pp, format='pdf')
 
-        if silent == False: log.info('## Reading : '+out_pdf)
+        if silent == False: log.info('## Writing : '+out_pdf)
         pp.close()
+        out_pdf = out_pdf_default
     #endfor
 
     if silent == False: log.info('### End clean_QA : '+systime())
