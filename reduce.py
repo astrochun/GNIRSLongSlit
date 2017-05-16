@@ -101,6 +101,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Use file_handling.mv_files instead of cp_files()
      - Simplify arc_list to include full path
      - Changes to call of file_handling.rm_files
+    Modified by Chun Ly, 16 May 2017
+     - Full path for flatfile, minor fixes
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -210,9 +212,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         log.warn("## Files exist! Will not run nsreduce!!")
 
     # + on 05/05/2017
-    flatfile = 'final_flat.fits' # Mod on 06/05/2017
+    flatfile = rawdir+'final_flat.fits' # Mod on 06/05/2017
     if not exists(flatfile):
-        iraf.gnirs.nsflat('rnc@'+flats_rev, flatfile=flatfile) # Mod on 06/05/2017
+        iraf.gnirs.nsflat(rawdir+'rnc@'+rawdir+flats_rev, flatfile=flatfile) # Mod on 06/05/2017
     else:
         log.warn('## File exists!!! : '+flatfile)
         log.warn('## Will not run nsflat')
@@ -231,7 +233,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                             fl_sky=no, fl_cut=yes, fl_flat=no,
                             fl_dark=no) #fl_nsappwave=no)
     else:
-        log.warn('## File exists!!! : '+flatfile)
+        log.warn('## File exists!!!')
         log.warn('## Will not run nsreduce on arc data')
 
     #os.chdir(rawdir) # + on 06/05/2017
