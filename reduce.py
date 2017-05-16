@@ -103,6 +103,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Changes to call of file_handling.rm_files
     Modified by Chun Ly, 16 May 2017
      - Full path for flatfile, minor fixes
+     - Add code to run skysub on telluric data with nsreduce (step5a)
+     - Add code to run skysub on science data with nsreduce (step5b)
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -256,6 +258,40 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     else:
         log.warn('## Files exist!!!')
         log.warn('## Will not run nswavelength on rnc arc data')
+
+    # Step 5a : Sky subtract telluric data | + on 16/05/2017
+    tell_list = 'telluric.lis'
+    do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', tell_list)
+    if do_run:
+        iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+tell_list, outprefix='',
+                            outimages=rawdir+'rnc@'+rawdir+tell_list,
+                            fl_nsappwave=no, fl_sky=yes, fl_flat=yes,
+                            flatimage=flatfile)
+
+    else:
+        log.warn('## Files exist!!!')
+        log.warn('## Will not run nsreduce on nc telluric data')
+
+    # Step 5b : Sky subtract science data | + on 16/05/2017
+    obj_list = 'obj.lis'
+    sky_list = 'sky.lis'
+    do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', obj_list)
+    if do_run:
+        iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+obj_list, outprefix='',
+                            outimages=rawdir+'rnc@'+rawdir+obj_list,
+                            fl_nsappwave=no, fl_sky=yes,
+                            skyimages=rawdir+'nc@'+rawdir+sky_list,
+                            fl_flat=yes, flatimage=flatfile)
+    do_run = iraf_get_subset.check_prefix(rawdir, 'rnc', sky_list)
+    if do_run:
+        iraf.gnirs.nsreduce(rawdir+'nc@'+rawdir+sky_list, outprefix='',
+                            outimages=rawdir+'rnc@'+rawdir+sky_list,
+                            fl_nsappwave=no, fl_sky=yes,
+                            skyimages=rawdir+'nc@'+rawdir+obj_list,
+                            fl_flat=yes, flatimage=flatfile)
+    else:
+        log.warn('## Files exist!!!')
+        log.warn('## Will not run nsreduce on nc sci data')
 
     #os.chdir(cdir) # + on 06/05/2017
 
