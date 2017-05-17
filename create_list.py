@@ -72,6 +72,7 @@ def main(path0, silent=False, verbose=True):
     Modified by Chun Ly, 16 May 2017
      - Change obj.lis and sky.lis to include both A-B and B-A sets
      - Avoid QA flag of 'sky'
+     - Fix minor bug
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -150,7 +151,8 @@ def main(path0, silent=False, verbose=True):
         QA = ['N/A'] * len0 # Later + on 05/03/2017
 
         for a,b in zip0:
-            if a != 'sky': for idx in b: QA[idx] = a # Mod on 16/05/2017
+            if a != 'sky':
+                for idx in b: QA[idx] = a # Mod on 16/05/2017
             outfile = path+a+'.lis'
             if silent == False: log.info('## Writing : '+outfile)
             np.savetxt(outfile, tab0['filename'][b], fmt='%s')
