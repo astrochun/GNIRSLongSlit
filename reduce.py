@@ -113,6 +113,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Switch input list filenames to include rawdir
      - Remove rawdir in multiple lines calling input list
      - Modify all calls to iraf_get_subset.check_prefix()
+    Modified by Chun Ly, 17 May 2017
+     - No need to run nsreduce on sky.lis since obj.lis include all frames
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -311,14 +313,6 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                 outimages=rawdir+'rnc@'+obj_list,
                                 fl_nsappwave=no, fl_sky=yes,
                                 skyimages=rawdir+'nc@'+sky_list,
-                                fl_flat=yes, flatimage=flatfile)
-
-        do_run = iraf_get_subset.check_prefix('rnc', sky_list)
-        if do_run:
-            iraf.gnirs.nsreduce(rawdir+'nc@'+sky_list, outprefix='',
-                                outimages=rawdir+'rnc@'+sky_list,
-                                fl_nsappwave=no, fl_sky=yes,
-                                skyimages=rawdir+'nc@'+obj_list,
                                 fl_flat=yes, flatimage=flatfile)
         else:
             log.warn('## Files exist!!!')
