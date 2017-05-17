@@ -44,7 +44,7 @@ yes, no = 'yes', 'no' # + on 26/04/2017
 
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0,
-        skysub=0, fitcoords=0, silent=False, verbose=True):
+        skysub=0, fitcoords=0, combine=0, silent=False, verbose=True):
 
     '''
     Main function to run the IRAF Gemini reduction package on GNIRS data
@@ -118,12 +118,15 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Added do_all keyword to simplify things. This will run all steps
      - Added additional log.info messages for each step
      - Add fitcoords keyword and code to execute nsfitcoords and nstransform
+
+     - Add combine keyword and code to execute nscombine
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
     # + on 16/05/2017
-    tot0 = sum([do_all,prepare,do_flat,do_arcs,wave_cal,skysub,fitcoords])
+    tot0 = sum([do_all, prepare, do_flat, do_arcs, wave_cal, skysub,
+                fitcoords,combine])
     if tot0 == 0:
         log.warn('## No GNIRS functions are being called!!!')
         log.warn('## Run with do_all=1 or either of these keywords set to 1 : ')
@@ -132,12 +135,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         log.warn('## do_arcs  : nsreduce arc data')
         log.warn('## wave_cal : Wavelength calibration')
         log.warn('## skysub   : Skysubtraction - telluric and science data')
-        log.warn('## fitcoords: nsfitcoords and nstransform on telluric and science data')
+        log.warn('## fitcoords: nsfitcoords, nstransform on telluric and science data')
+        log.warn('## combine  : nscombine telluric and science data')
         return
     if do_all:
         prepare, do_flat, do_arcs = 1, 1, 1
         wave_cals, skysub = 1, 1
-        fitcoords = 1
+        combine, fitcoords = 1, 1
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
@@ -175,6 +179,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     obj_list  = rawdir+'obj.lis'
     sky_list  = rawdir+'sky.lis'
     flatfile  = rawdir+'final_flat.fits'
+
+    # + on 17/05/2017
+    tell_comb = rawdir+'tell_comb.fits'
+    obj_comb  = rawdir+'obj_comb.fits'
 
     # + on 26/04/2017
     all_lis = np.loadtxt(all_list, dtype=type(str)) # Mod on 06/05/2017
@@ -382,6 +390,17 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         iraf.chdir(cdir)
     #end fitcoords
+
+    # Step 7: Combine 2-D spectra together | + on 17/05/2017
+    if combine:
+        log.info("## Running nscombine on telluric data")
+        iraf.gnirs.nscombine(rawdir+'tfrnc@'+tell_list, output=tell_comb,
+                             fl_cross=yes, tolerance=0.1)
+
+        log.info("## Running nscombine on science data")
+        iraf.gnirs.nscombine(rawdir+'tfrnc@'+obj_list, output=obj_comb,
+                             fl_cross=yes, tolerance=0.1)
+
     #os.chdir(cdir) # + on 06/05/2017
 
     if silent == False: log.info('### End run : '+systime())
