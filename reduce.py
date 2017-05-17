@@ -120,6 +120,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Add fitcoords keyword and code to execute nsfitcoords and nstransform
 
      - Add combine keyword and code to execute nscombine
+     - Check if combined FITS file exists first before running nscombine
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -397,11 +398,18 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.info("## Running nscombine on telluric data")
             iraf.gnirs.nscombine(rawdir+'tfrnc@'+tell_list, output=tell_comb,
                                  fl_cross=yes, tolerance=0.1)
+        else:
+            log.warn('## File exists : '+tell_comb+' !!!')
+            log.warn('## Will not run nscombine on tfrnc telluric data')
 
         if not exists(obj_comb):
             log.info("## Running nscombine on science data")
             iraf.gnirs.nscombine(rawdir+'tfrnc@'+obj_list, output=obj_comb,
                                  fl_cross=yes, tolerance=0.1)
+        else:
+            log.warn('## File exists : '+obj_comb+' !!!')
+            log.warn('## Will not run nscombine on tfrnc science data')
+
 
     #os.chdir(cdir) # + on 06/05/2017
 
