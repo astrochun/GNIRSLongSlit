@@ -124,7 +124,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     tot0 = sum([do_all,prepare,do_flat,do_arcs,wave_cal,skysub])
     if tot0 == 0:
         log.warn('## No GNIRS functions are being called!!!')
-        log.warn('## Run with either of these keywords set to 1 : ')
+        log.warn('## Run with do_all=1 or either of these keywords set to 1 : ')
         log.warn('## prepare  : Execute nsprepare on all.lis')
         log.warn('## do_flat  : Create superflat')
         log.warn('## do_arcs  : nsreduce arc data')
