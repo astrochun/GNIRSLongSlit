@@ -391,15 +391,17 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         iraf.chdir(cdir)
     #end fitcoords
 
-    # Step 7: Combine 2-D spectra together | + on 17/05/2017
+    # Step 7: Combine 2-D spectra | + on 17/05/2017
     if combine:
-        log.info("## Running nscombine on telluric data")
-        iraf.gnirs.nscombine(rawdir+'tfrnc@'+tell_list, output=tell_comb,
-                             fl_cross=yes, tolerance=0.1)
+        if not exists(tell_comb):
+            log.info("## Running nscombine on telluric data")
+            iraf.gnirs.nscombine(rawdir+'tfrnc@'+tell_list, output=tell_comb,
+                                 fl_cross=yes, tolerance=0.1)
 
-        log.info("## Running nscombine on science data")
-        iraf.gnirs.nscombine(rawdir+'tfrnc@'+obj_list, output=obj_comb,
-                             fl_cross=yes, tolerance=0.1)
+        if not exists(obj_comb):
+            log.info("## Running nscombine on science data")
+            iraf.gnirs.nscombine(rawdir+'tfrnc@'+obj_list, output=obj_comb,
+                                 fl_cross=yes, tolerance=0.1)
 
     #os.chdir(cdir) # + on 06/05/2017
 
