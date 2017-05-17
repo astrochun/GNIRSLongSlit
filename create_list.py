@@ -69,6 +69,9 @@ def main(path0, silent=False, verbose=True):
     Modified by Chun Ly, 11 April 2017
      - Handle case when no data for all.lis are available
        (i.e., the observing sequence was canceled)
+    Modified by Chun Ly, 16 May 2017
+     - Change obj.lis and sky.lis to include both A-B and B-A sets
+     - Avoid QA flag of 'sky'
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -108,9 +111,11 @@ def main(path0, silent=False, verbose=True):
         i_sci = np.array(i_sci)
 
         # Note: Assumes that dithering pattern is ABA'B'
-        if len(i_sci) >0:
-            i_obj = i_sci[np.arange(0,len(i_sci),2)]
-            i_sky = i_sci[np.arange(1,len(i_sci),2)]
+        # Mod on 16/05/2017
+        i_obj = i_sci
+        i_off = [1, -1] * (len(i_sci)/2)
+        if len(i_sci) % 2 == 1: i_off.append(-1) # Odd number correction
+        i_sky = [a+b for a,b in zip(i_sci,i_off)]
 
         # Mod on 10/04/2017
         prefix, index = [], []
@@ -145,7 +150,7 @@ def main(path0, silent=False, verbose=True):
         QA = ['N/A'] * len0 # Later + on 05/03/2017
 
         for a,b in zip0:
-            for idx in b: QA[idx] = a
+            if a != 'sky': for idx in b: QA[idx] = a # Mod on 16/05/2017
             outfile = path+a+'.lis'
             if silent == False: log.info('## Writing : '+outfile)
             np.savetxt(outfile, tab0['filename'][b], fmt='%s')
