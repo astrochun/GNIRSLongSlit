@@ -43,8 +43,8 @@ co_filename = __file__ # + on 05/05/2017
 yes, no = 'yes', 'no' # + on 26/04/2017
 
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
-        do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0,
-        skysub=0, fitcoords=0, combine=0, silent=False, verbose=True):
+        do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0, skysub=0,
+        fitcoords=0, combine=0, extract=0, silent=False, verbose=True):
 
     '''
     Main function to run the IRAF Gemini reduction package on GNIRS data
@@ -121,13 +121,15 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
      - Add combine keyword and code to execute nscombine
      - Check if combined FITS file exists first before running nscombine
+
+     - Add extract keyword and code to execute nsextract on telluric data
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
     # + on 16/05/2017
     tot0 = sum([do_all, prepare, do_flat, do_arcs, wave_cal, skysub,
-                fitcoords,combine])
+                fitcoords, combine, extract])
     if tot0 == 0:
         log.warn('## No GNIRS functions are being called!!!')
         log.warn('## Run with do_all=1 or either of these keywords set to 1 : ')
@@ -138,11 +140,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         log.warn('## skysub   : Skysubtraction - telluric and science data')
         log.warn('## fitcoords: nsfitcoords, nstransform on telluric and science data')
         log.warn('## combine  : nscombine telluric and science data')
+        log.warn('## extract  : nsextract telluric data')
         return
     if do_all:
         prepare, do_flat, do_arcs = 1, 1, 1
         wave_cals, skysub = 1, 1
-        combine, fitcoords = 1, 1
+        extract, combine, fitcoords = 1, 1, 1
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
@@ -410,6 +413,16 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## File exists : '+obj_comb+' !!!')
             log.warn('## Will not run nscombine on tfrnc science data')
 
+    # Step 8: Extract 1-D spectra | + on 17/05/2017
+    if extract:
+        outspec = tell_comb.replace('tell','xtell')
+        if not exists(outspec):
+            log.info("## Running nsextract on telluric data")
+            iraf.gnirs.nsextract(tell_comb, outspectra=outspec,
+                                 database=rawdir+'database/')
+        else:
+            log.warn('## File exists : '+outspec+' !!!')
+            log.warn('## Will not run nsextract on comb_tell.fits')
 
     #os.chdir(cdir) # + on 06/05/2017
 
