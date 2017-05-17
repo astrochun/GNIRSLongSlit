@@ -43,8 +43,8 @@ co_filename = __file__ # + on 05/05/2017
 yes, no = 'yes', 'no' # + on 26/04/2017
 
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
-        prepare=0, do_flat=0, do_arcs=0, wave_cal=0, skysub=0,
-        silent=False, verbose=True):
+        do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0,
+        skysub=0, silent=False, verbose=True):
 
     '''
     Main function to run the IRAF Gemini reduction package on GNIRS data
@@ -115,12 +115,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Modify all calls to iraf_get_subset.check_prefix()
     Modified by Chun Ly, 17 May 2017
      - No need to run nsreduce on sky.lis since obj.lis include all frames
+     - Added do_all keyword to simplify things. This will run all steps
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
     # + on 16/05/2017
-    tot0 = sum([prepare,do_flat,do_arcs,wave_cal,skysub])
+    tot0 = sum([do_all,prepare,do_flat,do_arcs,wave_cal,skysub])
     if tot0 == 0:
         log.warn('## No GNIRS functions are being called!!!')
         log.warn('## Run with either of these keywords set to 1 : ')
@@ -130,6 +131,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         log.warn('## wave_cal : Wavelength calibration')
         log.warn('## skysub   : Skysubtraction - telluric and science data')
         return
+    if do_all:
+        prepare, do_flat, do_arcs = 1, 1, 1
+        wave_cals, skysub = 1, 1
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
