@@ -44,7 +44,7 @@ yes, no = 'yes', 'no' # + on 26/04/2017
 
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0,
-        skysub=0, silent=False, verbose=True):
+        skysub=0, fitcoords=0, silent=False, verbose=True):
 
     '''
     Main function to run the IRAF Gemini reduction package on GNIRS data
@@ -117,12 +117,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - No need to run nsreduce on sky.lis since obj.lis include all frames
      - Added do_all keyword to simplify things. This will run all steps
      - Added additional log.info messages for each step
+     - Add fitcoords keyword and code to execute nsfitcoords and nstransform
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
     # + on 16/05/2017
-    tot0 = sum([do_all,prepare,do_flat,do_arcs,wave_cal,skysub])
+    tot0 = sum([do_all,prepare,do_flat,do_arcs,wave_cal,skysub,fitcoords])
     if tot0 == 0:
         log.warn('## No GNIRS functions are being called!!!')
         log.warn('## Run with do_all=1 or either of these keywords set to 1 : ')
@@ -131,10 +132,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         log.warn('## do_arcs  : nsreduce arc data')
         log.warn('## wave_cal : Wavelength calibration')
         log.warn('## skysub   : Skysubtraction - telluric and science data')
+        log.warn('## fitcoords: nsfitcoords and nstransform on telluric and science data')
         return
     if do_all:
         prepare, do_flat, do_arcs = 1, 1, 1
         wave_cals, skysub = 1, 1
+        fitcoords = 1
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
@@ -329,6 +332,56 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Will not run nsreduce on nc sci data')
     #end skysub
 
+    # Step 6a : Apply wavelength solution to telluric data | + on 17/05/2017
+    if fitcoords:
+        # Telluric data
+        iraf.chdir(rawdir)
+        do_run = iraf_get_subset.check_prefix('frnc', tell_list)
+        if do_run:
+            log.info("## Running nsfitcoords on telluric data")
+            iraf.gnirs.nsfitcoords('rnc@'+tell_list, outprefix='',
+                                   outspectra='frnc@'+tell_list,
+                                   lamp='wrnc'+arcs[0],
+                                   database='database/')
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nsfitcoords on rnc telluric data')
+
+        do_run = iraf_get_subset.check_prefix('tfrnc', tell_list)
+        if do_run:
+            log.info("## Running nstransform on telluric data")
+            iraf.gnirs.nstransform('frnc@'+tell_list, outprefix='',
+                                   outspectra='tfrnc@'+tell_list,
+                                   database='database/')
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nstransform on frnc telluric data')
+
+        # Step 6b : Apply wavelength solution to science data | + on 17/05/2017
+        # Science data
+        do_run = iraf_get_subset.check_prefix('frnc', obj_list)
+        if do_run:
+            log.info("## Running nsfitcoords on science data")
+            iraf.gnirs.nsfitcoords('rnc@'+obj_list, outprefix='',
+                                   outspectra='frnc@'+obj_list,
+                                   lamp='wrnc'+arcs[0],
+                                   database='database/')
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nsfitcoords on rnc science data')
+
+        do_run = iraf_get_subset.check_prefix('tfrnc', obj_list)
+        if do_run:
+            log.info("## Running nstransform on science data")
+            iraf.gnirs.nstransform('frnc@'+obj_list, outprefix='',
+                                   outspectra='tfrnc@'+obj_list,
+                                   database='database/')
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nstransform on frnc science data')
+
+        iraf.chdir(cdir)
+    #end fitcoords
     #os.chdir(cdir) # + on 06/05/2017
 
     if silent == False: log.info('### End run : '+systime())
