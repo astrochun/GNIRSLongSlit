@@ -116,6 +116,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 17 May 2017
      - No need to run nsreduce on sky.lis since obj.lis include all frames
      - Added do_all keyword to simplify things. This will run all steps
+     - Added additional log.info messages for each step
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -213,6 +214,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 2 - Create flat | + on 26/04/2017
     if do_flat:
+        log.info("## Creating super flat")
         flats     = np.loadtxt(flat_list, dtype=type(str)) # Mod on 06/05/2017
         tmpflat   = rawdir+'tmpflat'
         if not exists(tmpflat):
@@ -264,6 +266,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     arcs = np.loadtxt(arc_list, dtype=type(str)) # Mod on 06/05/2017
 
     if do_arcs:
+        log.info("## Reducing arc data")
         do_run = iraf_get_subset.check_prefix('rnc', arc_list)
         if do_run:
             # Mod on 06/05/2017
@@ -280,6 +283,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 4 : Perform wavelength calibration | + on 05/05/2017
     if wave_cal:
+        log.info("## Performing non-interactive wavelength calibration on arc data")
         do_run = iraf_get_subset.check_prefix('wrnc', arc_list)
         if do_run:
             file_handling.cp_files(cdir, rawdir, 'rnc', arc_list) # + on 07/05/2017
@@ -300,6 +304,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
     if skysub:
+        log.info("## Performing sky subtraction on telluric data")
         do_run = iraf_get_subset.check_prefix('rnc', tell_list)
         if do_run:
             iraf.gnirs.nsreduce(rawdir+'nc@'+tell_list, outprefix='',
@@ -311,6 +316,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Will not run nsreduce on nc telluric data')
 
         # Step 5b : Sky subtract science data | + on 16/05/2017
+        log.info("## Performing sky subtraction on science data")
         do_run = iraf_get_subset.check_prefix('rnc', obj_list)
         if do_run:
             iraf.gnirs.nsreduce(rawdir+'nc@'+obj_list, outprefix='',
