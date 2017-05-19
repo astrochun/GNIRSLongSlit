@@ -25,6 +25,7 @@ from astropy.visualization import ZScaleInterval
 zscale = ZScaleInterval()
 from astropy.visualization.mpl_normalize import ImageNormalize
 
+from pylab import subplots_adjust
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
 def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
@@ -57,6 +58,12 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
      - Annotate each page with the dataframe information
      - Label lines
      - Aesthetic changes for plotting
+
+     - Aesthetic changes for plotting
+       - subplots_adjust
+       - Better labeling of lines
+       - xlim, ylim set
+       - Adjust PDF paper size
     '''
     
     if silent == False: log.info('### Begin QA_wave_cal : '+systime())
@@ -124,18 +131,20 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
                 x1 = x_cols[x_idx][sort0]
                 y1 = y_val[x_idx,y_idx][sort0]
                 ax.plot(x1, y1, 'r--', alpha=0.5)
-                ax.annotate(str(line_list[ll]), [max(x_cols),max(y1)],
-                            ha='right', va='bottom', fontsize=10)
+                ax.annotate(str(line_list[ll]), [690,np.average(y1)],
+                            ha='right', va='center', fontsize=10,
+                            color='red', bbox=bbox_props)
         ax.set_xlabel('X [pixels]')
         ax.set_ylabel('Y [pixels]')
+        ax.set_xlim([0,690])
+        ax.set_ylim([0,1025])
         ax.minorticks_on()
-        plt.subplots_adjust(left=0.10, bottom=0.025, top=0.99,
-                           right=0.99)
+        subplots_adjust(left=0.095, bottom=0.025, top=0.995, right=0.99)
         str0 = (rnc_files[nn]+'\n'+d_files[nn]).replace(path,'')
         ax.annotate(str0, [0.025,0.975], xycoords='axes fraction', ha='left',
                     va='top', fontsize=14, bbox=bbox_props)
-        fig.suptitle(path)
-        fig.set_size_inches(8,11)
+        ax.set_title(path)
+        fig.set_size_inches(7.65,10.5) # Scale proportionally
         fig.savefig(pp, format='pdf')
     #endfor
 
