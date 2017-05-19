@@ -40,6 +40,11 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 18 May 2017
+    Modified by Chun Ly, 19 May 2017
+     - Fix bug with scatter plot (wrong indexing)
+     - Fix bug with l_val0 and l_val (those were flipped)
+     - Draw dashed lines connecting the points
+     - Adjust margins, add labels
     '''
     
     if silent == False: log.info('### Begin QA_wave_cal : '+systime())
@@ -88,17 +93,29 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
                 temp1 = temp1.split(' ')
                 temp1 = [val for val in temp1 if val != '']
                 y_val[cc,rr]  = np.float(temp1[1])
-                l_val0[cc,rr] = np.float(temp1[2])
-                l_val[cc,rr]  = np.float(temp1[3])
+                l_val[cc,rr]  = np.float(temp1[2])
+                l_val0[cc,rr] = np.float(temp1[3])
             #endfor
-
             x_temp = np.repeat(x_cols[cc],n_features[cc])
-            y_temp = y_val[cc,0:n_features[cc]-1]
-            print len(x_temp), len(y_temp)
-            ax.scatter(x_temp, y_temp, color='red', marker='o', alpha=0.5)
+            y_temp = y_val[cc,0:n_features[cc]]
+            ax.scatter(x_temp, y_temp, facecolor='none', edgecolor='red',
+                       marker='o', s=25)
         #endfor
 
-        fig.set_size_inches(11,8)
+        line_list = list(set(l_val0.reshape(n_cols*n_max).tolist()))
+        print line_list
+        for ll in range(len(line_list)):
+            if line_list[ll] != 0:
+                #print line_list[ll]
+                x_idx, y_idx = np.where(l_val0 == line_list[ll])
+                sort0 = np.argsort(x_cols[x_idx])
+                ax.plot(x_cols[x_idx][sort0], y_val[x_idx,y_idx][sort0], 'r--')
+        ax.set_xlabel('X [pixels]')
+        ax.set_ylabel('Y [pixels]')
+        ax.minorticks_on()
+        plt.subplots_adjust(left=0.10, bottom=0.025, top=0.99,
+                           right=0.99, wspace=0.02, hspace=0.02)
+        fig.set_size_inches(8,11)
         fig.savefig(pp, format='pdf')
     #endfor
 
