@@ -20,6 +20,13 @@ from matplotlib.backends.backend_pdf import PdfPages
 from astropy.io import fits
 from astropy import log
 
+# + on 19/05/2017
+from astropy.visualization import ZScaleInterval
+zscale = ZScaleInterval()
+from astropy.visualization.mpl_normalize import ImageNormalize
+
+bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
+
 def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
 
     '''
@@ -45,6 +52,11 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
      - Fix bug with l_val0 and l_val (those were flipped)
      - Draw dashed lines connecting the points
      - Adjust margins, add labels
+
+     - Adjust image scale (Using zscale)
+     - Annotate each page with the dataframe information
+     - Label lines
+     - Aesthetic changes for plotting
     '''
     
     if silent == False: log.info('### Begin QA_wave_cal : '+systime())
@@ -68,7 +80,9 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
         im0  = hdu0['SCI'].data
 
         fig, ax = plt.subplots()
-        ax.imshow(im0, cmap='Greys', origin='lower')
+        z1, z2 = zscale.get_limits(im0)
+        norm = ImageNormalize(vmin=z1, vmax=z2)
+        ax.imshow(im0, cmap='Greys', origin='lower', norm=norm)
 
         f0   = open(d_files[nn], 'r')
         str0 = f0.readlines()
@@ -99,22 +113,28 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
             x_temp = np.repeat(x_cols[cc],n_features[cc])
             y_temp = y_val[cc,0:n_features[cc]]
             ax.scatter(x_temp, y_temp, facecolor='none', edgecolor='red',
-                       marker='o', s=25)
+                       marker='o', s=25, alpha=0.5)
         #endfor
 
         line_list = list(set(l_val0.reshape(n_cols*n_max).tolist()))
-        print line_list
         for ll in range(len(line_list)):
             if line_list[ll] != 0:
-                #print line_list[ll]
                 x_idx, y_idx = np.where(l_val0 == line_list[ll])
                 sort0 = np.argsort(x_cols[x_idx])
-                ax.plot(x_cols[x_idx][sort0], y_val[x_idx,y_idx][sort0], 'r--')
+                x1 = x_cols[x_idx][sort0]
+                y1 = y_val[x_idx,y_idx][sort0]
+                ax.plot(x1, y1, 'r--', alpha=0.5)
+                ax.annotate(str(line_list[ll]), [max(x_cols),max(y1)],
+                            ha='right', va='bottom', fontsize=10)
         ax.set_xlabel('X [pixels]')
         ax.set_ylabel('Y [pixels]')
         ax.minorticks_on()
         plt.subplots_adjust(left=0.10, bottom=0.025, top=0.99,
-                           right=0.99, wspace=0.02, hspace=0.02)
+                           right=0.99)
+        str0 = (rnc_files[nn]+'\n'+d_files[nn]).replace(path,'')
+        ax.annotate(str0, [0.025,0.975], xycoords='axes fraction', ha='left',
+                    va='top', fontsize=14, bbox=bbox_props)
+        fig.suptitle(path)
         fig.set_size_inches(8,11)
         fig.savefig(pp, format='pdf')
     #endfor
