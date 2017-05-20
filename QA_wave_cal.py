@@ -30,6 +30,8 @@ import aplpy # + on 19/05/2017
 from pylab import subplots_adjust
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
+co_dirname = os.path.dirname(__file__)
+
 def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
 
     '''
@@ -184,9 +186,19 @@ def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 19 May 2017
+    Modified by Chun Ly, 20 May 2017
+     - Draw OH night skyline emission on plots
     '''
 
     if silent == False: log.info('### Begin OH_check : '+systime())
+
+    # + on 20/05/2017
+    OH_file = co_dirname+'/rousselot2000.dat'
+    if exists(OH_file):
+        if silent == False: log.info('### Reading : '+OH_file)
+        OH_data  = np.loadtxt(OH_file)
+        OH_lines = OH_data[:,0]
+        OH_int   = OH_data[:,1]
 
     if objs == '':
         obj_list = path + 'obj.lis'
@@ -209,6 +221,19 @@ def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
         z1, z2 = zscale.get_limits(im0)
         gc0.show_grayscale(invert=True, vmin=z1, vmax=z2)
         gc0.set_tick_color('black')
+
+        # + on 20/05/2017
+        hdr0     = hdu0['SCI'].header
+        crval2   = hdr0['CRVAL2']
+        cdelt2   = hdr0['CDELT2']
+        npix     = hdr0['NAXIS2']
+        lamb_max = crval2 + cdelt2*npix
+        OH_mark  = np.where((OH_lines >= crval2) & (OH_lines <= lamb_max))[0]
+        OH_mark  = np.where(OH_int >= 0.1*np.max(OH_int[OH_mark]))[0]
+        line_list = []
+        for ll in OH_mark:
+            line_list.append(np.array([[0,700], [OH_lines[ll],OH_lines[ll]]]))
+        gc0.show_lines(line_list, color='blue', alpha=0.5, linewidth=0.5, linestyle='dashed')
 
         #subplots_adjust(left=0.095, bottom=0.025, top=0.995, right=0.99)
         str0 = tfrnc_files[nn].replace(path,'')
