@@ -50,13 +50,8 @@
 # 2016-Oct-28 - AWS - switch pyfits -> astropy.io.fits
 # 2017-Feb-01 - AWS - add option to reject pixels above a threshold before calculating pattern
 # 2017-Mar-11 - AWS - fix calculation of stddev after quadrant adjustment
-# 2017-Mar-13 - AWS - use clipped stddev to determine quadrant improvment
-# 2017-May-13 - AWS - make sure roi indices are ints
 
 # To Do:
-
-# Fix array indexing: there shoul be a -1 after naxis1 and naxis2 as indexing goes from 0 to naxis-1
-# Also 0:qxsize and 0:qysize should be 0:qxsize-1 and 0:qysize-1.
 
 # Add option to fit an N order surface before calculating the pattern
 
@@ -85,7 +80,7 @@ from   scipy.optimize import leastsq
 import string
 import sys
 
-version = '2017-May-13'
+version = '2017-Mar-11'
 
 # ---------------------------------------------------------------------------------------------------
 
@@ -416,8 +411,7 @@ def CleanQuad(quad,patternin):
 
     # create blank pattern array:
     pattern = numpy.zeros(pysize*pxsize).reshape(pysize,pxsize)
-    #origstddev = numpy.std(quad)
-    origmedian, origstddev = IterStat(quad)
+    origstddev = numpy.std(quad)
     print '   ...standard deviation of input quadrant =%9.3f' % origstddev
 
     # find median pattern across quadrant:
@@ -459,8 +453,8 @@ def CleanQuad(quad,patternin):
     #print '   ...mean of pattern = ', numpy.mean(quadpattern)
 
     cleanedquad = quad - quadpattern                      # subtract pattern
-    #cleanstddev = numpy.std(cleanedquad)      # calculate standard deviation
-    cleanmedian, cleanstddev = IterStat(cleanedquad)  # calculate clipped standard deviation
+    cleanstddev = numpy.std(cleanedquad)      # calculate standard deviation
+
     print '   ...standard deviation of cleaned quadrant = %.3f' % cleanstddev
 
     if (force):
@@ -747,9 +741,6 @@ def cleanir(inputfile):
 
     qxsize = naxis1 / 2                                       # quadrant x size
     qysize = naxis2 / 2                                       # quadrant y size
-    if verbose:
-        print '...qxsize =', qxsize
-        print '...qysize =', qysize
 
     if qxsize%pxsize != 0 or qysize%pysize != 0:
         print 'ERROR: quadrant size is not a multiple of the pattern size'
@@ -1162,10 +1153,10 @@ def cleanir(inputfile):
 
         if havedq:                                # Flag pixels with bad DQ
             print '...flagging bad pixels...'
-            dq1 = dq[qysize:int((1+cfrac)*qysize), int((1-cfrac)*qxsize):qxsize]
-            dq2 = dq[qysize:int((1+cfrac)*qysize), qxsize:int((1+cfrac)*qxsize)]
-            dq3 = dq[int((1-cfrac)*qysize):qysize, int((1-cfrac)*qxsize):qxsize]
-            dq4 = dq[int((1-cfrac)*qysize):qysize, qxsize:int((1+cfrac)*qxsize)]
+            dq1 = dq[qysize:(1+cfrac)*qysize, (1-cfrac)*qxsize:qxsize]
+            dq2 = dq[qysize:(1+cfrac)*qysize, qxsize:(1+cfrac)*qxsize]
+            dq3 = dq[(1-cfrac)*qysize:qysize, (1-cfrac)*qxsize:qxsize]
+            dq4 = dq[(1-cfrac)*qysize:qysize, qxsize:(1+cfrac)*qxsize]
             patternin1[dq1==1] = bad
             patternin2[dq2==1] = bad
             patternin3[dq3==1] = bad
