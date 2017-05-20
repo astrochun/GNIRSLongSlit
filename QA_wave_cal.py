@@ -37,6 +37,15 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
 
     Parameters
     ----------
+    path : str
+      Full path to where output PDF and FITS file are located. Must end
+      with a '/'
+
+    arcs : str or list (Optional)
+      List of raw filenames for the arc data (e.g., 'N20170101S0111.fits')
+
+    out_pdf : str
+      Filename for output PDF. Do NOT include full path
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -68,7 +77,7 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
        - Adjust PDF paper size
     '''
     
-    if silent == False: log.info('### Begin QA_wave_cal : '+systime())
+    if silent == False: log.info('### Begin arc_check : '+systime())
 
     if arcs == '':
         arc_list = path + 'arc.lis'
@@ -151,7 +160,7 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
     #endfor
 
     pp.close()
-    if silent == False: log.info('### End QA_wave_cal : '+systime())
+    if silent == False: log.info('### End arc_check : '+systime())
 #enddef
 
 def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
