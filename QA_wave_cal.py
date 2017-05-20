@@ -209,40 +209,50 @@ def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
 
     tfrnc_files = [path+'tfrnc'+file0 for file0 in objs]
 
+    # + on 20/05/2017
+    chk = [file0 for file0 in tfrnc_files if exists(file0) == True]
+    if len(chk) == 0:
+        log.warn('### Files not found!!!')
+        log.warn('### '+', '.join(file0))
+        log.warn('### Exiting!!!')
+        return
+
     out_pdf = path+'OH_check.pdf' if out_pdf == '' else path+out_pdf
     pp = PdfPages(out_pdf)
 
     for nn in xrange(n_obj):
-        hdu0 = fits.open(tfrnc_files[nn])
-        im0  = hdu0['SCI'].data
+        if exists(tfrnc_files[nn]): # Mod on 20/05/2017
+            hdu0 = fits.open(tfrnc_files[nn])
+            im0  = hdu0['SCI'].data
 
-        gc0 = aplpy.FITSFigure(hdu0, hdu='SCI', figsize=(7.65,10.5))
+            gc0 = aplpy.FITSFigure(hdu0, hdu='SCI', figsize=(7.65,10.5))
 
-        z1, z2 = zscale.get_limits(im0)
-        gc0.show_grayscale(invert=True, vmin=z1, vmax=z2)
-        gc0.set_tick_color('black')
+            z1, z2 = zscale.get_limits(im0)
+            gc0.show_grayscale(invert=True, vmin=z1, vmax=z2)
+            gc0.set_tick_color('black')
 
-        # + on 20/05/2017
-        hdr0     = hdu0['SCI'].header
-        crval2   = hdr0['CRVAL2']
-        cdelt2   = hdr0['CDELT2']
-        npix     = hdr0['NAXIS2']
-        lamb_max = crval2 + cdelt2*npix
-        OH_mark  = np.where((OH_lines >= crval2) & (OH_lines <= lamb_max))[0]
-        OH_mark  = np.where(OH_int >= 0.1*np.max(OH_int[OH_mark]))[0]
-        line_list = []
-        for ll in OH_mark:
-            line_list.append(np.array([[0,700], [OH_lines[ll],OH_lines[ll]]]))
-        gc0.show_lines(line_list, color='blue', alpha=0.5, linewidth=0.5, linestyle='dashed')
+            # + on 20/05/2017
+            hdr0     = hdu0['SCI'].header
+            crval2   = hdr0['CRVAL2']
+            cdelt2   = hdr0['CDELT2']
+            npix     = hdr0['NAXIS2']
+            lamb_max = crval2 + cdelt2*npix
+            OH_mark  = np.where((OH_lines >= crval2) & (OH_lines <= lamb_max))[0]
+            OH_mark  = np.where(OH_int >= 0.1*np.max(OH_int[OH_mark]))[0]
+            line_list = []
+            for ll in OH_mark:
+                line_list.append(np.array([[0,700], [OH_lines[ll],OH_lines[ll]]]))
+            gc0.show_lines(line_list, color='blue', alpha=0.5, linewidth=0.5, linestyle='dashed')
 
-        #subplots_adjust(left=0.095, bottom=0.025, top=0.995, right=0.99)
-        str0 = tfrnc_files[nn].replace(path,'')
-        gc0.add_label(0.025, 0.975, str0, color='red', relative=True,
-                     ha='left', va='top', weight='medium', fontsize=14,
-                     bbox=bbox_props)
-        gc0.set_axis_labels(xlabel='X [pixels]', ylabel=r'Wavelength ($\AA$)')
-        #gc0.set_axis_label_rotation(90)
-        gc0.savefig(pp, format='pdf')
+            #subplots_adjust(left=0.095, bottom=0.025, top=0.995, right=0.99)
+            str0 = tfrnc_files[nn].replace(path,'')
+            gc0.add_label(0.025, 0.975, str0, color='red', relative=True,
+                          ha='left', va='top', weight='medium', fontsize=14,
+                          bbox=bbox_props)
+            gc0.set_axis_labels(xlabel='X [pixels]', ylabel=r'Wavelength ($\AA$)')
+            #gc0.set_axis_label_rotation(90)
+            gc0.savefig(pp, format='pdf')
+        #endif
     #endfor
 
     if silent == False: log.info('### Writing : '+out_pdf)
