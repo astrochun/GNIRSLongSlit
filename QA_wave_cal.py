@@ -25,6 +25,8 @@ from astropy.visualization import ZScaleInterval
 zscale = ZScaleInterval()
 from astropy.visualization.mpl_normalize import ImageNormalize
 
+import aplpy # + on 19/05/2017
+
 from pylab import subplots_adjust
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
@@ -152,3 +154,64 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
     if silent == False: log.info('### End QA_wave_cal : '+systime())
 #enddef
 
+def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
+
+    '''
+    Generate plot illustrating expected location of OH skyline to
+    check wavelength calibration
+
+    Parameters
+    ----------
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+
+    Notes
+    -----
+    Created by Chun Ly, 19 May 2017
+    '''
+
+    if silent == False: log.info('### Begin OH_check : '+systime())
+
+    if objs == '':
+        obj_list = path + 'obj.lis'
+        if silent == False: log.info('### Reading : '+obj_list)
+        objs = np.loadtxt(obj_list, dtype=type(str))
+
+    n_obj = len(objs)
+
+    tfrnc_files = [path+'tfrnc'+file0 for file0 in objs]
+
+    out_pdf = path+'OH_check.pdf' if out_pdf == '' else path+out_pdf
+    pp = PdfPages(out_pdf)
+
+    for nn in xrange(n_obj):
+        hdu0 = fits.open(tfrnc_files[nn])
+        im0  = hdu0['SCI'].data
+
+        gc0 = aplpy.FITSFigure(hdu0, hdu='SCI', figsize=(7.65,10.5))
+
+        z1, z2 = zscale.get_limits(im0)
+        gc0.show_grayscale(invert=True, vmin=z1, vmax=z2)
+        gc0.set_tick_color('black')
+
+        #subplots_adjust(left=0.095, bottom=0.025, top=0.995, right=0.99)
+        str0 = tfrnc_files[nn].replace(path,'')
+        gc0.add_label(0.025, 0.975, str0, color='red', relative=True,
+                     ha='left', va='top', weight='medium', fontsize=14,
+                     bbox=bbox_props)
+        gc0.set_axis_labels(xlabel='X [pixels]', ylabel=r'Wavelength ($\AA$)')
+        #gc0.set_axis_label_rotation(90)
+        gc0.savefig(pp, format='pdf')
+    #endfor
+
+    if silent == False: log.info('### Writing : '+out_pdf)
+    pp.close()
+    if silent == False: log.info('### End OH_check : '+systime())
+#enddef
