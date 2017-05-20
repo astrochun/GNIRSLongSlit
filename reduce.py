@@ -123,6 +123,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Check if combined FITS file exists first before running nscombine
 
      - Add extract keyword and code to execute nsextract on telluric data
+
+    Modified by Chun Ly, 20 May 2017
+     - Use iraf.chdir to move around for nswavelength (step4)
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -294,28 +297,23 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Will not run nsreduce on arc data')
     #end do_arcs
 
-    #os.chdir(rawdir) # + on 06/05/2017
-
     # Step 4 : Perform wavelength calibration | + on 05/05/2017
     if wave_cal:
+        iraf.chdir(rawdir) # + on 20/05/2017
         log.info("## Performing non-interactive wavelength calibration on arc data")
         do_run = iraf_get_subset.check_prefix('wrnc', arc_list)
         if do_run:
-            file_handling.cp_files(cdir, rawdir, 'rnc', arc_list) # + on 07/05/2017
-
             # Mod on 06/05/2017
             iraf.gnirs.nswavelength('rnc@'+arc_list, outprefix='',
                                     outspectra='wrnc@'+arc_list,
                                     coordlist="gnirs$data/lowresargon.dat",
-                                    database=rawdir+'database/',
+                                    database='database/',
                                     fl_inter=no, cradius=20, threshold=50.0,
                                     order=2)
-            # Mod on 15/05/2017
-            file_handling.mv_files(rawdir, 'wrnc', arc_list) # + on 07/05/2017
-            file_handling.rm_files('rnc', arc_list) # Mod on 15/05/2017
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nswavelength on rnc arc data')
+        iraf.chdir(cdir)
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
     if skysub:
