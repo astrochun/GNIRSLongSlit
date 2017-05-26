@@ -37,6 +37,7 @@ iraf.set(stdimage="imt4096")
 
 import iraf_get_subset # + on 26/04/2017
 import file_handling # + on 07/05/2017
+import QA_wave_cal # + on 25/05/2017
 
 co_filename = __file__ # + on 05/05/2017
 
@@ -126,6 +127,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     Modified by Chun Ly, 20 May 2017
      - Use iraf.chdir to move around for nswavelength (step4)
+    Modified by Chun Ly, 25 May 2017
+     - Call QA_wave_cal.arc_check() to illustrate wavelength calibration
+       on arc data
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -314,6 +318,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Files exist!!!')
             log.warn('## Will not run nswavelength on rnc arc data')
         iraf.chdir(cdir)
+
+        QA_wave_cal.arc_check(rawdir, arcs=arcs) # + on 25/05/2017
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
     if skysub:
