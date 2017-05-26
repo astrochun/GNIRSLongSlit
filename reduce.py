@@ -130,6 +130,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 25 May 2017
      - Call QA_wave_cal.arc_check() to illustrate wavelength calibration
        on arc data
+     - Call QA_wave_cal.OH_check() to illustrate wavelength calibration
+       on object data
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -397,6 +399,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Will not run nstransform on frnc science data')
 
         iraf.chdir(cdir)
+        QA_wave_cal.OH_check(rawdir) # + on 25/05/2017
     #end fitcoords
 
     # Step 7: Combine 2-D spectra | + on 17/05/2017
