@@ -62,6 +62,7 @@ def get_offsets(path0, silent=True, verbose=False):
             log.warning('## Not over-writing!!! ')
         else:
             fits_files = np.loadtxt(path+'obj.lis', dtype=type(str))
+            fits_files = [path+file0 for file0 in fits_files] # Bug fix
             n_files = len(fits_files)
 
             names0 = ('filename', 'xoffset', 'yoffset', 'poffset', 'qoffset')
