@@ -165,7 +165,7 @@ def main(path0, silent=False, verbose=True):
     if silent == False: log.info('### End main : '+systime())
 #enddef
 
-def zcalbase_gal_gemini_2017a():
+def zcalbase_gal_gemini_2017a(offsets=False):
     '''
     Function to run main() on each set of GNIRS 2017A observation set
     to obtain FITS header info
@@ -184,6 +184,8 @@ def zcalbase_gal_gemini_2017a():
     Created by Chun Ly, 4 March 2017
     Modified by Chun Ly, 12 March 2017
      - global gnirs_2017 use
+    Modified by Chun Ly, 30 May 2017
+     - Added option to run get_offsets() with offsets keyword
     '''
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
@@ -192,6 +194,9 @@ def zcalbase_gal_gemini_2017a():
     #targets0 = ['DEEP05', 'DEEP06', 'DEEP07', 'Keck03', 'Keck27', 'MMT37']
 
     for target in targets0:
-        main(path0+target+'/')
-
+        # Mod on 30/05/2017
+        if offsets == False:
+            main(path0+target+'/')
+        else:
+            get_offsets(path0+target+'/')
 #enddef
