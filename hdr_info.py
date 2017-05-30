@@ -24,6 +24,67 @@ from . import gnirs_2017a #targets0
 
 import dir_check
 
+def get_offsets(path0, silent=True, verbose=False):
+
+    '''
+    Function to get offsets from FITS header and write it to ASCII file
+
+    Parameters
+    ----------
+    path0 : str
+     Path to FITS file. Must include '/' at the end
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+    tab0 : astropy.table.Table
+     Astropy ASCII table written to [path0]+'sci_offsets.tbl'
+
+    Notes
+    -----
+    Created by Chun Ly, 30 May 2017
+    '''
+
+    if silent == False: log.info('### Begin get_offsets : '+systime())
+
+    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
+
+    for path in list_path:
+        outfile = path + 'sci_offsets.tbl'
+
+        if exists(outfile):
+            log.warning('## File exists : '+outfile)
+            log.warning('## Not over-writing!!! ')
+        else:
+            fits_files = np.loadtxt(path+'obj.lis', dtype=type(str))
+            n_files = len(fits_files)
+
+            names0 = ('filename', 'xoffset', 'yoffset', 'poffset', 'qoffset')
+            dtype0 = ('S20', 'f8', 'f8', 'f8', 'f8')
+            tab0 = Table(names=names0, dtype=dtype0)
+
+            for nn in xrange(n_files):
+                basename = os.path.basename(fits_files[nn])
+                if verbose == True: log.info('## Reading : '+basename)
+                h0 = fits.getheader(fits_files[nn])
+                vec0 = [basename, h0['XOFFSET'], h0['YOFFSET'],
+                        h0['POFFSET'], h0['QOFFSET']]
+                tab0.add_row(vec0)
+
+            if silent == False: log.info('## Writing : '+outfile)
+            asc.write(tab0, outfile, format='fixed_width_two_line')
+        #endelse
+    #endfor
+
+    if silent == False: log.info('### End get_offsets : '+systime())
+
+#enddef
+
 def main(path0, silent=False, verbose=True):
 
     '''
@@ -40,7 +101,7 @@ def main(path0, silent=False, verbose=True):
 
     verbose : boolean
       Turns on additional stdout messages. Default: True
-	  
+
     Returns
     -------
     tab0 : astropy.table.Table
