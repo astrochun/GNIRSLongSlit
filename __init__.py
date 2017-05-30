@@ -39,6 +39,7 @@ import dir_check
 
 import iraf_get_subset
 import file_handling
+import QA_wave_cal
 import reduce
 
 reload(hdr_info)
@@ -57,4 +58,5 @@ reload(dir_check)
 
 reload(iraf_get_subset)
 reload(file_handling)
+reload(QA_wave_cal)
 reload(reduce)
