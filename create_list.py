@@ -75,6 +75,8 @@ def main(path0, silent=False, verbose=True):
      - Fix minor bug
     Modified by Chun Ly, 17 May 2017
      - Minor fix for i_sky to handle skipping of frames for i_obj
+    Modified by Chun Ly, 31 May 2017
+     - Minor fix for when no science data is available
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -116,11 +118,13 @@ def main(path0, silent=False, verbose=True):
         # Note: Assumes that dithering pattern is ABA'B'
         # Mod on 16/05/2017
         # Mod on 17/05/2017 - Minor bug if things skip for sci frames
-        i_obj = i_sci
-        i_off = [1, -1] * (len(i_sci)/2)
-        if len(i_sci) % 2 == 1: i_off.append(-1) # Odd number correction
-        i_sky = i_sci[np.arange(len(i_sci))+np.array(i_off)]
-        # i_sky = [a+b for a,b in zip(i_sci,i_off)]
+        # Mod on 31/05/2017 - Minor bug if i_sci is empty
+        if len(i_sci) > 0:
+            i_obj = i_sci
+            i_off = [1, -1] * (len(i_sci)/2)
+            if len(i_sci) % 2 == 1: i_off.append(-1) # Odd number correction
+            i_sky = i_sci[np.arange(len(i_sci))+np.array(i_off)]
+            # i_sky = [a+b for a,b in zip(i_sci,i_off)]
 
         # Mod on 10/04/2017
         prefix, index = [], []
