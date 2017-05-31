@@ -62,6 +62,7 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
      - Call dir_check.main() to handle multiple date directories
     Modified by Chun Ly, 30 May 2017
      - Added overwrite option. Default is to not overwrite .sh files
+     - Fix bug when only one file is found
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -80,6 +81,7 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
         else:
             if silent == False: log.info('## Reading : '+clean_file0)
             files = np.loadtxt(clean_file0, dtype=type(str)).tolist()
+            if type(files) == str: files = [files] # Bug fix. Mod on 30/05/2017
 
             out_script0 = path+'run_cleanir.sh' if out_script == '' \
                           else out_script
