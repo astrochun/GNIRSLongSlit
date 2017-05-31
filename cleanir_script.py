@@ -34,7 +34,8 @@ co     = __file__
 co_dir = os.path.dirname(co)+'/'
 cmd0   = co_dir+'cleanir.py'
         
-def run(path0, clean_file='', out_script='', silent=False, verbose=True):
+def run(path0, clean_file='', out_script='', silent=False, verbose=True,
+        overwrite=False):
 
     '''
     Create a .sh script to run cleanir.py for a set of files
@@ -48,6 +49,9 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True):
     verbose : boolean
       Turns on additional stdout messages. Default: True
 
+    overwrite : boolean
+      Overwrite files if they exists. Default: False
+
     Returns
     -------
 
@@ -56,6 +60,8 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True):
     Created by Chun Ly, 7 March 2017
     Modified by Chun Ly, 15 May 2017
      - Call dir_check.main() to handle multiple date directories
+    Modified by Chun Ly, 30 May 2017
+     - Added overwrite option. Default is to not overwrite .sh files
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -81,15 +87,20 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True):
             if len(dir_list) != 0:
                 out_script0 = out_script0.replace('.sh', '.'+date+'.sh')
 
-            if silent == False:
-                stat0 = 'Overwriting' if exists(out_script0) else 'Writing'
-                log.info('## '+stat0+' : '+out_script0)
-            f = open(out_script0, 'w')
-            for ii in xrange(len(files)):
-                cmd1 = cmd0+' -afqo '+path+'c'+files[ii]+' '+path+files[ii]
-                f.write(cmd1+'\n')
-
-            f.close()
+            # Mod on 30/05/2017
+            if overwrite == False and exists(out_script0):
+                log.warn('## File found!!! : '+out_script0)
+                log.warn('## Will not overwrite!!!')
+            else:
+                if silent == False:
+                    stat0 = 'Overwriting' if exists(out_script0) else 'Writing'
+                    log.info('## '+stat0+' : '+out_script0)
+                f = open(out_script0, 'w')
+                for ii in xrange(len(files)):
+                    cmd1 = cmd0+' -afqo '+path+'c'+files[ii]+' '+path+files[ii]
+                    f.write(cmd1+'\n')
+                f.close()
+            #endelse
         #endelse
     #endfor
 
