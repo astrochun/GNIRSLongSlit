@@ -24,7 +24,7 @@ from . import gnirs_2017a #targets0
 
 import dir_check
 
-def main(path0, silent=False, verbose=True):
+def main(path0, silent=False, verbose=True, overwrite=False):
 
     '''
     main() function to sort through data and create individual lists
@@ -77,6 +77,8 @@ def main(path0, silent=False, verbose=True):
      - Minor fix for i_sky to handle skipping of frames for i_obj
     Modified by Chun Ly, 31 May 2017
      - Minor fix for when no science data is available
+    Modified by Chun Ly, 1 June 2017
+     - Added overwrite keyword option to overwrite file
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -162,18 +164,24 @@ def main(path0, silent=False, verbose=True):
             if a != 'sky':
                 for idx in b: QA[idx] = a # Mod on 16/05/2017
             outfile = path+a+'.lis'
-            if silent == False: log.info('## Writing : '+outfile)
-            np.savetxt(outfile, tab0['filename'][b], fmt='%s')
-            #asc.write will not work. Will not produce single column
-            #asc.write(tab0[b], outfile, overwrite=True,
-            #          format='no_header')
+            if overwrite == False and exists(outfile):
+                log.warn('File exists! Will not write '+outfile+'!!')
+            else:
+                if silent == False: log.info('## Writing : '+outfile)
+                np.savetxt(outfile, tab0['filename'][b], fmt='%s')
+                #asc.write will not work. Will not produce single column
+                #asc.write(tab0[b], outfile, overwrite=True,
+                #          format='no_header')
 
         # Later + on 05/03/2017 | Mod on 11/04/2017
         i_all    = [ii for ii in r0 if QA[ii] != 'N/A']
         if len(i_all) > 0:
             outfile0 = path+'all.lis'
-            if silent == False: log.info('## Writing : '+outfile0)
-            np.savetxt(outfile0, tab0['filename'][i_all], fmt='%s')
+            if overwrite == False and exists(outfile0):
+                log.warn('File exists! Will not write all.lis!!')
+            else:
+                if silent == False: log.info('## Writing : '+outfile0)
+                np.savetxt(outfile0, tab0['filename'][i_all], fmt='%s')
         else: log.warn('Will not write all.lis!!')
 
         # Later + on 05/03/2017
@@ -183,10 +191,14 @@ def main(path0, silent=False, verbose=True):
         # Later + on 05/03/2017
         outfile2 = infile.replace('.tbl', '.QA.tbl')
         if silent == False:
-            if not exists(outfile2):
-                log.info('## Writing : '+outfile2)
-            else: log.info('## Overwriting : '+outfile2)
-        asc.write(tab0, outfile2, format='fixed_width_two_line', overwrite=True)
+            if overwrite == False and exists(outfile2):
+                log.warn('File exists! Will not write '+outfile2+'!!')
+            else:
+                if not exists(outfile2):
+                    log.info('## Writing : '+outfile2)
+                else: log.info('## Overwriting : '+outfile2)
+                asc.write(tab0, outfile2, format='fixed_width_two_line',
+                          overwrite=True)
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
