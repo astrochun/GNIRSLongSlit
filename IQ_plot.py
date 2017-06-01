@@ -158,6 +158,7 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True,
     Modified by Chun Ly, 1 June 2017
      - Added overwrite keyword option to overwrite file. Default is not to
        overwrite .pdf files
+     - Bug found: No longer need sky.lis since obj.lis includes all
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -170,7 +171,7 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True,
     # Mod on 11/04/2017
     for path in list_path:
         files = []
-        file_lis = ['obj.lis','sky.lis','telluric.lis']
+        file_lis = ['obj.lis','telluric.lis'] # Minor bug fix on 01/06/2017
         for file0 in file_lis:
             # Mod on 13/04/2017
             if exists(path+file0):
