@@ -38,7 +38,7 @@ from . import gnirs_2017a #targets0
 import dir_check
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
-def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
+def main(file_list, path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
 
     '''
     main() function to read in each FITS image and display it on a zscale
@@ -64,6 +64,9 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
     verbose : boolean
       Turns on additional stdout messages. Default: True
 
+    overwrite : boolean
+      Overwrite files if they exists. Default: False
+
     Returns
     -------
     multi-page PDF plot
@@ -73,6 +76,9 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
     Created by Chun Ly, 6 March 2017
     Modified by Chun Ly, 23 March 2017
      - Call dir_check.main() to handle multiple date directories
+    Modified by Chun Ly, 1 June 2017
+     - Added overwrite keyword option to overwrite file. Default is not to
+       overwrite .pdf files
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -102,46 +108,51 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True):
         else:
             if silent == False: log.warn('## File not found : '+hdr_info_file)
 
-        pp = PdfPages(out_pdf)
+        if overwrite == False and exists(out_pdf):
+            log.warn('## File exists!! Will not overwrite '+out_pdf)
+        else:
+            pp = PdfPages(out_pdf)
 
-        for nn in xrange(n_files):
-            if silent == False: log.info('## Reading : '+files[nn])
-            # h0  = fits.getheader(path+files[nn], 0)
-            # im0 = fits.getdata(path+files[nn], 1)
-            hdu0 = fits.open(path+files[nn])
-            im0  = hdu0[1].data
-            hdu0[1].header = hdu0[0].header # Copy WCS header over
+            for nn in xrange(n_files):
+                if silent == False: log.info('## Reading : '+files[nn])
+                # h0  = fits.getheader(path+files[nn], 0)
+                # im0 = fits.getdata(path+files[nn], 1)
+                hdu0 = fits.open(path+files[nn])
+                im0  = hdu0[1].data
+                hdu0[1].header = hdu0[0].header # Copy WCS header over
 
-            gc  = aplpy.FITSFigure(hdu0, hdu=1, figsize=(8,8))
+                gc  = aplpy.FITSFigure(hdu0, hdu=1, figsize=(8,8))
 
-            z1, z2 = zscale.get_limits(im0)
-            gc.show_grayscale(invert=True, vmin=z1, vmax=z2)
-            gc.set_tick_color('black')
+                z1, z2 = zscale.get_limits(im0)
+                gc.show_grayscale(invert=True, vmin=z1, vmax=z2)
+                gc.set_tick_color('black')
 
-            gc.set_tick_yspacing('auto')
-            gc.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
-            gc.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
+                gc.set_tick_yspacing('auto')
+                gc.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
+                gc.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
 
-            txt0 = files[nn]
-            if exists(hdr_info_file):
-                txt0 += '\n'
-                tmp   = tab0[nn]
-                txt0 += 'Date Label : '+tmp['datelabel']+'\n'
-                txt0 += 'UT Date : '+tmp['UT_date']+'\n'
-                txt0 += tmp['object']+'\n'
-                txt0 += 'EXPTIME=%.1f ' % tmp['exptime']
-                txt0 += 'AIRMASS=%.3f \n' % tmp['airmass']
-                txt0 += '%s %.3f %s' % (tmp['grating'],tmp['gratwave'],
-                                        tmp['filter2'])
+                txt0 = files[nn]
+                if exists(hdr_info_file):
+                    txt0 += '\n'
+                    tmp   = tab0[nn]
+                    txt0 += 'Date Label : '+tmp['datelabel']+'\n'
+                    txt0 += 'UT Date : '+tmp['UT_date']+'\n'
+                    txt0 += tmp['object']+'\n'
+                    txt0 += 'EXPTIME=%.1f ' % tmp['exptime']
+                    txt0 += 'AIRMASS=%.3f \n' % tmp['airmass']
+                    txt0 += '%s %.3f %s' % (tmp['grating'],tmp['gratwave'],
+                                            tmp['filter2'])
 
-                gc.add_label(0.975, 0.115, txt0, color='red', relative=True,
-                             ha='right', va='bottom', weight='medium',
-                             size='medium', bbox=bbox_props)
+                    gc.add_label(0.975, 0.115, txt0, color='red', relative=True,
+                                 ha='right', va='bottom', weight='medium',
+                                 size='medium', bbox=bbox_props)
 
-                gc.savefig(pp, format='pdf')
+                    gc.savefig(pp, format='pdf')
 
-        if silent == False: log.info('## Writing : '+out_pdf)
-        pp.close()
+            if silent == False: log.info('## Writing : '+out_pdf)
+            pp.close()
+        #endelse
+
         out_pdf = out_pdf_default
     #endfor
 
