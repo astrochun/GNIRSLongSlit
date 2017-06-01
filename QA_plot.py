@@ -18,6 +18,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from pylab import subplots_adjust # + on 01/06/2017
 
 import glob
 
@@ -25,6 +26,8 @@ from astropy.table import Table
 from astropy import log
 from astropy.visualization import ZScaleInterval
 zscale = ZScaleInterval()
+from astropy.visualization.mpl_normalize import ImageNormalize # + on 01/06/2017
+
 import aplpy
 
 from astropy.stats import sigma_clipped_stats # + on 10/03/2017
@@ -365,6 +368,8 @@ def QA_combine(path0, targets0, out_pdf='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 31 May 2017
+    Modified by Chun Ly, 1 June 2017
+     - Switch over to pyplot.imshow() since aplpy cannot allow for more customization
     '''
 
     if silent == False: log.info('### Begin QA_combine : '+systime())
@@ -387,45 +392,73 @@ def QA_combine(path0, targets0, out_pdf='', silent=False, verbose=True):
                 log.warn('## '+dpath)
 
             if len(tel_file) == 1 and len(obj_file) == 1:
-                fig = plt.figure(figsize=(11,8))
+                fig, (ax1, ax2) = plt.subplots(1, 2) # Mod on 01/06/2017
 
+            # Mod on 01/06/2017
             if len(tel_file) != 0:
-                t_im = fits.getdata(tel_file[0])
+                t_im, t_hdr = fits.getdata(tel_file[0], header=True)
 
-                gc1 = aplpy.FITSFigure(tel_file[0], figure=fig,
-                                       subplot=[0.075,0.055,0.46,0.94])
+                lam_max = t_hdr['CRVAL2'] + t_hdr['CD2_2']*t_hdr['NAXIS2']
+                extent = [0, t_hdr['NAXIS1'], t_hdr['CRVAL2'], lam_max]
+
                 z1, z2 = zscale.get_limits(t_im)
-                gc1.show_grayscale(invert=False, vmin=z1, vmax=z2)
-                gc1.set_tick_color('black')
-                gc1.set_tick_yspacing('auto')
-                gc1.add_label(0.025, 0.975, tel_file[0], color='red',
-                              relative=True, ha='left', va='top',
-                              weight='medium', size='medium',
-                              bbox=bbox_props)
-                gc1.set_axis_labels(xlabel='X [pixels]', ylabel=r'Wavelength ($\AA$)')
-                gc1.tick_labels.set_xposition('bottom')
-                gc1.tick_labels.set_yposition('left')
+                norm = ImageNormalize(vmin=z2, vmax=z1)
+                ax1.imshow(t_im, cmap='Greys', origin='lower', norm=norm, extent=extent)
+                yticks = np.array(ax1.get_yticks())
+                ax1.set_yticklabels([val/1e4 for val in yticks])
 
+                ax1.get_yaxis().set_tick_params(which='major', direction='in',
+                                                right=True, length=5, width=1)
+                ax1.get_yaxis().set_tick_params(which='minor', direction='in',
+                                                right=True, length=2.5)
+                ax1.get_xaxis().set_tick_params(which='major', direction='in',
+                                                top=True, length=5, width=1)
+                ax1.get_xaxis().set_tick_params(which='minor', direction='in',
+                                                top=True, length=2.5)
+                ax1.minorticks_on()
+
+                ax1.set_xlabel('X [pixels]', fontsize=14)
+                ax1.set_ylabel(r'Wavelength ($\mu$m)', fontsize=14)
+
+                ax1.annotate(tel_file[0], [0.025,0.975], xycoords='axes fraction',
+                             ha='left', va='top', bbox=bbox_props)
+
+            # Mod on 01/06/2017
             if len(obj_file) != 0:
-                o_im = fits.getdata(obj_file[0])
+                o_im, o_hdr = fits.getdata(obj_file[0], header=True)
 
-                gc2 = aplpy.FITSFigure(obj_file[0], figure=fig,
-                                       subplot=[0.535,0.055,0.46,0.94])
+                lam_max = o_hdr['CRVAL2'] + o_hdr['CD2_2']*o_hdr['NAXIS2']
+                extent = [0, o_hdr['NAXIS1'], o_hdr['CRVAL2'], lam_max]
+
                 z1, z2 = zscale.get_limits(o_im)
-                gc2.show_grayscale(invert=False, vmin=z1, vmax=z2)
-                gc2.set_tick_color('black')
-                gc2.set_tick_yspacing('auto')
-                gc2.hide_ytick_labels()
-                #gc2.hide_yaxis_label()
-                gc2.add_label(0.025, 0.975, obj_file[0], color='red',
-                              relative=True, ha='left', va='top',
-                              weight='medium', size='medium',
-                              bbox=bbox_props)
-                gc2.set_axis_labels(xlabel='X [pixels]', ylabel='')
-                #gc2.tick_labels.hide_y() #tick_labels()
+                norm = ImageNormalize(vmin=z2, vmax=z1)
+                ax2.imshow(o_im, cmap='Greys', origin='lower', norm=norm, extent=extent)
+                yticks = np.array(ax2.get_yticks())
+                ax2.set_yticklabels([val/1e4 for val in yticks])
 
-            if len(tel_file) == 1 and len(obj_file) == 1:
-                fig.savefig(pp, format='pdf')
+                ax2.get_yaxis().set_tick_params(which='major', direction='in',
+                                                right=True, length=5, width=1)
+                ax2.get_yaxis().set_tick_params(which='minor', direction='in',
+                                                right=True, length=2.5)
+                ax2.get_xaxis().set_tick_params(which='major', direction='in',
+                                                top=True, length=5, width=1)
+                ax2.get_xaxis().set_tick_params(which='minor', direction='in',
+                                                top=True, length=2.5)
+                ax2.minorticks_on()
+
+                ax2.set_xlabel('X [pixels]', fontsize=14)
+                ax2.set_ylabel('')
+                ax2.set_yticklabels([])
+
+                ax2.annotate(obj_file[0], [0.025,0.975], xycoords='axes fraction',
+                             ha='left', va='top', bbox=bbox_props)
+
+            if len(tel_file) == 1 and len(obj_file) == 1: # Mod on 01/06/2017
+                subplots_adjust(left=0.06, bottom=0.06, top=0.995, right=0.99,
+                                hspace=0.00, wspace=0.00)
+                fig.set_size_inches(11,7.3)
+                # fig.tight_layout()
+                fig.savefig(pp, format='pdf') #, bbox_inches='tight')
 
     if silent == False: log.info('## Writing : '+out_pdf)
     pp.close()
