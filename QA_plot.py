@@ -334,6 +334,104 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
     if silent == False: log.info('### End clean_QA : '+systime())
 #enddef
 
+def QA_combine(path0, targets0, out_pdf='', silent=False, verbose=True):
+    '''
+    Display sky-subtracted and shifted combined images for telluric and
+    science data
+
+    Parameters
+    ----------
+    path0 : str
+      Full path to where output PDF and FITS file are located. Must end
+      with a '/'
+
+    targets0: list or numpy array
+      A list or array of source names available through path0
+
+    out_pdf : str
+      Filename for output PDF. Do NOT include full path.
+      Default: 'QA_combine.pdf'
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+    multi-page PDF plot, 'QA_combine.pdf'
+
+    Notes
+    -----
+    Created by Chun Ly, 31 May 2017
+    '''
+
+    if silent == False: log.info('### Begin QA_combine : '+systime())
+
+    out_pdf = path0+'QA_combine.pdf' if out_pdf == '' else path0+out_pdf
+    pp = PdfPages(out_pdf)
+
+    for target in targets0:
+        t_path = path0+target+'/'
+
+        dir_list, list_path = dir_check.main(t_path, silent=silent,
+                                             verbose=verbose)
+
+        for dpath in list_path:
+            tel_file = glob.glob(dpath+'tell_comb.fits')
+            obj_file = glob.glob(dpath+'obj_comb.fits')
+
+            if len(tel_file) == 0 and len(obj_file) == 0:
+                log.warn('## No tell_comb.fits and obj_comb.fits found in: ')
+                log.warn('## '+dpath)
+
+            if len(tel_file) == 1 and len(obj_file) == 1:
+                fig = plt.figure(figsize=(11,8))
+
+            if len(tel_file) != 0:
+                t_im = fits.getdata(tel_file[0])
+
+                gc1 = aplpy.FITSFigure(tel_file[0], figure=fig,
+                                       subplot=[0.075,0.055,0.46,0.94])
+                z1, z2 = zscale.get_limits(t_im)
+                gc1.show_grayscale(invert=False, vmin=z1, vmax=z2)
+                gc1.set_tick_color('black')
+                gc1.set_tick_yspacing('auto')
+                gc1.add_label(0.025, 0.975, tel_file[0], color='red',
+                              relative=True, ha='left', va='top',
+                              weight='medium', size='medium',
+                              bbox=bbox_props)
+                gc1.set_axis_labels(xlabel='X [pixels]', ylabel=r'Wavelength ($\AA$)')
+                gc1.tick_labels.set_xposition('bottom')
+                gc1.tick_labels.set_yposition('left')
+
+            if len(obj_file) != 0:
+                o_im = fits.getdata(obj_file[0])
+
+                gc2 = aplpy.FITSFigure(obj_file[0], figure=fig,
+                                       subplot=[0.535,0.055,0.46,0.94])
+                z1, z2 = zscale.get_limits(o_im)
+                gc2.show_grayscale(invert=False, vmin=z1, vmax=z2)
+                gc2.set_tick_color('black')
+                gc2.set_tick_yspacing('auto')
+                gc2.hide_ytick_labels()
+                #gc2.hide_yaxis_label()
+                gc2.add_label(0.025, 0.975, obj_file[0], color='red',
+                              relative=True, ha='left', va='top',
+                              weight='medium', size='medium',
+                              bbox=bbox_props)
+                gc2.set_axis_labels(xlabel='X [pixels]', ylabel='')
+                #gc2.tick_labels.hide_y() #tick_labels()
+
+            if len(tel_file) == 1 and len(obj_file) == 1:
+                fig.savefig(pp, format='pdf')
+
+    if silent == False: log.info('## Writing : '+out_pdf)
+    pp.close()
+    if silent == False: log.info('### End QA_combine : '+systime())
+#enddef
+
 def zcalbase_gal_gemini_2017a_raw():
     '''
     Function to run main() on each set of GNIRS 2017A observation set
