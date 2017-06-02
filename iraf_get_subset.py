@@ -66,7 +66,8 @@ def main(path, final_prefix, outfile='', all_lis=[], all_file='',
     if silent == False: log.info('### End main : '+systime())
 #enddef
 
-def check_prefix(final_prefix, input_lis, path='', silent=False, verbose=True):
+def check_prefix(final_prefix, input_lis, list_path='', path='',
+                 silent=False, verbose=True):
     '''
     Check if specific files from an input list exist with given prefix
 
@@ -78,12 +79,15 @@ def check_prefix(final_prefix, input_lis, path='', silent=False, verbose=True):
 
     input_lis : str
       Filename for input list to check ('arc.lis', 'flat.lis', etc.)
-      If full path is included, do not provide [path]
+      If full path is included, do not provide [list_path]
 
-    path : str (Optional)
-      Full path to list if list does not contain full path.
+    list_path : str (Optional)
+      Full path for input_lis of it does not contain full path.
       Must include '/' at the end
 
+    path : str (Optional)
+      Full path to individual files if [input_lis] contents do not contain
+      full path. Must include '/' at the end
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -102,11 +106,14 @@ def check_prefix(final_prefix, input_lis, path='', silent=False, verbose=True):
     Created by Chun Ly, 5 May 2017
     Modified by Chun Ly, 16 May 2017
      - Switch path to an optional keyword
+    Modified by Chun Ly, 2 June 2017
+     - Changed path -> list_path for input_lis
+     - path is now for individual frames from the input_lis
     '''
 
     if silent == False: log.info('### Begin check_prefix : '+systime())
 
-    input_lis0 = path+input_lis
+    input_lis0 = list_path+input_lis
     if silent == False: log.info('### Reading : '+input_lis0)
     files = np.loadtxt(input_lis0, dtype=type(str))
 
