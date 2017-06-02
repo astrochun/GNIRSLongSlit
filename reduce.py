@@ -132,6 +132,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        on arc data
      - Call QA_wave_cal.OH_check() to illustrate wavelength calibration
        on object data
+    Modified by Chun Ly, 2 June 2017
+     - Run nsreduce without skysub for wavelength check using OH skylines
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -348,6 +350,26 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nsreduce on nc sci data')
+
+        # Run nsreduce without skysubtraction for wavelength check with OH
+        # night skylines | + on 01/06/2017
+        obj = np.loadtxt(obj_list, dtype=type(str)) # Mod on 06/05/2017
+        OH_obj_list = rawdir+'obj.OH.lis'
+        if not exists(OH_obj_list):
+            OH_obj_lists = [file0.replace('.fits','.OH.fits') for file0 in obj]
+            if silent == False: log.info('## Writing : '+OH_obj_list)
+            np.savetxt(OH_obj_list, OH_obj_lists, fmt='%s')
+        else:
+            log.warn('## File exists!!! : '+OH_obj)
+
+        do_run = iraf_get_subset.check_prefix('rnc', OH_obj_list)
+        if do_run:
+            iraf.gnirs.nsreduce(rawdir+'nc@'+obj_list, outprefix='',
+                                outimages=rawdir+'rnc@'+OH_obj_list,
+                                fl_nsappwave=no, fl_sky=no, fl_flat=no)
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nsreduce on nc sci OH data')
     #end skysub
 
     # Step 6a : Apply wavelength solution to telluric data | + on 17/05/2017
