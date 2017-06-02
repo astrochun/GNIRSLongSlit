@@ -231,7 +231,7 @@ def quadrant_bias_values(hdu, gc0):
 
 #enddef
 
-def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
+def clean_QA(path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
     '''
     Visually compare raw and cleanir-fixed FITS images
 
@@ -250,6 +250,9 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
     verbose : boolean
       Turns on additional stdout messages. Default: True
 
+    overwrite : boolean
+      Overwrite files if they exists. Default: False
+
     Returns
     -------
     multi-page PDF plot
@@ -267,6 +270,9 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
      - Fix bug with call to dir_check()
      - Change out_pdf default name (include clean suffix)
      - Fix handling of symlink files; Check for False, not True
+    Modified by Chun Ly, 2 June 2017
+     - Added overwrite keyword option to overwrite file. Default is not to
+       overwrite .pdf files
     '''
 
     if silent == False: log.info('### Begin clean_QA : '+systime())
@@ -289,59 +295,63 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True):
         files   = [file for file in files if os.path.islink(file) == False]
         n_files = len(files)
 
-        pp = PdfPages(out_pdf)
+        if overwrite == False and exists(out_pdf):
+            log.warn('## File exists!! Will not overwrite '+out_pdf)
+        else:
+            pp = PdfPages(out_pdf)
 
-        for nn in xrange(n_files):
-            if silent == False: log.info('## Reading : '+files[nn])
-            orig_file = files[nn].replace('cN','N')
+            for nn in xrange(n_files):
+                if silent == False: log.info('## Reading : '+files[nn])
+                orig_file = files[nn].replace('cN','N')
 
-            im1 = fits.getdata(orig_file)
-            im2 = fits.getdata(files[nn])
-            #hdu1 = fits.open(orig_file)
-            #im1  = hdu1[1].data
-            #hdu1[1].header = hdu1[0].header # Copy WCS header over
+                im1 = fits.getdata(orig_file)
+                im2 = fits.getdata(files[nn])
+                #hdu1 = fits.open(orig_file)
+                #im1  = hdu1[1].data
+                #hdu1[1].header = hdu1[0].header # Copy WCS header over
 
-            #hdu2 = fits.open(files[nn])
-            #im2  = hdu2[1].data
-            #hdu2[1].header = hdu2[0].header # Copy WCS header over
+                #hdu2 = fits.open(files[nn])
+                #im2  = hdu2[1].data
+                #hdu2[1].header = hdu2[0].header # Copy WCS header over
 
-            fig = plt.figure(figsize=(16,8))
+                fig = plt.figure(figsize=(16,8))
 
-            gc1 = aplpy.FITSFigure(orig_file, figure=fig,
-                                   subplot=[0.05,0.055,0.47,0.94])
-            z1, z2 = zscale.get_limits(im1)
-            gc1.show_grayscale(invert=True, vmin=z1, vmax=z2)
-            gc1.set_tick_color('black')
-            gc1.set_tick_yspacing('auto')
-            #gc1.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
-            #gc1.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
-            gc1.add_label(0.025, 0.975, orig_file, color='red', relative=True,
-                          ha='left', va='top', weight='medium', size='medium',
-                          bbox=bbox_props)
+                gc1 = aplpy.FITSFigure(orig_file, figure=fig,
+                                       subplot=[0.05,0.055,0.47,0.94])
+                z1, z2 = zscale.get_limits(im1)
+                gc1.show_grayscale(invert=True, vmin=z1, vmax=z2)
+                gc1.set_tick_color('black')
+                gc1.set_tick_yspacing('auto')
+                #gc1.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
+                #gc1.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
+                gc1.add_label(0.025, 0.975, orig_file, color='red',
+                              relative=True, ha='left', va='top',
+                              weight='medium', size='medium', bbox=bbox_props)
 
-            quadrant_bias_values(fits.open(orig_file), gc1) # + on 10/03/2017
+                quadrant_bias_values(fits.open(orig_file), gc1) # + on 10/03/2017
 
-            gc2 = aplpy.FITSFigure(files[nn], figure=fig,
-                                   subplot=[0.525,0.055,0.47,0.94])
-            z1, z2 = zscale.get_limits(im2)
-            gc2.show_grayscale(invert=True, vmin=z1, vmax=z2)
-            gc2.set_tick_color('black')
-            gc2.set_tick_yspacing('auto')
-            gc2.hide_ytick_labels()
-            gc2.hide_yaxis_label()
-            gc2.add_label(0.025, 0.975, files[nn], color='red', relative=True,
-                          ha='left', va='top', weight='medium', size='medium',
-                          bbox=bbox_props)
+                gc2 = aplpy.FITSFigure(files[nn], figure=fig,
+                                       subplot=[0.525,0.055,0.47,0.94])
+                z1, z2 = zscale.get_limits(im2)
+                gc2.show_grayscale(invert=True, vmin=z1, vmax=z2)
+                gc2.set_tick_color('black')
+                gc2.set_tick_yspacing('auto')
+                gc2.hide_ytick_labels()
+                gc2.hide_yaxis_label()
+                gc2.add_label(0.025, 0.975, files[nn], color='red',
+                              relative=True, ha='left', va='top',
+                              weight='medium', size='medium', bbox=bbox_props)
 
-            quadrant_bias_values(fits.open(files[nn]), gc2) # + on 10/03/2017
+                quadrant_bias_values(fits.open(files[nn]), gc2) # + on 10/03/2017
 
-            #gc2.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
-            #gc2.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
+                #gc2.ticks.set_yspacing(1/60.0) # Every 1 arcmin in Dec
+                #gc2.set_tick_labels_format(xformat='hh:mm:ss', yformat='dd:mm')
 
-            fig.savefig(pp, format='pdf')
+                fig.savefig(pp, format='pdf')
 
-        if silent == False: log.info('## Writing : '+out_pdf)
-        pp.close()
+            if silent == False: log.info('## Writing : '+out_pdf)
+            pp.close()
+        #endelse
         out_pdf = out_pdf_default
     #endfor
 
