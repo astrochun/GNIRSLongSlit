@@ -136,6 +136,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Run nsreduce without skysub for wavelength check using OH skylines
      - Fix call to iraf_get_subset.check_prefix()
      - Fix bug: variable name incorrect
+     - Run nsfitcoords and nstransform on un-skysubtracted science data
+       for wavelength check using OH skylines
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -196,6 +198,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     obj_list  = rawdir+'obj.lis'
     sky_list  = rawdir+'sky.lis'
     flatfile  = rawdir+'final_flat.fits'
+    OH_obj_list = rawdir+'obj.OH.lis'
 
     # + on 17/05/2017
     tell_comb = rawdir+'tell_comb.fits'
@@ -356,7 +359,6 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         # Run nsreduce without skysubtraction for wavelength check with OH
         # night skylines | + on 01/06/2017
         obj = np.loadtxt(obj_list, dtype=type(str)) # Mod on 06/05/2017
-        OH_obj_list = rawdir+'obj.OH.lis'
         if not exists(OH_obj_list):
             OH_obj_lists = [file0.replace('.fits','.OH.fits') for file0 in obj]
             if silent == False: log.info('## Writing : '+OH_obj_list)
@@ -421,6 +423,30 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nstransform on frnc science data')
+
+        # Apply wavelength solution to unsubtracted science data
+        # + on 02/06/2017
+        do_run = iraf_get_subset.check_prefix('frnc', OH_obj_list, path=rawdir)
+        if do_run:
+            log.info("## Running nsfitcoords on science OH data")
+            iraf.gnirs.nsfitcoords('rnc@'+OH_obj_list, outprefix='',
+                                   outspectra='frnc@'+OH_obj_list,
+                                   lamp='wrnc'+arcs[0],
+                                   database='database/')
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nsfitcoords on rnc sci OH data')
+
+        # + on 02/06/2017
+        do_run = iraf_get_subset.check_prefix('tfrnc', OH_obj_list, path=rawdir)
+        if do_run:
+            log.info("## Running nstransform on science OH data")
+            iraf.gnirs.nstransform('frnc@'+OH_obj_list, outprefix='',
+                                   outspectra='tfrnc@'+OH_obj_list,
+                                   database='database/')
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nstransform on frnc sci OH data')
 
         iraf.chdir(cdir)
         QA_wave_cal.OH_check(rawdir) # + on 25/05/2017
