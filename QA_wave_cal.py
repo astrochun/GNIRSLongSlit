@@ -165,7 +165,8 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
     if silent == False: log.info('### End arc_check : '+systime())
 #enddef
 
-def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
+def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
+             verbose=True):
 
     '''
     Generate plot illustrating expected location of OH skyline to
@@ -180,6 +181,9 @@ def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
     verbose : boolean
       Turns on additional stdout messages. Default: True
 
+    skysub : boolean
+      Display skysubtracted or un-skysubtracted images. Default: False
+
     Returns
     -------
 
@@ -188,6 +192,9 @@ def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
     Created by Chun Ly, 19 May 2017
     Modified by Chun Ly, 20 May 2017
      - Draw OH night skyline emission on plots
+    Modified by Chun Ly, 2 June 2017
+     - Add skysub keyword option to use either sky-subtracted
+       images or those without skysubtraction (OH skylines more visible)
     '''
 
     if silent == False: log.info('### Begin OH_check : '+systime())
@@ -200,8 +207,11 @@ def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
         OH_lines = OH_data[:,0]
         OH_int   = OH_data[:,1]
 
+    # Mod on 02/06/2017
     if objs == '':
-        obj_list = path + 'obj.lis'
+        obj_list = path + 'obj.lis' if skysub == True else \
+                   path + 'obj.OH.lis'
+
         if silent == False: log.info('### Reading : '+obj_list)
         objs = np.loadtxt(obj_list, dtype=type(str))
 
@@ -217,7 +227,13 @@ def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
         log.warn('### Exiting!!!')
         return
 
-    out_pdf = path+'OH_check.pdf' if out_pdf == '' else path+out_pdf
+    # Mod on 02/06/2017
+    if out_pdf == '':
+        out_pdf = path+'OH_check.pdf' if skysub == True else \
+                  path+'OH_check.raw.pdf'
+    else:
+        out_pdf = path+out_pdf
+
     pp = PdfPages(out_pdf)
 
     for nn in xrange(n_obj):
@@ -238,11 +254,12 @@ def OH_check(path, objs='', out_pdf='', silent=False, verbose=True):
             npix     = hdr0['NAXIS2']
             lamb_max = crval2 + cdelt2*npix
             OH_mark  = np.where((OH_lines >= crval2) & (OH_lines <= lamb_max))[0]
-            OH_mark  = np.where(OH_int >= 0.1*np.max(OH_int[OH_mark]))[0]
+            OH_mark  = np.where(OH_int >= 0.05*np.max(OH_int[OH_mark]))[0]
             line_list = []
             for ll in OH_mark:
                 line_list.append(np.array([[0,700], [OH_lines[ll],OH_lines[ll]]]))
-            gc0.show_lines(line_list, color='blue', alpha=0.5, linewidth=0.5, linestyle='dashed')
+            gc0.show_lines(line_list, color='red', alpha=0.5, linewidth=1.0,
+                           linestyle='dashed')
 
             #subplots_adjust(left=0.095, bottom=0.025, top=0.995, right=0.99)
             str0 = tfrnc_files[nn].replace(path,'')
