@@ -135,6 +135,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 2 June 2017
      - Run nsreduce without skysub for wavelength check using OH skylines
      - Fix call to iraf_get_subset.check_prefix()
+     - Fix bug: variable name incorrect
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -361,7 +362,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             if silent == False: log.info('## Writing : '+OH_obj_list)
             np.savetxt(OH_obj_list, OH_obj_lists, fmt='%s')
         else:
-            log.warn('## File exists!!! : '+OH_obj)
+            log.warn('## File exists!!! : '+OH_obj_list)
 
         do_run = iraf_get_subset.check_prefix('rnc', OH_obj_list, path=rawdir)
         if do_run:
