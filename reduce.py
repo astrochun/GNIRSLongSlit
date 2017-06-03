@@ -134,6 +134,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        on object data
     Modified by Chun Ly, 2 June 2017
      - Run nsreduce without skysub for wavelength check using OH skylines
+     - Fix call to iraf_get_subset.check_prefix()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -270,7 +271,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # + on 04/05/2017 | Mod on 05/05/2017
         # Mod on 06/05/2017
-        do_run = iraf_get_subset.check_prefix('rnc', flats_rev)
+        do_run = iraf_get_subset.check_prefix('rnc', flats_rev, path=rawdir)
         if do_run:
             # Mod on 06/05/2017
             iraf.gnirs.nsreduce(rawdir+'nc@'+flats_rev, outprefix='',
@@ -293,7 +294,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     if do_arcs:
         log.info("## Reducing arc data")
-        do_run = iraf_get_subset.check_prefix('rnc', arc_list)
+        do_run = iraf_get_subset.check_prefix('rnc', arc_list, path=rawdir)
         if do_run:
             # Mod on 06/05/2017
             iraf.gnirs.nsreduce(rawdir+'nc@'+arc_list, outprefix='',
@@ -309,7 +310,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     if wave_cal:
         iraf.chdir(rawdir) # + on 20/05/2017
         log.info("## Performing non-interactive wavelength calibration on arc data")
-        do_run = iraf_get_subset.check_prefix('wrnc', arc_list)
+        do_run = iraf_get_subset.check_prefix('wrnc', arc_list, path=rawdir)
         if do_run:
             # Mod on 06/05/2017
             iraf.gnirs.nswavelength('rnc@'+arc_list, outprefix='',
@@ -328,7 +329,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
     if skysub:
         log.info("## Performing sky subtraction on telluric data")
-        do_run = iraf_get_subset.check_prefix('rnc', tell_list)
+        do_run = iraf_get_subset.check_prefix('rnc', tell_list, path=rawdir)
         if do_run:
             iraf.gnirs.nsreduce(rawdir+'nc@'+tell_list, outprefix='',
                                 outimages=rawdir+'rnc@'+tell_list,
@@ -340,7 +341,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Step 5b : Sky subtract science data | + on 16/05/2017
         log.info("## Performing sky subtraction on science data")
-        do_run = iraf_get_subset.check_prefix('rnc', obj_list)
+        do_run = iraf_get_subset.check_prefix('rnc', obj_list, path=rawdir)
         if do_run:
             iraf.gnirs.nsreduce(rawdir+'nc@'+obj_list, outprefix='',
                                 outimages=rawdir+'rnc@'+obj_list,
@@ -362,7 +363,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             log.warn('## File exists!!! : '+OH_obj)
 
-        do_run = iraf_get_subset.check_prefix('rnc', OH_obj_list)
+        do_run = iraf_get_subset.check_prefix('rnc', OH_obj_list, path=rawdir)
         if do_run:
             iraf.gnirs.nsreduce(rawdir+'nc@'+obj_list, outprefix='',
                                 outimages=rawdir+'rnc@'+OH_obj_list,
@@ -376,7 +377,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     if fitcoords:
         # Telluric data
         iraf.chdir(rawdir)
-        do_run = iraf_get_subset.check_prefix('frnc', tell_list)
+        do_run = iraf_get_subset.check_prefix('frnc', tell_list, path=rawdir)
         if do_run:
             log.info("## Running nsfitcoords on telluric data")
             iraf.gnirs.nsfitcoords('rnc@'+tell_list, outprefix='',
@@ -387,7 +388,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Files exist!!!')
             log.warn('## Will not run nsfitcoords on rnc telluric data')
 
-        do_run = iraf_get_subset.check_prefix('tfrnc', tell_list)
+        do_run = iraf_get_subset.check_prefix('tfrnc', tell_list, path=rawdir)
         if do_run:
             log.info("## Running nstransform on telluric data")
             iraf.gnirs.nstransform('frnc@'+tell_list, outprefix='',
@@ -399,7 +400,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Step 6b : Apply wavelength solution to science data | + on 17/05/2017
         # Science data
-        do_run = iraf_get_subset.check_prefix('frnc', obj_list)
+        do_run = iraf_get_subset.check_prefix('frnc', obj_list, path=rawdir)
         if do_run:
             log.info("## Running nsfitcoords on science data")
             iraf.gnirs.nsfitcoords('rnc@'+obj_list, outprefix='',
@@ -410,7 +411,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Files exist!!!')
             log.warn('## Will not run nsfitcoords on rnc science data')
 
-        do_run = iraf_get_subset.check_prefix('tfrnc', obj_list)
+        do_run = iraf_get_subset.check_prefix('tfrnc', obj_list, path=rawdir)
         if do_run:
             log.info("## Running nstransform on science data")
             iraf.gnirs.nstransform('frnc@'+obj_list, outprefix='',
