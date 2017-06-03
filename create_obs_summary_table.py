@@ -74,6 +74,9 @@ def main(path0, targets, outfile=None, silent=False, verbose=True):
     -----
     Created by Chun Ly, 25 April 2017
     Modified by Chun Ly, 5 May 2017
+     - Handle overwriting file
+    Modified by Chun Ly, 3 June 2017
+     - Bug fix: Check if hdr_info.QA.tbl exists
     '''
     
     if silent == False: log.info('### Begin main : '+systime())
@@ -94,35 +97,52 @@ def main(path0, targets, outfile=None, silent=False, verbose=True):
             Targets.append(txt) #targets[tt])
 
             QA_file = path+'/hdr_info.QA.tbl'
-            QA_tab  = asc.read(QA_file, format='fixed_width_two_line')
+            # Mod on 03/06/2017
+            if not exists(QA_file):
+                log.warn('## File not found! '+QA_file)
 
-            # All science targets
-            idx = [xx for xx in range(len(QA_tab)) if
-                   ('obj' in QA_tab['QA'][xx]) or ('sky' in QA_tab['QA'][xx])]
+                ObsDate.append('N/A')
+                gratwave.append('N/A')
 
-            # Later Mod on 25/04/2017
-            tab_ref = QA_tab[idx][0]
-            t_date  = tab_ref['UT_date'].split('T')[0]
-            exptime = tab_ref['exptime']
+                ObsSet.append('N/A')
+                TotalTime.append('N/A')
+                Airmass.append('N/A')
 
-            ObsDate.append(t_date)
-            gratwave.append(tab_ref['gratwave'])
+                TellStar.append('N/A')
+                TellSet.append('N/A')
+                TellAM.append('N/A')
+            else:
+                QA_tab  = asc.read(QA_file, format='fixed_width_two_line')
 
-            ObsSet.append(str(len(idx))+'x'+str(exptime)+'s')
-            TotalTime.append('%.2f' % (len(idx)*exptime/60.0))
+                # All science targets
+                idx = [xx for xx in range(len(QA_tab)) if
+                       ('obj' in QA_tab['QA'][xx]) or
+                       ('sky' in QA_tab['QA'][xx])]
 
-            AM0 = QA_tab['airmass'][idx]
-            Airmass.append('%.3f-%.3f' % (np.min(AM0),np.max(AM0)))
+                # Later Mod on 25/04/2017
+                tab_ref = QA_tab[idx][0]
+                t_date  = tab_ref['UT_date'].split('T')[0]
+                exptime = tab_ref['exptime']
 
-            t_idx = [xx for xx in range(len(QA_tab)) if
-                     ('telluric' in QA_tab['QA'][xx])]
-            t_names = list(set(QA_tab['object'][t_idx]))
+                ObsDate.append(t_date)
+                gratwave.append(tab_ref['gratwave'])
 
-            telstar, telset, telAM = get_telluric_info(QA_tab, t_idx, t_names)
-            TellStar.append(telstar)
-            TellSet.append(telset)
-            TellAM.append(telAM) # Later + on 25/04/2017
-            cnt += 1
+                ObsSet.append(str(len(idx))+'x'+str(exptime)+'s')
+                TotalTime.append('%.2f' % (len(idx)*exptime/60.0))
+
+                AM0 = QA_tab['airmass'][idx]
+                Airmass.append('%.3f-%.3f' % (np.min(AM0),np.max(AM0)))
+
+                t_idx = [xx for xx in range(len(QA_tab)) if
+                         ('telluric' in QA_tab['QA'][xx])]
+                t_names = list(set(QA_tab['object'][t_idx]))
+
+                telstar, telset, telAM = get_telluric_info(QA_tab, t_idx, t_names)
+                TellStar.append(telstar)
+                TellSet.append(telset)
+                TellAM.append(telAM) # Later + on 25/04/2017
+                cnt += 1
+            #endelse
         #endfor
     #endfor
 
