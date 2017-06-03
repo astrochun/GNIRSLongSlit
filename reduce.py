@@ -138,6 +138,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Fix bug: variable name incorrect
      - Run nsfitcoords and nstransform on un-skysubtracted science data
        for wavelength check using OH skylines
+     - Call QA_wave_cal.OH_check to produce OH_check.raw.pdf with
+       un-skysubtracted science data
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -449,7 +451,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Will not run nstransform on frnc sci OH data')
 
         iraf.chdir(cdir)
-        QA_wave_cal.OH_check(rawdir) # + on 25/05/2017
+        QA_wave_cal.OH_check(rawdir, skysub=False) # + 02/06/2017
+        QA_wave_cal.OH_check(rawdir, skysub=True) # + on 25/05/2017
     #end fitcoords
 
     # Step 7: Combine 2-D spectra | + on 17/05/2017
