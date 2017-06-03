@@ -18,6 +18,7 @@ import glob # + on 26/04/2017
 import numpy as np
 
 import matplotlib.pyplot as plt
+from pylab import subplots_adjust
 
 from astropy.table import Table
 from astropy import log # Mod on 26/04/2017
@@ -42,6 +43,83 @@ import QA_wave_cal # + on 25/05/2017
 co_filename = __file__ # + on 05/05/2017
 
 yes, no = 'yes', 'no' # + on 26/04/2017
+
+def compute_weights(rawdir, out_pdf='', silent=True, verbose=False):
+    '''
+    Uses alignment star to determine weights for each science frame
+
+    Parameters
+    ----------
+    rawdir : str
+      Path to raw files. Must end in a '/'
+
+    out_pdf : str
+      Filename for output PDF. Do NOT include full path
+      Default: 'compute_weights.pdf'
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+
+    Notes
+    -----
+    Created by Chun Ly, 3 June 2017
+    '''
+
+    if silent == False: log.info('### Begin compute_weights : '+systime())
+
+    out_pdf = rawdir+'compute_weights.pdf' if out_pdf == '' else \
+              rawdir+out_pdf
+
+    obj_list  = rawdir+'obj.lis'
+
+    do_run = iraf_get_subset.check_prefix('e', obj_list, path=rawdir)
+    if do_run:
+        iraf.gnirs.nsextract(rawdir+'tfrnc@'+obj_list,
+                             outspectra=rawdir+'e@'+obj_list, nsum=50,
+                             database=rawdir+'database/')
+
+    e_files = glob.glob(rawdir+'eN*fits')
+    n_files = len(e_files)
+
+    weights0 = np.zeros(n_files)
+    median0 = np.zeros(n_files)
+
+    fig, ax = plt.subplots()
+
+    for nn in xrange(n_files):
+        print '## Reading : ', e_files[nn]
+        t_hdu = fits.open(e_files[nn])
+        spec1d = t_hdu['SCI'].data
+        hdr    = t_hdu['SCI'].header
+
+        crval1 = hdr['CRVAL1']
+        cd1_1  = hdr['CD1_1']
+        etime  = t_hdu[0].header['EXPTIME']
+
+        wave = (crval1 + cd1_1*np.arange(hdr['NAXIS1']))/1E4 # Microns
+        cts  = spec1d/etime
+
+        median0[nn] = np.median(cts)
+        ax.plot(wave, cts, label=os.path.basename(e_files[nn]))
+    #endfor
+
+    ax.set_xlabel(r'Wavelength ($\mu$m)', fontsize=16)
+    ax.set_ylabel('Flux (cts/s)', fontsize=16)
+    ax.set_ylim([0.0, max(median0)*1.25])
+    ax.minorticks_on()
+
+    subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99)
+    ax.legend(loc='upper right', fontsize=12, frameon=False)
+    fig.set_size_inches(11,8)
+    fig.savefig(out_pdf)
+    if silent == False: log.info('### End compute_weights : '+systime())
+#enddef
 
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0, skysub=0,
