@@ -86,7 +86,7 @@ def get_offsets(path0, silent=True, verbose=False):
 
 #enddef
 
-def main(path0, silent=False, verbose=True):
+def main(path0, silent=False, verbose=True, overwrite=False):
 
     '''
     main() function to obtain information from FITS header and write to
@@ -132,7 +132,7 @@ def main(path0, silent=False, verbose=True):
 
         # Mod later on 04/03/2017 to not overwrite file
         # Mod on 05/03/2017 to always print out this warning
-        if exists(outfile):
+        if overwrite == False and exists(outfile):
             log.warning('## File exists : '+outfile)
             log.warning('## Not over-writing!!! ')
         else:
@@ -144,7 +144,7 @@ def main(path0, silent=False, verbose=True):
                       'exptime', 'airmass', 'grating', 'gratwave', 'filter1',
                       'filter2', 'slit')
             dtype0 = ('S20', 'S30', 'S25', 'S8', 'S100',
-                      'f8', 'f8', 'S15', 'f8', 'S15', 'S15', 'S20')
+                      'f8', 'f8', 'S15', 'f8', 'S20', 'S20', 'S20')
             tab0 = Table(names=names0, dtype=dtype0)
 
             for nn in xrange(n_files):
