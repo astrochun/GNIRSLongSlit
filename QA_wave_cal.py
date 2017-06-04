@@ -32,7 +32,7 @@ bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
 co_dirname = os.path.dirname(__file__)
 
-def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
+def arc_check(path, arcs=[''], out_pdf='', silent=False, verbose=True):
 
     '''
     Generate plot illustrating wavelength calibration from IRAF database
@@ -81,7 +81,7 @@ def arc_check(path, arcs='', out_pdf='', silent=False, verbose=True):
     
     if silent == False: log.info('### Begin arc_check : '+systime())
 
-    if arcs == '':
+    if arcs[0] == '':
         arc_list = path + 'arc.lis'
         if silent == False: log.info('### Reading : '+arc_list)
         arcs = np.loadtxt(arc_list, dtype=type(str))
