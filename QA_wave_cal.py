@@ -127,8 +127,15 @@ def arc_check(path, arcs=[''], out_pdf='', silent=False, verbose=True):
                 temp1 = temp1.split(' ')
                 temp1 = [val for val in temp1 if val != '']
                 y_val[cc,rr]  = np.float(temp1[1])
-                l_val[cc,rr]  = np.float(temp1[2])
-                l_val0[cc,rr] = np.float(temp1[3])
+                try:
+                    l_val[cc,rr]  = np.float(temp1[2])
+                except ValueError:
+                    pass
+
+                try:
+                    l_val0[cc,rr] = np.float(temp1[3])
+                except ValueError:
+                    pass
             #endfor
             x_temp = np.repeat(x_cols[cc],n_features[cc])
             y_temp = y_val[cc,0:n_features[cc]]
