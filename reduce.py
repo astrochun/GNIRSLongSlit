@@ -399,7 +399,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             # Mod on 06/05/2017
             iraf.gnirs.nswavelength('rnc@'+arc_list, outprefix='',
                                     outspectra='wrnc@'+arc_list,
-                                    coordlist="gnirs$data/lowresargon.dat",
+                                    coordlist="gnirs$data/argon.dat",
                                     database='database/',
                                     fl_inter=no, cradius=20, threshold=50.0,
                                     order=2)
