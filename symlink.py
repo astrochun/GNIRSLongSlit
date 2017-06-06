@@ -55,12 +55,14 @@ def get_files(path0, silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 22 March 2017
+    Modified by Chun Ly, 5 June 2017
+     - Fix minor bug: infile -> infile0
     '''
 
     if silent == False: log.info('### Begin get_files : '+systime())
 
     infile0 = path0+'all.lis'
-    if not exists(infile):
+    if not exists(infile0):
         log.warn('### File does not exists!!! : '+infile0)
         log.warn('### EXITING!!!')
         return
