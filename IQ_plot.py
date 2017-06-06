@@ -112,8 +112,8 @@ def compute_fwhm(im0):
 
     return bins+bsize/2, fwhm0, stack0_shift
 
-def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True,
-         overwrite=False):
+def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
+         verbose=True, overwrite=False):
     '''
     main() function to compute natural seeing (image quality) from bright
     alignment star
@@ -159,6 +159,8 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True,
      - Added overwrite keyword option to overwrite file. Default is not to
        overwrite .pdf files
      - Bug found: No longer need sky.lis since obj.lis includes all
+    Modified by Chun Ly, 6 June 2017
+     - Add skysub keyword option to operate on sky-subtracted images
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -187,7 +189,14 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True,
 
         n_files = len(files)
 
-        out_pdf = path+'IQ_plot.pdf' if out_pdf == '' else path+out_pdf
+        # Mod on 06/06/2017
+        if skysub == True:
+            files = ['rnc'+file0 for file0 in files]
+            out_pdf = path+'IQ_plot.skysub.pdf' if out_pdf == '' else \
+                      path+out_pdf
+        else:
+            out_pdf = path+'IQ_plot.raw.pdf' if out_pdf == '' else \
+                      path+out_pdf
 
         if overwrite == False and exists(out_pdf):
             log.warn('## File exists!! Will not overwrite '+out_pdf)
@@ -197,7 +206,11 @@ def main(path0='', out_pdf='', check_quality=True, silent=False, verbose=True,
             for nn in xrange(n_files):
                 if silent == False: log.info('## Reading : '+files[nn])
                 hdr0 = fits.getheader(path+files[nn])
-                im0  = fits.getdata(path+files[nn])
+                # Mod on 06/06/2017
+                if skysub == False:
+                    im0 = fits.getdata(path+files[nn])
+                else:
+                    im0 = fits.getdata(path+files[nn], 'sci')
 
                 bins, fwhm0, stack0_shift = compute_fwhm(im0)
 
