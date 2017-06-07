@@ -222,6 +222,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Handle flat-fielding for X-band data (no flat applied)
     Modified by Chun Ly, 7 June 2017
      - No flatfielding for telluric X-band data (for consistency)
+     - Fix minor bug: Check for cN*fits file in rawdir
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -265,7 +266,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     os.system('cp -a '+co_filename+' '+rawdir+reduce_file)
 
     # Check for cleanir files first | Later + on 26/04/2017
-    c_files = glob.glob('cN*fits') # Mod on 06/05/2017
+    c_files = glob.glob(rawdir+'cN*fits') # Mod on 06/05/2017, 07/06/2017
     if len(c_files) == 0:
         log.warn("## No cleanir files (cN*fits) available")
         log.warn("## Need to execute symlink.run()") # + on 05/05/2017
