@@ -218,6 +218,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        for wavelength check using OH skylines
      - Call QA_wave_cal.OH_check to produce OH_check.raw.pdf with
        un-skysubtracted science data
+    Modified by Chun Ly, 6 June 2017
+     - Handle flat-fielding for X-band data (no flat applied)
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -427,11 +429,22 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         log.info("## Performing sky subtraction on science data")
         do_run = iraf_get_subset.check_prefix('rnc', obj_list, path=rawdir)
         if do_run:
+            # Mod on 06/06/2017
+            obj0    = np.loadtxt(obj_list, dtype=type(str))
+            obj_hdr = fits.getheader(rawdir+'nc'+obj0[0])
+            if obj_hdr['FILTER2'] == 'X_G0518':
+                log.warn('## X-band data!! Will not use flat!')
+                fl_flat = no
+                flatimage = ''
+            else:
+                fl_flat = yes
+                flatimage = flatfile
+
             iraf.gnirs.nsreduce(rawdir+'nc@'+obj_list, outprefix='',
                                 outimages=rawdir+'rnc@'+obj_list,
                                 fl_nsappwave=no, fl_sky=yes,
                                 skyimages=rawdir+'nc@'+sky_list,
-                                fl_flat=yes, flatimage=flatfile)
+                                fl_flat=fl_flat, flatimage=flatimage)
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nsreduce on nc sci data')
