@@ -230,6 +230,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 15 June 2017
      - Run nsfitcoords and nstransform on arc data to examine wavelength
        calibration
+    Modified by Chun Ly, 16 June 2017
+     - Call QA_wave_cal.arc_check2 to produce arc_check2.pdf with
+       transformed arc data
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -455,7 +458,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nstransform on frnc arc data')
+
         iraf.chdir(cdir)
+        QA_wave_cal.arc_check2(rawdir, arcs=arcs) # + on 25/05/2017
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
     if skysub:
