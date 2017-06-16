@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 from astropy.io import fits
+from astropy.io import ascii as asc # + on 16/06/2017
 from astropy import log
 
 # + on 19/05/2017
@@ -282,4 +283,102 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
     if silent == False: log.info('### Writing : '+out_pdf)
     pp.close()
     if silent == False: log.info('### End OH_check : '+systime())
+#enddef
+
+def arc_check2(path, arcs='', out_pdf='', silent=False, verbose=True):
+
+    '''
+    Generate plot illustrating expected location of arc lines to
+    check wavelength calibration
+
+    Parameters
+    ----------
+    path : str
+      Full path to where output PDF and FITS file are located. Must end
+      with a '/'
+
+    arcs : str or list (Optional)
+      List of raw filenames for the arc data (e.g., 'N20170101S0111.fits')
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+
+    Notes
+    -----
+    Created by Chun Ly, 16 June 2017
+     - Started as a copy of OH_check
+    '''
+
+    if silent == False: log.info('### Begin arc_check2 : '+systime())
+
+    arc_file = co_dirname+'/argon.dat'
+    if exists(arc_file):
+        if silent == False: log.info('### Reading : '+arc_file)
+        arc_data   = asc.read(arc_file, format='commented_header')
+        arc_lines  = arc_data['Line'].data
+        arc_source = arc_data['Source'].data
+
+    if arcs == '':
+        arcs_list = path + 'arc.lis'
+
+        if silent == False: log.info('### Reading : '+arcs_list)
+        arcs = np.loadtxt(arcs_list, dtype=type(str))
+
+    n_arcs = len(arcs)
+
+    tfrnc_files = [path+'tfrnc'+file0 for file0 in arcs]
+
+    chk = [file0 for file0 in tfrnc_files if exists(file0) == True]
+    if len(chk) == 0:
+        log.warn('### Files not found!!!')
+        log.warn('### '+', '.join(file0))
+        log.warn('### Exiting!!!')
+        return
+
+    out_pdf = path+'arc_check2.pdf' if out_pdf == '' else path+out_pdf
+
+    pp = PdfPages(out_pdf)
+
+    for nn in xrange(n_arcs):
+        if exists(tfrnc_files[nn]): # Mod on 20/05/2017
+            hdu0 = fits.open(tfrnc_files[nn])
+            im0  = hdu0['SCI'].data
+
+            gc0 = aplpy.FITSFigure(hdu0, hdu='SCI', figsize=(7.65,10.5))
+
+            z1, z2 = zscale.get_limits(im0)
+            gc0.show_grayscale(invert=True, vmin=z1, vmax=z2)
+            gc0.set_tick_color('black')
+
+            # + on 20/05/2017
+            hdr0     = hdu0['SCI'].header
+            crval2   = hdr0['CRVAL2']
+            cdelt2   = hdr0['CDELT2']
+            npix     = hdr0['NAXIS2']
+            lamb_max = crval2 + cdelt2*npix
+            arc_mark = np.where((arc_lines >= crval2) & (arc_lines <= lamb_max))[0]
+            line_list = []
+            for ll in arc_mark:
+                line_list.append(np.array([[0,700], [arc_lines[ll],arc_lines[ll]]]))
+            gc0.show_lines(line_list, color='red', alpha=0.5, linewidth=1.0,
+                           linestyle='dashed')
+
+            str0 = tfrnc_files[nn].replace(path,'')
+            gc0.add_label(0.025, 0.975, str0, color='red', relative=True,
+                          ha='left', va='top', weight='medium', fontsize=14,
+                          bbox=bbox_props)
+            gc0.set_axis_labels(xlabel='X [pixels]', ylabel=r'Wavelength ($\AA$)')
+            gc0.savefig(pp, format='pdf')
+        #endif
+    #endfor
+
+    if silent == False: log.info('### Writing : '+out_pdf)
+    pp.close()
+    if silent == False: log.info('### End arc_check2 : '+systime())
 #enddef
