@@ -227,6 +227,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Fix minor bug: Check for cN*fits file in rawdir
     Modified by Chun Ly, 12 June 2017
      - Pass initial guesses for CRVAL,CDELT,CRPIX to nswavelength
+    Modified by Chun Ly, 15 June 2017
+     - Run nsfitcoords and nstransform on arc data to examine wavelength
+       calibration
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -429,6 +432,30 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         iraf.chdir(cdir)
 
         QA_wave_cal.arc_check(rawdir, arcs=arcs) # + on 25/05/2017
+
+        # Transform arc data to illustrate expected location of arc lines |  + on 15/06/2017
+        iraf.chdir(rawdir)
+        do_run = iraf_get_subset.check_prefix('frnc', arc_list, path=rawdir)
+        if do_run:
+            log.info("## Running nsfitcoords on arc data")
+            iraf.gnirs.nsfitcoords('rnc@'+arc_list, outprefix='',
+                                   outspectra='frnc@'+arc_list,
+                                   lamp='wrnc'+arcs[0],
+                                   database='database/')
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nsfitcoords on rnc arc data')
+
+        do_run = iraf_get_subset.check_prefix('tfrnc', arc_list, path=rawdir)
+        if do_run:
+            log.info("## Running nstransform on arc data")
+            iraf.gnirs.nstransform('frnc@'+arc_list, outprefix='',
+                                   outspectra='tfrnc@'+arc_list,
+                                   database='database/')
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nstransform on frnc arc data')
+        iraf.chdir(cdir)
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
     if skysub:
