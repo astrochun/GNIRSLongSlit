@@ -23,6 +23,7 @@ from pylab import subplots_adjust
 from astropy.table import Table
 from astropy import log # Mod on 26/04/2017
 
+from astropy.stats import sigma_clipped_stats # + on 16/06/2017
 from pyraf import iraf
 
 iraf.gemini(_doprint=0)
@@ -121,6 +122,60 @@ def compute_weights(rawdir, out_pdf='', silent=True, verbose=False):
     fig.set_size_inches(11,8)
     fig.savefig(out_pdf)
     if silent == False: log.info('### End compute_weights : '+systime())
+#enddef
+
+def normalize_x_flat(flatfile, out_pdf='', silent=True, verbose=False):
+    '''
+    Fix weird flats (broad dip) for X-band flats
+
+    Parameters
+    ----------
+    flatfile : str
+      Filename of final flat. Must provide full path
+
+    silent : boolean
+      Turns off stdout messages. Default: True
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: False
+
+    Returns
+    -------
+    PDF plot. Default: 'normalized_x_flat.pdf'
+
+    Notes
+    -----
+    Created by Chun Ly, 16 June 2017
+    '''
+
+    if silent == False: log.info('### Begin normalize_x_flat : '+systime())
+
+    path0 = os.path.dirname(flatfile)+'/'
+
+    if silent == False: log.info('### Reading : '+flatfile)
+    hdu0 = fits.open(flatfile)
+    im0  = hdu0['SCI'].data
+
+    fig, ax = plt.subplots()
+
+    mean, median, std = sigma_clipped_stats(im0, sigma=2, iters=10, axis=0)
+    ax.plot(mean,       'b--', label='mean')
+    ax.plot(median,     'k--', label='median')
+    ax.plot(median+std, 'g:', label=r'$\sigma$')
+    ax.plot(median-std, 'g:')
+    ax.set_xlabel('X [pixels]')
+    ax.set_ylabel('Normalized value')
+    ax.minorticks_on()
+    ax.set_xlim([0,700])
+    ax.legend(loc='upper right', frameon=False)
+    subplots_adjust(left=0.1, right=0.975, top=0.99, bottom=0.1)
+    if out_pdf == '': out_pdf = path0 + 'normalize_x_flat.pdf'
+
+    if silent == False: log.info('### Writing : '+out_pdf)
+    fig.savefig(out_pdf)
+
+    if silent == False: log.info('### End normalize_x_flat : '+systime())
+
 #enddef
 
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
