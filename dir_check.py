@@ -52,6 +52,8 @@ def main(path0, silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 23 March 2017
+    Modified by Chun Ly, 18 June 2017
+     - Change dir_list output if no directories is available
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -70,6 +72,7 @@ def main(path0, silent=False, verbose=True):
     if len(dir_list) == 0:
         if silent == False:
             log.info('## No dir found')
+        dir_list = [''] # Mod on 18/07/2017
         list_path = [path0]
     else:
         if silent == False:
