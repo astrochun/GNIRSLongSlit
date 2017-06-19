@@ -63,6 +63,8 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
     Modified by Chun Ly, 30 May 2017
      - Added overwrite option. Default is to not overwrite .sh files
      - Fix bug when only one file is found
+    Modified by Chun Ly, 18 June 2017
+     - Fix to work with no date directory
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -86,7 +88,7 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
             out_script0 = path+'run_cleanir.sh' if out_script == '' \
                           else out_script
 
-            if len(dir_list) != 0:
+            if date != '': # Mod on 18/06/2017
                 out_script0 = out_script0.replace('.sh', '.'+date+'.sh')
 
             # Mod on 30/05/2017
