@@ -203,6 +203,8 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
     Modified by Chun Ly, 2 June 2017
      - Add skysub keyword option to use either sky-subtracted
        images or those without skysubtraction (OH skylines more visible)
+    Modified by Chun Ly, 26 June 2017
+     - Plot more OH skylines (change threshold for OH_mark)
     '''
 
     if silent == False: log.info('### Begin OH_check : '+systime())
@@ -262,7 +264,8 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
             npix     = hdr0['NAXIS2']
             lamb_max = crval2 + cdelt2*npix
             OH_mark  = np.where((OH_lines >= crval2) & (OH_lines <= lamb_max))[0]
-            OH_mark  = np.where(OH_int >= 0.05*np.max(OH_int[OH_mark]))[0]
+            # Mod on 26/06/2017
+            OH_mark  = np.where(OH_int >= 0.005*np.max(OH_int[OH_mark]))[0]
             line_list = []
             for ll in OH_mark:
                 line_list.append(np.array([[0,700], [OH_lines[ll],OH_lines[ll]]]))
