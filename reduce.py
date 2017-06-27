@@ -288,6 +288,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 16 June 2017
      - Call QA_wave_cal.arc_check2 to produce arc_check2.pdf with
        transformed arc data
+    Modified by Chun Ly, 26 June 2017
+     - Change sign for CDELT
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -471,7 +473,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             crpix   = n_sp_pix / 2.0
             crval   = arc_hdr['gratwave'] * 1e4 # in Angstroms
             if arc_hdr['FILTER2'] == 'X_G0518':
-                cdelt = 0.094*1e4/n_sp_pix
+                cdelt = -0.094*1e4/n_sp_pix
             if arc_hdr['FILTER2'] == 'J_G0517':
                 cdelt = 0.113*1e4/n_sp_pix
             log.info('## CRVAL : %.1f ' % crval)
