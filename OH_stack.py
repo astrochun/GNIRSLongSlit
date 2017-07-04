@@ -138,3 +138,57 @@ def transform(rawdir, silent=False, verbose=False):
     iraf.chdir(cdir)
 #enddef
 
+def plot_spec(rawdir, out_pdf='', silent=False, verbose=False):
+
+    '''
+    Plot median spectrum of OH skylines
+
+    Parameters
+    ----------
+    rawdir : str
+      Path to raw files. Must end in a '/'
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+    Produces 'OH_spec.pdf'
+
+    Notes
+    -----
+    Created by Chun Ly, 4 July 2017
+    '''
+
+    out_pdf = rawdir+'OH_spec.pdf' if out_pdf == '' else rawdir+out_pdf
+
+    im0, hdr = fits.getdata(rawdir+'tfOH_stack.fits', extname='SCI',
+                            header=True)
+
+    OH_med0 = np.median(im0, axis=1)
+
+    crval2 = hdr['CRVAL2']
+    cd2_2  = hdr['CD2_2']
+    crpix  = hdr['CRPIX2']
+
+    x0  = crval2 + cd2_2*np.arange(len(OH_med0))
+    x0 /= 1e4 # In microns
+    fig, ax = plt.subplots()
+    ax.plot(x0, OH_med0/max(OH_med0), 'k-', label='OH_stack')
+
+    ax.set_xlabel(r'Wavelength ($\mu$m)', fontsize=16)
+    ax.set_ylabel('Normalized Flux', fontsize=16)
+    ax.set_ylim([0.0, 1.10])
+    ax.minorticks_on()
+    ax.tick_params(labelsize=14)
+
+    subplots_adjust(left=0.07, right=0.99, bottom=0.07, top=0.99)
+    ax.legend(loc='upper right', fontsize=14, frameon=False)
+    fig.set_size_inches(11,8)
+
+    fig.savefig(out_pdf)
+#enddef
+
