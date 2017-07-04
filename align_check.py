@@ -133,6 +133,8 @@ def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi):
     Created by Chun Ly, 5 April 2017
     Modified by Chun Ly, 6 April 2017
      - Determine how far source is from slit center
+    Modified by Chun Ly, 3 July 2017
+     - Fix ValueError with interp1d
     '''
     sigG = 3.0
     max0 = np.nanmax(im0)
@@ -156,6 +158,7 @@ def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi):
         ini_guess = (max0, x_cen, y_cen, sigG, sigG, 0.0, 0.0)
         bounds = ((     0, -x_sz0, -y_sz0,    0,    0,       0, 0),
                   (np.inf,  x_sz0,  y_sz0, 10.0, 10.0, 2*np.pi, np.inf))
+
         popt, pcov = opt.curve_fit(gauss2d, (gx, gy), im0_re, ini_guess,
                                    bounds=bounds)
 
@@ -163,8 +166,10 @@ def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi):
         FWHMy = popt[4] * f_s * pscale
 
         # Determine how off from slit center | + on 06/04/2017
-        f_lo = interp1d(c_slit_x0, c_slit_y0_lo)
-        f_hi = interp1d(c_slit_x0, c_slit_y0_hi)
+        # Mod on 03/07/2017 to handle ValueError problem
+        f_lo = interp1d(c_slit_x0, c_slit_y0_lo, bounds_error=False)
+        f_hi = interp1d(c_slit_x0, c_slit_y0_hi, bounds_error=False)
+
         s_lo = f_lo(popt[1])-y_sz0
         s_hi = f_hi(popt[1])-y_sz0
         slit_off = (popt[2] - (s_lo+s_hi)/2.0) * pscale
