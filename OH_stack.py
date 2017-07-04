@@ -117,7 +117,7 @@ def transform(rawdir, silent=False, verbose=False):
 
     Returns
     -------
-    2-D image containing OH skyline called 'OH_stack.fits'
+    2-D image with transformation called 'fOH_stack.fits' and 'tfOH_stack.fits'
 
     Notes
     -----
