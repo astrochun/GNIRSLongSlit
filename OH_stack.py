@@ -18,7 +18,22 @@ import numpy as np
 
 import glob
 
+# + on 04/07/2017
+from matplotlib import pyplot as plt
+from pylab import subplots_adjust
+
 from astropy import log
+
+# + on 04/07/2017
+from pyraf import iraf #from reduce import iraf
+iraf.gemini(_doprint=0)
+iraf.gemini.gnirs(_doprint=0)
+
+log.info("Unlearning tasks")
+iraf.gemini.unlearn()
+iraf.gemini.gemtools.unlearn()
+iraf.gemini.gnirs.unlearn()
+iraf.gemini.nsheader('gnirs')
 
 def run(rawdir, silent=False, verbose=False):
 
@@ -83,5 +98,43 @@ def run(rawdir, silent=False, verbose=False):
     hdu0.writeto(outfile, output_verify='ignore', overwrite=True)
 
     if silent == False: log.info('### End run : '+systime())
+#enddef
+
+def transform(rawdir, silent=False, verbose=False):
+    '''
+    Transform OH_stack 2-D FITS image for wavelength calibration checks
+
+    Parameters
+    ----------
+    rawdir : str
+      Path to raw files. Must end in a '/'
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+    2-D image containing OH skyline called 'OH_stack.fits'
+
+    Notes
+    -----
+    Created by Chun Ly, 4 July 2017
+    '''
+
+    cdir = os.getcwd()+'/' # + on 06/05/2017
+
+    iraf.chdir(rawdir)
+    log.info("## Running nsfitcoords on OH_stack")
+    iraf.gnirs.nsfitcoords('wOH_stack.fits', outprefix='',
+                           outspectra='fOH_stack.fits',
+                           lamp='wOH_stack.fits', database='database_OH/')
+
+    iraf.gnirs.nstransform('fOH_stack.fits', outprefix='',
+                           outspectra='tfOH_stack.fits',
+                           database='database_OH/')
+    iraf.chdir(cdir)
 #enddef
 
