@@ -26,6 +26,9 @@ from astropy import log
 
 # + on 04/07/2017
 from math import pi
+from IQ_plot import gauss1d
+from scipy.optimize import curve_fit
+#from Zcalbase_gal.observing.locate_em_lines import gaussian_R
 
 # + on 04/07/2017
 from pyraf import iraf #from reduce import iraf
@@ -37,6 +40,8 @@ iraf.gemini.unlearn()
 iraf.gemini.gemtools.unlearn()
 iraf.gemini.gnirs.unlearn()
 iraf.gemini.nsheader('gnirs')
+
+co_dirname = os.path.dirname(__file__)
 
 def gaussian(x, mu, sig):
     # + on 04/07/2017
@@ -199,6 +204,7 @@ def plot_spec(rawdir, out_pdf='', silent=False, verbose=False):
     Notes
     -----
     Created by Chun Ly, 4 July 2017
+     - Overlay Rousselot (2000) model spectrum
     '''
 
     out_pdf = rawdir+'OH_spec.pdf' if out_pdf == '' else rawdir+out_pdf
@@ -214,8 +220,38 @@ def plot_spec(rawdir, out_pdf='', silent=False, verbose=False):
 
     x0  = crval2 + cd2_2*np.arange(len(OH_med0))
     x0 /= 1e4 # In microns
+    y0  = OH_med0/max(OH_med0)
+
     fig, ax = plt.subplots()
-    ax.plot(x0, OH_med0/max(OH_med0), 'k-', label='OH_stack')
+
+    OH_file = co_dirname+'/rousselot2000.dat'
+    if exists(OH_file):
+        if silent == False: log.info('### Reading : '+OH_file)
+        OH_data  = np.loadtxt(OH_file)
+        OH_lines = OH_data[:,0] / 1E4
+        OH_int   = OH_data[:,1]
+
+        i_max = np.where(OH_med0 == max(OH_med0))[0]
+        l_max = x0[i_max[0]]
+        p0 = [0.0, max(y0), l_max, 2.0/1e4]
+        popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
+        fwhm   = popt[3]*2*np.sqrt(2*np.log(2))
+        R_spec = l_max / fwhm
+
+        OH_spec_mod = np.zeros(len(x0))
+        in_rge = np.where((OH_lines >= x0[0]) & (OH_lines <= x0[-1]))[0]
+        for ii in range(len(in_rge)):
+            idx = in_rge[ii]
+            #ax.plot(np.repeat(OH_lines[in_rge[ii]],2), [0,1.1], 'r--')
+            temp = OH_int[idx] * gaussian_R(x0, OH_lines[idx], R_spec)
+            OH_spec_mod += temp
+
+        ax.plot(x0, y0, 'k-', label='OH_stack')
+
+        OH_spec_mod /= np.max(OH_spec_mod)
+        ax.plot(x0, OH_spec_mod, 'r--', alpha=0.75,
+                label='OH model (Rousselot 2000)')
+
 
     ax.set_xlabel(r'Wavelength ($\mu$m)', fontsize=16)
     ax.set_ylabel('Normalized Flux', fontsize=16)
