@@ -124,9 +124,9 @@ def compute_weights(rawdir, out_pdf='', silent=True, verbose=False):
     if silent == False: log.info('### End compute_weights : '+systime())
 #enddef
 
-def normalize_x_flat(flatfile, out_pdf='', silent=True, verbose=False):
+def normalize_flat(flatfile, out_pdf='', silent=True, verbose=False):
     '''
-    Fix weird flats (broad dip) for X-band flats
+    Plot up flat average and fix weird flats (broad dip)
 
     Parameters
     ----------
@@ -141,14 +141,14 @@ def normalize_x_flat(flatfile, out_pdf='', silent=True, verbose=False):
 
     Returns
     -------
-    PDF plot. Default: 'normalized_x_flat.pdf'
+    PDF plot. Default: 'normalized_flat.pdf'
 
     Notes
     -----
     Created by Chun Ly, 16 June 2017
     '''
 
-    if silent == False: log.info('### Begin normalize_x_flat : '+systime())
+    if silent == False: log.info('### Begin normalize_flat : '+systime())
 
     path0 = os.path.dirname(flatfile)+'/'
 
@@ -169,12 +169,12 @@ def normalize_x_flat(flatfile, out_pdf='', silent=True, verbose=False):
     ax.set_xlim([0,700])
     ax.legend(loc='upper right', frameon=False)
     subplots_adjust(left=0.1, right=0.975, top=0.99, bottom=0.1)
-    if out_pdf == '': out_pdf = path0 + 'normalize_x_flat.pdf'
+    if out_pdf == '': out_pdf = path0 + 'normalize_flat.pdf'
 
     if silent == False: log.info('### Writing : '+out_pdf)
     fig.savefig(out_pdf)
 
-    if silent == False: log.info('### End normalize_x_flat : '+systime())
+    if silent == False: log.info('### End normalize_flat : '+systime())
 
 #enddef
 
