@@ -290,6 +290,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        transformed arc data
     Modified by Chun Ly, 26 June 2017
      - Change sign for CDELT
+    Modified by Chun Ly, 11 July 2017
+     - Call normalize_flat()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -443,6 +445,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             log.warn('## File exists!!! : '+flatfile)
             log.warn('## Will not run nsflat')
+
+        # Generate normalized flat plot | + on 11/07/2017
+        normalize_flat(flatfile)
     #end do_flat
 
     # Step 3 : Reduce arcs | + on 05/05/2017
