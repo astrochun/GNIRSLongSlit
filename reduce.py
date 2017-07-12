@@ -292,6 +292,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Change sign for CDELT
     Modified by Chun Ly, 11 July 2017
      - Call normalize_flat()
+     - Logging information
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -315,6 +316,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         prepare, do_flat, do_arcs = 1, 1, 1
         wave_cals, skysub = 1, 1
         extract, combine, fitcoords = 1, 1, 1
+
+    # + on 11/07/2017
+    log.info('prepare = %i  do_flat   = %i' % (prepare, do_flat))
+    log.info('do_arcs = %i  wave_cal  = %i' % (do_arcs, wave_cal))
+    log.info('skysub  = %i  fitcoords = %i' % (skysub, fitcoords))
+    log.info('combine = %i  extract   = %i' % (combine, extract))
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
