@@ -40,6 +40,7 @@ iraf.set(stdimage="imt4096")
 import iraf_get_subset # + on 26/04/2017
 import file_handling # + on 07/05/2017
 import QA_wave_cal # + on 25/05/2017
+import OH_stack # + on 13/07/2017
 
 co_filename = __file__ # + on 05/05/2017
 
@@ -294,6 +295,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call normalize_flat()
      - Logging information
      - Minor bug: wave_cals -> wave_cal
+    Modified by Chun Ly, 13 July 2017
+     - Add call to OH_stack.run() in wave_cal to generate stacked OH data
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -532,6 +535,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         iraf.chdir(cdir)
         QA_wave_cal.arc_check2(rawdir, arcs=arcs) # + on 25/05/2017
+
+        # Wavelength calibration with OH skylines
+        # + on 13/07/2017
+        log.info("## Performing non-interactive wavelength calibration on OH data")
+        OH_stack.run(rawdir)
+    #end wave_cal
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
     if skysub:
