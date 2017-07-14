@@ -281,7 +281,6 @@ def plot_spec(rawdir, out_pdf='', silent=False, verbose=False):
 
     fig, ax = plt.subplots()
 
-    OH_file = co_dirname+'/rousselot2000.dat'
     if exists(OH_file):
         if silent == False: log.info('### Reading : '+OH_file)
         OH_data  = np.loadtxt(OH_file)
