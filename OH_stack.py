@@ -32,6 +32,7 @@ from scipy.optimize import curve_fit
 
 # + on 04/07/2017
 from pyraf import iraf #from reduce import iraf
+
 iraf.gemini(_doprint=0)
 iraf.gemini.gnirs(_doprint=0)
 
@@ -41,7 +42,10 @@ iraf.gemini.gemtools.unlearn()
 iraf.gemini.gnirs.unlearn()
 iraf.gemini.nsheader('gnirs')
 
+n_sp_pix = 1022 # + on 13/07/2017
+
 co_dirname = os.path.dirname(__file__)
+OH_file = co_dirname+'/rousselot2000.dat'
 
 def gaussian(x, mu, sig):
     # + on 04/07/2017
@@ -143,6 +147,58 @@ def run(rawdir, silent=False, verbose=False):
     if silent == False: log.info('### End run : '+systime())
 #enddef
 
+def wave_cal(rawdir, silent=False, verbose=False):
+    '''
+    Run gnirs.nswavelength on OH_stack 2-D FITS image for wavelength
+    calibration
+
+    Parameters
+    ----------
+    rawdir : str
+      Path to raw files. Must end in a '/'
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+    2-D image with transformation called 'fOH_stack.fits' and 'tfOH_stack.fits'
+
+    Notes
+    -----
+    Created by Chun Ly, 13 July 2017
+    '''
+
+    iraf.chdir(rawdir)
+
+    timestamp = systime().replace(':','.')
+    logfile   = rawdir+'gnirs_'+timestamp+'.log'
+    iraf.gemini.gnirs.logfile = logfile
+
+    log.info("## Raw data is located in : %s" % rawdir)
+
+    hdr0  = fits.getheader('OH_stack.fits')
+    crpix = n_sp_pix / 2.0
+    crval = hdr0['gratwave'] * 1e4 # in Angstroms
+    if hdr0['FILTER2'] == 'X_G0518':
+        cdelt = -0.094*1e4/n_sp_pix
+    if hdr0['FILTER2'] == 'J_G0517':
+        cdelt = -0.113*1e4/n_sp_pix
+    if silent == False:
+        log.info('## CRVAL : %.1f ' % crval)
+        log.info('## CDELT : %.1f  CRPIX : %.1f' % (cdelt,crpix))
+
+    iraf.gnirs.nswavelength('OH_stack.fits', outprefix='',
+                            outspectra='wOH_stack.fits',
+                            crval=crval, cdelt=cdelt, crpix=crpix,
+                            coordlist=OH_file, database='database_OH/',
+                            fl_inter='no', cradius=20, threshold=25.0,
+                            order=4)
+#enddef
+
 def transform(rawdir, silent=False, verbose=False):
     '''
     Transform OH_stack 2-D FITS image for wavelength calibration checks
@@ -180,6 +236,7 @@ def transform(rawdir, silent=False, verbose=False):
                            database='database_OH/')
     iraf.chdir(cdir)
 #enddef
+
 
 def plot_spec(rawdir, out_pdf='', silent=False, verbose=False):
 
