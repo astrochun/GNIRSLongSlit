@@ -11,7 +11,10 @@ Requirements:
  ccdproc    >= v1.2.0
  chun_codes (https://github.com/astrochun/chun_codes)
  matplotlib >= v1.5.3
+ scipy      >= 0.18.1
  numpy      >= v1.11.1
+ pyraf      >= 2.2.dev
+  - Install through astroconda to get gemini IRAF package included
 
 How to use:
 import GNIRSLongSlit as gnirsls
