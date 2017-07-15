@@ -161,8 +161,9 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Bug found: No longer need sky.lis since obj.lis includes all
     Modified by Chun Ly, 6 June 2017
      - Add skysub keyword option to operate on sky-subtracted images
-    Modified by Chun Ly, 6 June 2017
+    Modified by Chun Ly, 14 July 2017
      - Fix tick mark locations
+     - Fix y limit range for extreme outliers
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -292,7 +293,10 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
 
                 # Aesthetics
                 ax0[row].set_xlim([0,1050])
-                ax0[row].set_ylim([min(fwhm0)-0.025,max(fwhm0)+0.075])
+                if max(fwhm0[good]) > 3:
+                    ax0[row].set_ylim([0,3.0])
+                else:
+                    ax0[row].set_ylim([min(fwhm0)-0.025,max(fwhm0)+0.075])
                 ax0[row].minorticks_on()
 
                 if row == 1 or nn == n_files-1:
