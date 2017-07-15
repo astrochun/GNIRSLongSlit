@@ -161,6 +161,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Bug found: No longer need sky.lis since obj.lis includes all
     Modified by Chun Ly, 6 June 2017
      - Add skysub keyword option to operate on sky-subtracted images
+    Modified by Chun Ly, 6 June 2017
+     - Fix tick mark locations
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -220,6 +222,11 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                 good = np.where(fwhm0 >0)[0]
                 ax0[row].plot(bins[good], fwhm0[good], marker='o', alpha=0.5,
                               mec='none', mfc='b', linestyle='none', zorder=2)
+
+                ax0[row].get_yaxis().set_tick_params(which='both', right=True,
+                                                     width=1, direction='in')
+                ax0[row].get_xaxis().set_tick_params(which='both', top=True,
+                                                     width=1, direction='in')
 
                 # Compute average line profile from stack0_shift
                 # Later + on 10/03/2017
