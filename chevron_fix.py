@@ -49,6 +49,8 @@ def run(files=[''], file_list='', n_rows=1, silent=False, verbose=True):
      - Compute median in each quadrant
      - Apply correction within a certain number of std deviations (handles random noise
        but not regions with low emission from sky)
+    Modified by Chun Ly, 15 July 2017
+     - Mask pixels above certain sigma threshold
     '''
     
     if silent == False:
@@ -62,7 +64,7 @@ def run(files=[''], file_list='', n_rows=1, silent=False, verbose=True):
         if silent == False: log.info('### Reading : '+file_list)
         files = np.loadtxt(file_list, dtype=type(str)).tolist()
 
-    x0   = xrange(1024)
+    x0   = np.arange(1024)
     bins = 8*np.arange(129)
 
     for ff in xrange(len(files)):
@@ -70,7 +72,9 @@ def run(files=[''], file_list='', n_rows=1, silent=False, verbose=True):
         im0  = hdu0[1].data
         sh0  = im0.shape
         y_bins = np.int(np.ceil(np.float(im0.shape[0])/n_rows))
-        med0_arr = np.zeros(sh0)
+        med0_arr = np.zeros(sh0, dtype=np.float64)
+
+        mask0  = np.zeros_like(im0, dtype=np.int) # + on 15/07/2017
 
         # Compute median for each quadrant | + on 22/06/2017
         median0 = np.zeros(4)
@@ -88,10 +92,16 @@ def run(files=[''], file_list='', n_rows=1, silent=False, verbose=True):
             std0[qq]    = std
             log.info('## q'+str(qq+1)+' %.3f %.3f %3f ' % (mean, median, std))
 
+            # + on 15/07/2017
+            src_y, src_x = np.where((t_im0 - median)/std > 2.0)
+            mask0[r1[qq]+src_y,c1[qq]+src_x] = 1
+
         for row in range(y_bins):
             # mean, median, std = sigma_clipped_stats(im0[row], sigma=2, iters=10, axis=0)
-            stat0, edge, num = binned_statistic(x0, im0[row], bins=bins,
-                                                statistic='median')
+            no_mask = np.where(mask0[row] == 0)[0] # + on 15/07/2017
+
+            stat0, edge, num = binned_statistic(x0[no_mask], im0[row][no_mask],
+                                                bins=bins, statistic='median')
 
             # Determine median and std to adopt | + on 22/06/2017
             if row >= sh0[0]/2:
@@ -103,16 +113,22 @@ def run(files=[''], file_list='', n_rows=1, silent=False, verbose=True):
 
             # Compute offsets | + on 22/06/2017
             med0_arr[row] = np.repeat(stat0, 8) - t_med
-            no_fix = np.where(np.absolute(med0_arr[row]/t_std) >= 5)[0]
-            if len(no_fix) > 0: med0_arr[row,no_fix] = 0.0
+            #no_fix = np.where(np.absolute(med0_arr[row]/t_std) >= 5)[0]
+            #if len(no_fix) > 0: med0_arr[row,no_fix] = 0.0
         #endfor
+
+        # + on 15/07/2017
+        no_fix = np.where(mask0 == 1)
+        med0_arr[no_fix] = 0.0
 
         corr_hdu = hdu0
         corr_im0 = im0 - med0_arr
         corr_hdu[1].data = corr_im0
 
-        corr_hdu.writeto(files[ff].replace('.fits','.bcorr.fits'), overwrite=True)
+        corr_hdu.writeto(files[ff].replace('.fits','.bcorr2.fits'), overwrite=True)
         fits.writeto(files[ff].replace('.fits','.fix.fits'), med0_arr, overwrite=True)
+        fits.writeto(files[ff].replace('.fits','.mask.fits'), mask0, overwrite=True)
+
     #endfor
 
     if silent == False:
