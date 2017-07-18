@@ -288,7 +288,7 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
     if silent == False: log.info('### End OH_check : '+systime())
 #enddef
 
-def arc_check2(path, arcs='', out_pdf='', silent=False, verbose=True):
+def arc_check2(path, arcs=[''], out_pdf='', silent=False, verbose=True):
 
     '''
     Generate plot illustrating expected location of arc lines to
@@ -316,6 +316,8 @@ def arc_check2(path, arcs='', out_pdf='', silent=False, verbose=True):
     -----
     Created by Chun Ly, 16 June 2017
      - Started as a copy of OH_check
+    Modified by Chun Ly, 17 July 2017
+     - Fix bug with arcs handling
     '''
 
     if silent == False: log.info('### Begin arc_check2 : '+systime())
@@ -327,7 +329,7 @@ def arc_check2(path, arcs='', out_pdf='', silent=False, verbose=True):
         arc_lines  = arc_data['Line'].data
         arc_source = arc_data['Source'].data
 
-    if arcs == '':
+    if arcs[0] == '':
         arcs_list = path + 'arc.lis'
 
         if silent == False: log.info('### Reading : '+arcs_list)
