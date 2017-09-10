@@ -302,6 +302,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        multiplying science frames by the flat rather than dividing. Creating
        a flat that is the inverse from nsflat to use for flatfielding
      - Generate normalize_flat plot using nsflat's flat
+     - Use inverted flat for nsreduce call of telluric and science data
+       with fl_flat='yes' to fix flatfielding bug
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -563,16 +565,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     if skysub:
         log.info("## Performing sky subtraction on telluric data")
 
-        # + on 07/06/2017
-        obj0    = np.loadtxt(obj_list, dtype=type(str))
-        obj_hdr = fits.getheader(rawdir+'nc'+obj0[0])
-        if obj_hdr['FILTER2'] == 'X_G0518':
-            log.warn('## X-band data!! Will not use flat!')
-            fl_flat = no
-            flatimage = ''
-        else:
-            fl_flat = yes
-            flatimage = flatfile
+        # Mod on 10/09/2017
+        fl_flat   = yes
+        flatimage = flatfile
 
         do_run = iraf_get_subset.check_prefix('rnc', tell_list, path=rawdir)
         if do_run:
@@ -588,7 +583,6 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         log.info("## Performing sky subtraction on science data")
         do_run = iraf_get_subset.check_prefix('rnc', obj_list, path=rawdir)
         if do_run:
-
             iraf.gnirs.nsreduce(rawdir+'nc@'+obj_list, outprefix='',
                                 outimages=rawdir+'rnc@'+obj_list,
                                 fl_nsappwave=no, fl_sky=yes,
