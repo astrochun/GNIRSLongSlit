@@ -297,6 +297,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Minor bug: wave_cals -> wave_cal
     Modified by Chun Ly, 13 July 2017
      - Add call to OH_stack.run() in wave_cal to generate stacked OH data
+    Modified by Chun Ly, 10 September 2017
+     - Found source of problem for flatfielding.  Seems like nsreduce is
+       multiplying science frames by the flat rather than dividing. Creating
+       a flat that is the inverse from nsflat to use for flatfielding
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -451,11 +455,23 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn("## Files exist! Will not run nsreduce!!")
 
         # + on 05/05/2017
+        # Mod on 10/09/2017
+        flatfile_orig = flatfile.replace('.fits', '.orig.fits')
+        if not exists(flatfile_orig):
+            iraf.gnirs.nsflat(rawdir+'rnc@'+flats_rev, flatfile=flatfile_orig) # Mod on 06/05/2017
+        else:
+            log.warn('## File exists!!! : '+flatfile_orig)
+            log.warn('## Will not run nsflat')
+
+        # + on 10/09/2017
         if not exists(flatfile):
-            iraf.gnirs.nsflat(rawdir+'rnc@'+flats_rev, flatfile=flatfile) # Mod on 06/05/2017
+            hdu  = fits.open(flatfile_orig)
+            d1   = hdu[1].data
+            i_d1 = 1/d1
+            hdu[1].data = i_d1
+            hdu.writeto(flatfile, output_verify='ignore')
         else:
             log.warn('## File exists!!! : '+flatfile)
-            log.warn('## Will not run nsflat')
 
         # Generate normalized flat plot | + on 11/07/2017
         normalize_flat(flatfile)
