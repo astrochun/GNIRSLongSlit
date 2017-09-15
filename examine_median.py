@@ -34,7 +34,8 @@ def run(rawdir, style, silent=False, verbose=True):
       Type of data to plot. Options are:
        'orig': For original data (before any bias removal) 'ncN' files
        'bias': After bias removal 'bncN' files
-       'flat': For flattened data 'rbncN'
+       'flat': For flattened data 'rbncN' (Will use OH frames since those
+                                           are not sky subtracted)
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -48,10 +49,13 @@ def run(rawdir, style, silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 14 September 2017
+    Modified by Chun Ly, 15 September 2017
+     - Add if statements for style = 'flat'
     '''
 
     if style == 'orig': prefix = 'nc'
     if style == 'bias': prefix = 'bnc'
+    if style == 'flat': prefix = 'rbnc' # + on 15/09/2017
 
     if silent == False: log.info('### Begin run : '+systime())
 
@@ -59,6 +63,10 @@ def run(rawdir, style, silent=False, verbose=True):
     if silent == False: log.info('### Reading : '+infile)    
     files0 = np.loadtxt(infile, dtype=type(str)).tolist()
     files0 = [rawdir+prefix+file0 for file0 in files0]
+
+    # + on 15/09/2017
+    if style == 'flat':
+        files0 = [file0.replace('.fits','.OH.fits') for file0 in files0]
 
     fig, ax = plt.subplots()
     
