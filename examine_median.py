@@ -36,6 +36,7 @@ def run(rawdir, style, silent=False, verbose=True):
        'bias': After bias removal 'bncN' files
        'flat': For flattened data 'rbncN' (Will use OH frames since those
                                            are not sky subtracted)
+       'skysub': For flattened and skysub data 'rbncN'
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -51,11 +52,14 @@ def run(rawdir, style, silent=False, verbose=True):
     Created by Chun Ly, 14 September 2017
     Modified by Chun Ly, 15 September 2017
      - Add if statements for style = 'flat'
+     - Add if statements for style = 'skysub'
     '''
 
     if style == 'orig': prefix = 'nc'
     if style == 'bias': prefix = 'bnc'
     if style == 'flat': prefix = 'rbnc' # + on 15/09/2017
+
+    if style == 'skysub': prefix = 'rbnc' # + on 15/09/2017
 
     if silent == False: log.info('### Begin run : '+systime())
 
