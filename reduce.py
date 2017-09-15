@@ -317,8 +317,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Change prefix to use the bias-subtracted frames - from remove_bias_level()
      - Remove bias level in flats; Use bias-subtracted flats for superflat
      - Remove previous code involving inverted flat
+     - Call examine_median for orig and bias-subtracted cases
     Modified by Chun Ly, 15 September 2017
      - Apply flatfield to bnc OH images
+     - Call examine_median for skysub and flat cases
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -608,6 +610,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Files exist!!!')
             log.warn('## Will not run nsreduce on bnc sci data')
 
+
+        examine_median.run(rawdir, 'skysub') # + on 15/09/2017
+
         # Run nsreduce without skysubtraction for wavelength check with OH
         # night skylines | + on 01/06/2017
         obj = np.loadtxt(obj_list, dtype=type(str)) # Mod on 06/05/2017
@@ -629,6 +634,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nsreduce on bnc sci OH data')
+
+        examine_median.run(rawdir, 'flat') # + on 15/09/2017
     #end skysub
 
     # Step 6a : Apply wavelength solution to telluric data | + on 17/05/2017
