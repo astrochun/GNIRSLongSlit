@@ -317,6 +317,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Change prefix to use the bias-subtracted frames - from remove_bias_level()
      - Remove bias level in flats; Use bias-subtracted flats for superflat
      - Remove previous code involving inverted flat
+    Modified by Chun Ly, 15 September 2017
+     - Apply flatfield to bnc OH images
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -618,9 +620,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         do_run = iraf_get_subset.check_prefix('rbnc', OH_obj_list, path=rawdir)
         if do_run:
+            # Mod on 15/09/2017
             iraf.gnirs.nsreduce(rawdir+'bnc@'+obj_list, outprefix='',
                                 outimages=rawdir+'rbnc@'+OH_obj_list,
-                                fl_nsappwave=no, fl_sky=no, fl_flat=no)
+                                fl_nsappwave=no, fl_sky=no,
+                                fl_flat=fl_flat, flatimage=flatimage)
+
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nsreduce on bnc sci OH data')
