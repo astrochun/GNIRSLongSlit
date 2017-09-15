@@ -316,6 +316,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Fix typo in call to remove_bias_level()
      - Change prefix to use the bias-subtracted frames - from remove_bias_level()
      - Remove bias level in flats; Use bias-subtracted flats for superflat
+     - Remove previous code involving inverted flat
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -482,25 +483,15 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # + on 05/05/2017
         # Mod on 10/09/2017
-        flatfile_orig = flatfile.replace('.fits', '.orig.fits')
-        if not exists(flatfile_orig):
-            iraf.gnirs.nsflat(rawdir+'rnc@'+flats_rev, flatfile=flatfile_orig) # Mod on 06/05/2017
+        # Mod on 14/09/2017
+        if not exists(flatfile):
+            iraf.gnirs.nsflat(rawdir+'rbnc@'+flats_rev, flatfile=flatfile)
         else:
             log.warn('## File exists!!! : '+flatfile_orig)
             log.warn('## Will not run nsflat')
 
-        # + on 10/09/2017
-        if not exists(flatfile):
-            hdu  = fits.open(flatfile_orig)
-            d1   = hdu[1].data
-            i_d1 = 1/d1
-            hdu[1].data = i_d1
-            hdu.writeto(flatfile, output_verify='ignore')
-        else:
-            log.warn('## File exists!!! : '+flatfile)
-
         # Generate normalized flat plot | + on 11/07/2017
-        normalize_flat(flatfile_orig) # Mod on 10/09/2017
+        normalize_flat(flatfile) # Mod on 10/09/2017, 14/09/2017
     #end do_flat
 
     # Step 3 : Reduce arcs | + on 05/05/2017
