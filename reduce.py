@@ -307,6 +307,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        with fl_flat='yes' to fix flatfielding bug
     Modified by Chun Ly, 14 September 2017
      - Call remove_bias_removal()
+     - Flag CRs in nsprepare
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -397,12 +398,14 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             if n_nc == 0:
                 # Mod on 26/04/2017 - Must specify full path
                 # Mod on 06/05/2017
+                # Mod on 14/09/2017 - Flag CRs
                 inimages  = "c@"+all_list
                 outimages = rawdir+"nc@"+all_list
                 iraf.gnirs.nsprepare(inimages=inimages, rawpath=rawdir,
                                      outprefix='', outimages=outimages,
                                      bpm=bpm, shiftx="INDEF", shifty="INDEF",
-                                     fl_forcewcs=fl_forcewcs, fl_correct=no)
+                                     fl_forcewcs=fl_forcewcs, fl_correct=no,
+                                     fl_cravg=yes)
             else:
                 '''
                 Warns if files do not exist. Need to implement a way to run
