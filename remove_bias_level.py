@@ -30,8 +30,7 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
       Path to raw files. Must end in a '/'
 
     files0 : list. Optional
-      Full path to files.  If specified, than these files are used instead of
-      glob search
+      Name of files. No need to specify full path as rawdir is used
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -45,6 +44,7 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
     Notes
     -----
     Created by Chun Ly, 14 September 2017
+     - Change files0 to not include full path
     '''
 
     if silent == False: log.info('### Begin run : '+systime())
@@ -60,12 +60,12 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
     bias_offset3 = np.zeros(n_files0)
 
     for nn in range(n_files0):
-        outfile = files0[nn].replace('ncN','bncN')
+        outfile = rawdir+files0[nn].replace('ncN','bncN') # Mod on 14/09/2017
         if exists(outfile):
             log.warn('Will not overwrite file : '+outfile)
         else:
             if verbose == True: log.info('## Reading : '+outfile)
-            hdu = fits.open(files0[nn])
+            hdu = fits.open(rawdir+files0[nn]) # Mod on 14/09/2017
 
             if ('BIAS_FIX' in hdu['SCI'].header) == False:
                 naxis1 = hdu['SCI'].header['NAXIS1']
@@ -95,7 +95,6 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
                 im0[     0:qysize,     0:qxsize] -= bias_LL
                 im0[     0:qysize,qxsize:naxis1] -= bias_LR
 
-                outfile = files0[nn].replace('ncN','bncN')
                 if verbose == True: log.info('## Writing : '+outfile)
                 hdu['SCI'].data = im0
                 hdu['SCI'].header['BIAS_FIX'] = 'Yes'
@@ -103,8 +102,7 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
             #endif
         #endelse
 
-        files  = [t_file.replace(rawdir,'') for t_file in files0]
-        arr0   = [files, bias_offset0, bias_offset1, bias_offset2, bias_offset3]
+        arr0   = [files0, bias_offset0, bias_offset1, bias_offset2, bias_offset3]
         names0 = names=('filename','bias_UL','bias_UR','bias_LL','bias_LR')
         tab0   = Table(arr0, names=names0)
 
