@@ -77,6 +77,8 @@ def compute_weights(rawdir, out_pdf='', silent=True, verbose=False):
     Notes
     -----
     Created by Chun Ly, 3 June 2017
+    Modified by Chun Ly, 14 September 2017
+     - Change prefix to use the bias-subtracted frames - from remove_bias_level()
     '''
 
     if silent == False: log.info('### Begin compute_weights : '+systime())
@@ -88,7 +90,7 @@ def compute_weights(rawdir, out_pdf='', silent=True, verbose=False):
 
     do_run = iraf_get_subset.check_prefix('e', obj_list, path=rawdir)
     if do_run:
-        iraf.gnirs.nsextract(rawdir+'tfrnc@'+obj_list,
+        iraf.gnirs.nsextract(rawdir+'tfrbnc@'+obj_list,
                              outspectra=rawdir+'e@'+obj_list, nsum=50,
                              database=rawdir+'database/')
 
@@ -312,6 +314,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call remove_bias_level()
      - Flag CRs in nsprepare
      - Fix typo in call to remove_bias_level()
+     - Change prefix to use the bias-subtracted frames - from remove_bias_level()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -587,28 +590,28 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         fl_flat   = yes
         flatimage = flatfile
 
-        do_run = iraf_get_subset.check_prefix('rnc', tell_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('rbnc', tell_list, path=rawdir)
         if do_run:
-            iraf.gnirs.nsreduce(rawdir+'nc@'+tell_list, outprefix='',
-                                outimages=rawdir+'rnc@'+tell_list,
+            iraf.gnirs.nsreduce(rawdir+'bnc@'+tell_list, outprefix='',
+                                outimages=rawdir+'rbnc@'+tell_list,
                                 fl_nsappwave=no, fl_sky=yes, fl_flat=fl_flat,
                                 flatimage=flatimage)
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nsreduce on nc telluric data')
+            log.warn('## Will not run nsreduce on bnc telluric data')
 
         # Step 5b : Sky subtract science data | + on 16/05/2017
         log.info("## Performing sky subtraction on science data")
-        do_run = iraf_get_subset.check_prefix('rnc', obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('rbnc', obj_list, path=rawdir)
         if do_run:
-            iraf.gnirs.nsreduce(rawdir+'nc@'+obj_list, outprefix='',
-                                outimages=rawdir+'rnc@'+obj_list,
+            iraf.gnirs.nsreduce(rawdir+'bnc@'+obj_list, outprefix='',
+                                outimages=rawdir+'rbnc@'+obj_list,
                                 fl_nsappwave=no, fl_sky=yes,
-                                skyimages=rawdir+'nc@'+sky_list,
+                                skyimages=rawdir+'bnc@'+sky_list,
                                 fl_flat=fl_flat, flatimage=flatimage)
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nsreduce on nc sci data')
+            log.warn('## Will not run nsreduce on bnc sci data')
 
         # Run nsreduce without skysubtraction for wavelength check with OH
         # night skylines | + on 01/06/2017
@@ -620,87 +623,87 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             log.warn('## File exists!!! : '+OH_obj_list)
 
-        do_run = iraf_get_subset.check_prefix('rnc', OH_obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('rbnc', OH_obj_list, path=rawdir)
         if do_run:
-            iraf.gnirs.nsreduce(rawdir+'nc@'+obj_list, outprefix='',
-                                outimages=rawdir+'rnc@'+OH_obj_list,
+            iraf.gnirs.nsreduce(rawdir+'bnc@'+obj_list, outprefix='',
+                                outimages=rawdir+'rbnc@'+OH_obj_list,
                                 fl_nsappwave=no, fl_sky=no, fl_flat=no)
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nsreduce on nc sci OH data')
+            log.warn('## Will not run nsreduce on bnc sci OH data')
     #end skysub
 
     # Step 6a : Apply wavelength solution to telluric data | + on 17/05/2017
     if fitcoords:
         # Telluric data
         iraf.chdir(rawdir)
-        do_run = iraf_get_subset.check_prefix('frnc', tell_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('frbnc', tell_list, path=rawdir)
         if do_run:
             log.info("## Running nsfitcoords on telluric data")
-            iraf.gnirs.nsfitcoords('rnc@'+tell_list, outprefix='',
-                                   outspectra='frnc@'+tell_list,
+            iraf.gnirs.nsfitcoords('rbnc@'+tell_list, outprefix='',
+                                   outspectra='frbnc@'+tell_list,
                                    lamp='wrnc'+arcs[0],
                                    database='database/')
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nsfitcoords on rnc telluric data')
+            log.warn('## Will not run nsfitcoords on rbnc telluric data')
 
-        do_run = iraf_get_subset.check_prefix('tfrnc', tell_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('tfrbnc', tell_list, path=rawdir)
         if do_run:
             log.info("## Running nstransform on telluric data")
-            iraf.gnirs.nstransform('frnc@'+tell_list, outprefix='',
-                                   outspectra='tfrnc@'+tell_list,
+            iraf.gnirs.nstransform('frbnc@'+tell_list, outprefix='',
+                                   outspectra='tfrbnc@'+tell_list,
                                    database='database/')
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nstransform on frnc telluric data')
+            log.warn('## Will not run nstransform on frbnc telluric data')
 
         # Step 6b : Apply wavelength solution to science data | + on 17/05/2017
         # Science data
-        do_run = iraf_get_subset.check_prefix('frnc', obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('frbnc', obj_list, path=rawdir)
         if do_run:
             log.info("## Running nsfitcoords on science data")
-            iraf.gnirs.nsfitcoords('rnc@'+obj_list, outprefix='',
-                                   outspectra='frnc@'+obj_list,
+            iraf.gnirs.nsfitcoords('rbnc@'+obj_list, outprefix='',
+                                   outspectra='frbnc@'+obj_list,
                                    lamp='wrnc'+arcs[0],
                                    database='database/')
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nsfitcoords on rnc science data')
+            log.warn('## Will not run nsfitcoords on rbnc science data')
 
-        do_run = iraf_get_subset.check_prefix('tfrnc', obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('tfrbnc', obj_list, path=rawdir)
         if do_run:
             log.info("## Running nstransform on science data")
-            iraf.gnirs.nstransform('frnc@'+obj_list, outprefix='',
-                                   outspectra='tfrnc@'+obj_list,
+            iraf.gnirs.nstransform('frbnc@'+obj_list, outprefix='',
+                                   outspectra='tfrbnc@'+obj_list,
                                    database='database/')
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nstransform on frnc science data')
+            log.warn('## Will not run nstransform on frbnc science data')
 
         # Apply wavelength solution to unsubtracted science data
         # + on 02/06/2017
-        do_run = iraf_get_subset.check_prefix('frnc', OH_obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('frbnc', OH_obj_list, path=rawdir)
         if do_run:
             log.info("## Running nsfitcoords on science OH data")
-            iraf.gnirs.nsfitcoords('rnc@'+OH_obj_list, outprefix='',
-                                   outspectra='frnc@'+OH_obj_list,
+            iraf.gnirs.nsfitcoords('rbnc@'+OH_obj_list, outprefix='',
+                                   outspectra='frbnc@'+OH_obj_list,
                                    lamp='wrnc'+arcs[0],
                                    database='database/')
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nsfitcoords on rnc sci OH data')
+            log.warn('## Will not run nsfitcoords on rbnc sci OH data')
 
         # + on 02/06/2017
-        do_run = iraf_get_subset.check_prefix('tfrnc', OH_obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('tfrbnc', OH_obj_list, path=rawdir)
         if do_run:
             log.info("## Running nstransform on science OH data")
-            iraf.gnirs.nstransform('frnc@'+OH_obj_list, outprefix='',
-                                   outspectra='tfrnc@'+OH_obj_list,
+            iraf.gnirs.nstransform('frbnc@'+OH_obj_list, outprefix='',
+                                   outspectra='tfrbnc@'+OH_obj_list,
                                    database='database/')
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nstransform on frnc sci OH data')
+            log.warn('## Will not run nstransform on frbnc sci OH data')
 
         iraf.chdir(cdir)
         QA_wave_cal.OH_check(rawdir, skysub=False) # + 02/06/2017
@@ -711,19 +714,19 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     if combine:
         if not exists(tell_comb):
             log.info("## Running nscombine on telluric data")
-            iraf.gnirs.nscombine(rawdir+'tfrnc@'+tell_list, output=tell_comb,
+            iraf.gnirs.nscombine(rawdir+'tfrbnc@'+tell_list, output=tell_comb,
                                  fl_cross=yes, tolerance=0.1)
         else:
             log.warn('## File exists : '+tell_comb+' !!!')
-            log.warn('## Will not run nscombine on tfrnc telluric data')
+            log.warn('## Will not run nscombine on tfrbnc telluric data')
 
         if not exists(obj_comb):
             log.info("## Running nscombine on science data")
-            iraf.gnirs.nscombine(rawdir+'tfrnc@'+obj_list, output=obj_comb,
+            iraf.gnirs.nscombine(rawdir+'tfrbnc@'+obj_list, output=obj_comb,
                                  fl_cross=yes, tolerance=0.1)
         else:
             log.warn('## File exists : '+obj_comb+' !!!')
-            log.warn('## Will not run nscombine on tfrnc science data')
+            log.warn('## Will not run nscombine on tfrbnc science data')
 
     # Step 8: Extract 1-D spectra | + on 17/05/2017
     if extract:
