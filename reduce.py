@@ -315,6 +315,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Flag CRs in nsprepare
      - Fix typo in call to remove_bias_level()
      - Change prefix to use the bias-subtracted frames - from remove_bias_level()
+     - Remove bias level in flats; Use bias-subtracted flats for superflat
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -428,7 +429,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         #endelse
 
         # + on 14/09/2017
-        files0  = np.loadtxt(obj_list, dtype=type(str)).tolist()
+        files0  = np.loadtxt(flat_list, dtype=type(str)).tolist()
+        files0 += np.loadtxt(obj_list, dtype=type(str)).tolist()
         files0 += np.loadtxt(tell_list, dtype=type(str)).tolist()
         files0 = ['nc'+file0 for file0 in files0]
         remove_bias_level.run(rawdir, files0)
@@ -442,7 +444,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         flats     = np.loadtxt(flat_list, dtype=type(str)) # Mod on 06/05/2017
         tmpflat   = rawdir+'tmpflat'
         if not exists(tmpflat):
-            flat_files = ['nc'+file0+'[SCI,1]' for file0 in flats] # Mod on 06/05/2017
+            flat_files = ['bnc'+file0+'[SCI,1]' for file0 in flats] # Mod on 06/05/2017
             if silent == False: log.info('## Writing : '+tmpflat)
             np.savetxt(tmpflat, flat_files, fmt='%s')
         else:
@@ -468,11 +470,11 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # + on 04/05/2017 | Mod on 05/05/2017
         # Mod on 06/05/2017
-        do_run = iraf_get_subset.check_prefix('rnc', flats_rev, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('rbnc', flats_rev, path=rawdir)
         if do_run:
             # Mod on 06/05/2017
-            iraf.gnirs.nsreduce(rawdir+'nc@'+flats_rev, outprefix='',
-                                outimages=rawdir+'rnc@'+flats_rev,
+            iraf.gnirs.nsreduce(rawdir+'bnc@'+flats_rev, outprefix='',
+                                outimages=rawdir+'rbnc@'+flats_rev,
                                 fl_sky=no, fl_cut=yes, fl_flat=no, fl_dark=no,
                                 fl_nsappwave=no)
         else:
