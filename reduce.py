@@ -41,7 +41,10 @@ import iraf_get_subset # + on 26/04/2017
 import file_handling # + on 07/05/2017
 import QA_wave_cal # + on 25/05/2017
 import OH_stack # + on 13/07/2017
-import remove_bias_level # + on 14/09/2017
+
+# + on 14/09/2017
+import remove_bias_level
+import examine_median
 
 co_filename = __file__ # + on 05/05/2017
 
@@ -426,6 +429,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         files0 += np.loadtxt(tell_list, dtype=type(str)).tolist()
         files0 = ['nc'+file0 for file0 in files0]
         remove_bias_level.run(rawdir, files0)
+        examine_median.run(rawdir, 'orig')
+        examine_median.run(rawdir, 'bias')
     #end prepare
 
     # Step 2 - Create flat | + on 26/04/2017
