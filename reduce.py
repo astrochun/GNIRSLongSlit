@@ -41,6 +41,7 @@ import iraf_get_subset # + on 26/04/2017
 import file_handling # + on 07/05/2017
 import QA_wave_cal # + on 25/05/2017
 import OH_stack # + on 13/07/2017
+import remove_bias_removal # + on 14/09/2017
 
 co_filename = __file__ # + on 05/05/2017
 
@@ -304,6 +305,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Generate normalize_flat plot using nsflat's flat
      - Use inverted flat for nsreduce call of telluric and science data
        with fl_flat='yes' to fix flatfielding bug
+    Modified by Chun Ly, 14 September 2017
+     - Call remove_bias_removal()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -413,6 +416,11 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 #                     bpm=bpm, shiftx="INDEF", shifty="INDEF",
                 #                     fl_forcewcs=fl_forcewcs)
         #endelse
+
+        # + on 14/09/2017
+        files0  = np.loadtxt(obj_list, dtype=type(str)).tolist()
+        files0 += np.loadtxt(tell_list, dtype=type(str)).tolist()
+        remove_bias_removal.run(rawdir, files0)
     #end prepare
 
     # Step 2 - Create flat | + on 26/04/2017
