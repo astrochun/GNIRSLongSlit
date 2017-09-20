@@ -23,6 +23,9 @@ from astropy.stats import sigma_clipped_stats
 
 from astropy import log
 
+# + on 20/09/2017
+from check_path import main as check_path
+
 def main(rawdir, out_pdf='', silent=False, verbose=True):
 
     '''
@@ -46,9 +49,13 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 8 September 2017
+    Modified by Chun Ly, 20 September 2017
+     - Call check_path()
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
+
+    rawdir = check_path(rawdir) # + on 20/09/2017
 
     out_pdf = rawdir+'OH_flat_check.pdf' if out_pdf == '' else rawdir+out_pdf
 
