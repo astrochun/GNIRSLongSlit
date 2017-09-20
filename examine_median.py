@@ -18,6 +18,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import glob
 
+# + on 20/09/2017
+from check_path import main as check_path
+
 from astropy import log
 
 def run(rawdir, style, silent=False, verbose=True):
@@ -28,7 +31,7 @@ def run(rawdir, style, silent=False, verbose=True):
     Parameters
     ----------
     rawdir : str
-      Path to raw files. Must end in a '/'
+      Path to raw files.
 
     style : str
       Type of data to plot. Options are:
@@ -53,7 +56,11 @@ def run(rawdir, style, silent=False, verbose=True):
     Modified by Chun Ly, 15 September 2017
      - Add if statements for style = 'flat'
      - Add if statements for style = 'skysub'
+    Modified by Chun Ly, 20 September 2017
+     - Call check_path()
     '''
+
+    rawdir = check_path(rawdir) # + on 20/09/2017
 
     if style == 'orig': prefix = 'nc'
     if style == 'bias': prefix = 'bnc'
@@ -62,6 +69,7 @@ def run(rawdir, style, silent=False, verbose=True):
     if style == 'skysub': prefix = 'rbnc' # + on 15/09/2017
 
     if silent == False: log.info('### Begin run : '+systime())
+
 
     infile = rawdir+'obj.lis'
     if silent == False: log.info('### Reading : '+infile)    
