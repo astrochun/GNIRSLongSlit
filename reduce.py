@@ -46,6 +46,9 @@ import OH_stack # + on 13/07/2017
 import remove_bias_level
 import examine_median
 
+# + on 20/09/2017
+from check_path import main as check_path
+
 co_filename = __file__ # + on 05/05/2017
 
 yes, no = 'yes', 'no' # + on 26/04/2017
@@ -79,9 +82,13 @@ def compute_weights(rawdir, out_pdf='', silent=True, verbose=False):
     Created by Chun Ly, 3 June 2017
     Modified by Chun Ly, 14 September 2017
      - Change prefix to use the bias-subtracted frames - from remove_bias_level()
+    Modified by Chun Ly, 20 September 2017
+     - Call check_path()
     '''
 
     if silent == False: log.info('### Begin compute_weights : '+systime())
+
+    rawdir = check_path(rawdir) # + on 20/09/2017
 
     out_pdf = rawdir+'compute_weights.pdf' if out_pdf == '' else \
               rawdir+out_pdf
@@ -321,9 +328,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 15 September 2017
      - Apply flatfield to bnc OH images
      - Call examine_median for skysub and flat cases
+    Modified by Chun Ly, 20 September 2017
+     - Call check_path()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
+
+    rawdir = check_path(rawdir) # + on 20/09/2017
 
     # + on 16/05/2017
     tot0 = sum([do_all, prepare, do_flat, do_arcs, wave_cal, skysub,
