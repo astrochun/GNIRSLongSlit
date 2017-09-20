@@ -16,6 +16,9 @@ from astropy.io import fits
 import numpy as np
 import glob
 
+# + on 20/09/2017
+from check_path import main as check_path
+
 from astropy.table import Table
 from astropy import log
 
@@ -27,7 +30,7 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
     Parameters
     ----------
     rawdir : str
-      Path to raw files. Must end in a '/'
+      Path to raw files.
 
     files0 : list. Optional
       Name of files. No need to specify full path as rawdir is used
@@ -45,9 +48,13 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
     -----
     Created by Chun Ly, 14 September 2017
      - Change files0 to not include full path
+    Modified by Chun Ly, 20 September 2017
+     - Call check_path()
     '''
 
     if silent == False: log.info('### Begin run : '+systime())
+
+    rawdir = check_path(rawdir) # + on 20/09/2017
 
     if files0[0] == '':
         files0 = glob.glob(rawdir+'ncN????????S????.fits')
