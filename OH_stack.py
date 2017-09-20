@@ -30,6 +30,9 @@ from IQ_plot import gauss1d
 from scipy.optimize import curve_fit
 #from Zcalbase_gal.observing.locate_em_lines import gaussian_R
 
+# + on 20/09/2017
+from check_path import main as check_path
+
 # + on 04/07/2017
 from pyraf import iraf #from reduce import iraf
 
@@ -107,9 +110,13 @@ def run(rawdir, silent=False, verbose=False):
     Notes
     -----
     Created by Chun Ly, 25 June 2017
+    Modified by Chun Ly, 20 September 2017
+     - Call check_path()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
+
+    rawdir = check_path(rawdir) # + on 20/09/2017
 
     obj_list = rawdir + 'obj.lis'
     if silent == False: log.info('### Reading : '+obj_list)
@@ -170,7 +177,11 @@ def wave_cal(rawdir, silent=False, verbose=False):
     Notes
     -----
     Created by Chun Ly, 13 July 2017
+    Modified by Chun Ly, 20 September 2017
+     - Call check_path()
     '''
+
+    rawdir = check_path(rawdir) # + on 20/09/2017
 
     iraf.chdir(rawdir)
 
@@ -221,9 +232,13 @@ def transform(rawdir, silent=False, verbose=False):
     Notes
     -----
     Created by Chun Ly, 4 July 2017
+    Modified by Chun Ly, 20 September 2017
+     - Call check_path()
     '''
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
+
+    rawdir = check_path(rawdir) # + on 20/09/2017
 
     iraf.chdir(rawdir)
     log.info("## Running nsfitcoords on OH_stack")
@@ -262,7 +277,11 @@ def plot_spec(rawdir, out_pdf='', silent=False, verbose=False):
     -----
     Created by Chun Ly, 4 July 2017
      - Overlay Rousselot (2000) model spectrum
+    Modified by Chun Ly, 20 September 2017
+     - Call check_path()
     '''
+
+    rawdir = check_path(rawdir) # + on 20/09/2017
 
     out_pdf = rawdir+'OH_spec.pdf' if out_pdf == '' else rawdir+out_pdf
 
