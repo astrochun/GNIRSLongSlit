@@ -50,7 +50,6 @@ import examine_median
 from check_path import main as check_path
 
 co_filename = __file__ # + on 05/05/2017
-
 yes, no = 'yes', 'no' # + on 26/04/2017
 
 n_sp_pix = 1022 # + on 12/06/2017
@@ -192,6 +191,28 @@ def normalize_flat(flatfile, out_pdf='', silent=True, verbose=False):
 
 #enddef
 
+def computeStatistics(flat_files):
+    '''
+    
+    Parameters
+    ---------
+    flat_files : list(str)
+        list of flat files to be analyzed
+    '''
+    stats = []
+    for image in flat_files:
+        hdu = fits.open(image)
+        data = hdu['SCI'].data[:,160:800] #160-800 pixel range to exclude bias level
+        stats.append(sigma_clipped_stats(data))
+    stats = np.array(stats)
+    mean = stats[:,0]
+    median = stats[:,1]
+    stddev = stats[:,2]
+    avg = np.average(mean)
+    rat0 = 100.0*np.absolute(1-mean/avg)
+    goodFlats = np.where(rat0 <= 0.5)
+    return goodFlats
+
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0, skysub=0,
         fitcoords=0, combine=0, extract=0, silent=False, verbose=True):
@@ -330,6 +351,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call examine_median for skysub and flat cases
     Modified by Chun Ly, 20 September 2017
      - Call check_path()
+    Modified by Scott McKinley, 5 October 2017
+     - Created computeStatistics()
+     - removed call to iraf imstatistics with do_flat
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -460,25 +484,15 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         flats     = np.loadtxt(flat_list, dtype=type(str)) # Mod on 06/05/2017
         tmpflat   = rawdir+'tmpflat'
         if not exists(tmpflat):
-            flat_files = ['bnc'+file0+'[SCI,1]' for file0 in flats] # Mod on 06/05/2017
+            flat_files = ['bnc'+file0 for file0 in flats] # Mod on 06/05/2017 | Mod on 10/05/2017
             if silent == False: log.info('## Writing : '+tmpflat)
             np.savetxt(tmpflat, flat_files, fmt='%s')
         else:
             log.warn('## File exists!!! : '+tmpflat)
 
-        # Compute stats on flat; Use reliable ones + on 04/05/2017
-        flat_sig = iraf.imstatistic(images=rawdir+'@'+tmpflat,
-                                    lower=0, nclip=5,format='no',
-                                    fields="image,npix,mean,stddev,min,max",
-                                    Stderr=1)
-
-        npix = [int(str0.split('  ')[1])   for str0 in flat_sig]
-        mean = [float(str0.split('  ')[2]) for str0 in flat_sig]
-        std  = [float(str0.split('  ')[3]) for str0 in flat_sig]
-
-        avg  = np.average(mean)
-        rat0 = 100.0*np.absolute(1-mean/avg)
-        good = np.where(rat0 <= 0.5) # If difference is more than 0.5%
+        # tmpflat must not exist prior to call of run() for this call to succeed
+        good = computeStatistics(flat_files)
+        
         if len(good) > 0:
             log.info('## Flat files to use : ')
             log.info(', '.join(flats[good]))
