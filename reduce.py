@@ -354,6 +354,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Scott McKinley, 5 October 2017
      - Created computeStatistics()
      - removed call to iraf imstatistics with do_flat
+    Modified by Chun Ly, 7 Nov 2017
+     - Create and write average arcs stack
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -538,6 +540,24 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             log.warn('## File exists!!!')
             log.warn('## Will not run nsreduce on arc data')
+
+        # Combine arcs together | + on 07/11/2017
+        arc_stack_file = rawdir+'arc_stack.fits'
+        if exists(arc_stack_file):
+           log.warn('## File exists!!!')
+           log.warn('## Will NOT override '+arc_stack_file)
+        else:
+            a_files   = [rawdir+'rnc'+file0 for file0 in arcs]
+            n_a_files = len(a_files)
+            t_hdr     = fits.getheader(a_files[0], extname='SCI')
+            arcs_arr   = np.zeros( (n_a_files, t_hdr['NAXIS2'],t_hdr['NAXIS1']) )
+            for ii in range(n_a_files):
+                arcs_arr[ii] = fits.getdata(a_files[ii], extname='SCI')
+            arcs_avg = np.average(arcs_arr, axis=0)
+            if silent == False:
+                log.info('### Writing : '+arc_stack_file)
+            fits.writeto(arc_stack_file, arcs_avg, header=t_hdr)
+
     #end do_arcs
 
     # Step 4 : Perform wavelength calibration | + on 05/05/2017
