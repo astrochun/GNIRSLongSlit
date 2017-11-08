@@ -356,6 +356,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - removed call to iraf imstatistics with do_flat
     Modified by Chun Ly, 7 Nov 2017
      - Create and write average arcs stack
+    Modified by Chun Ly, 8 Nov 2017
+     - Bug with average arcs stack - Not formatted for gnirs pipeline
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -544,19 +546,26 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         # Combine arcs together | + on 07/11/2017
         arc_stack_file = rawdir+'arc_stack.fits'
         if exists(arc_stack_file):
-           log.warn('## File exists!!!')
-           log.warn('## Will NOT override '+arc_stack_file)
+            log.warn('## File exists!!!')
+            log.warn('## Will NOT override '+arc_stack_file)
         else:
             a_files   = [rawdir+'rnc'+file0 for file0 in arcs]
             n_a_files = len(a_files)
-            t_hdr     = fits.getheader(a_files[0], extname='SCI')
-            arcs_arr   = np.zeros( (n_a_files, t_hdr['NAXIS2'],t_hdr['NAXIS1']) )
+            t_hdu     = fits.open(a_files[0]) # + on 08/11/2017
+            t_hdr     = t_hdu['SCI'].header
+            arcs_arr  = np.zeros( (n_a_files, t_hdr['NAXIS2'],t_hdr['NAXIS1']) )
+            arcs_arr2 = np.zeros( (n_a_files, t_hdr['NAXIS2'],t_hdr['NAXIS1']) ) # + on 08/11/2017
             for ii in range(n_a_files):
-                arcs_arr[ii] = fits.getdata(a_files[ii], extname='SCI')
+                arcs_arr[ii]  = fits.getdata(a_files[ii], extname='SCI')
+                arcs_arr2[ii] = fits.getdata(a_files[ii], extname='VAR') # + on 08/11/2017
             arcs_avg = np.average(arcs_arr, axis=0)
+            # + on 08/11/2017
+            arcs_var = np.sqrt(arcs_arr2[0]**2+arcs_arr2[1]**2)/2.0
+            t_hdu['SCI'].data = arcs_avg
+            t_hdu['VAR'].data = arcs_var
             if silent == False:
                 log.info('### Writing : '+arc_stack_file)
-            fits.writeto(arc_stack_file, arcs_avg, header=t_hdr)
+            t_hdu.writeto(arc_stack_file, output_verify='ignore') # Mod on 08/11/2017
 
     #end do_arcs
 
