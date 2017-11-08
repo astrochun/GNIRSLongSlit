@@ -47,6 +47,8 @@ def main(rawdir, line_source='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 7-8 October 2017
+    Modified by Chun Ly, 8 November 2017
+     - Specify lampspec and outspec
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -91,22 +93,27 @@ def main(rawdir, line_source='', silent=False, verbose=True):
 
     if line_source == 'arc':
         coordlist = 'gnirs$data/argon.dat'
-        database='database/'
+        database  = 'database/'
     if line_source == 'OH':
         coordlist = OH_file
-        database='database_OH/'
-        
-    line2 = ['coordlist = %s' % coordlist, 'database = %s' % database]
+        database  = 'database_OH/'
+
+    # Mod on 08/11/2017
+    line2 = ["coordlist = '%s'" % coordlist,
+             "database  = '%s'" % database,
+             "lampspec  = '%s_stack.fits'"  % line_source,
+             "outspec   = 'w%s_stack.fits'" % line_source]
+
     f0.writelines("\n".join(line2)+"\n")
 
-    cmd = "iraf.gnirs.nswavelength('rnc@arc.lis', outprefix='',"+\
-          "outspectra='wrnc@arc.lis', crval=crval, cdelt=cdelt, crpix=crpix"+\
+    # Mod on 08/11/2017
+    cmd = "iraf.gnirs.nswavelength(lampspec, outprefix='',"+\
+          "outspectra=outspec, crval=crval, cdelt=cdelt, crpix=crpix, "+\
           "coordlist=coordlist, database=database, fl_inter='yes',"+\
           "cradius=20, threshold=50.0, order=2)"
 
-    f0.write(cmd)
+    f0.write(cmd+'\n')
     f0.close()
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
-
