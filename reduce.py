@@ -354,10 +354,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Scott McKinley, 5 October 2017
      - Created computeStatistics()
      - removed call to iraf imstatistics with do_flat
-    Modified by Chun Ly, 7 Nov 2017
+    Modified by Chun Ly, 7 November 2017
      - Create and write average arcs stack
-    Modified by Chun Ly, 8 Nov 2017
+    Modified by Chun Ly, 8 November 2017
      - Bug with average arcs stack - Not formatted for gnirs pipeline
+    Modified by Chun Ly, 11 November 2017
+     - Modify wave_cal sub-routine to handle interactive fitting from PyRAF
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -569,30 +571,19 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     #end do_arcs
 
-    # Step 4 : Perform wavelength calibration | + on 05/05/2017
+    # Step 4 : Perform wavelength calibration | + on 05/05/2017, Mod on 11/11/2017
     if wave_cal:
         iraf.chdir(rawdir) # + on 20/05/2017
-        log.info("## Performing non-interactive wavelength calibration on arc data")
-        do_run = iraf_get_subset.check_prefix('wrnc', arc_list, path=rawdir)
+        log.info("## Performing interactive wavelength calibration on arc data")
+        do_run = 0
+        if not exists('warc_stack.fits'): do_run = 1
         if do_run:
-            # Mod on 06/05/2017, 12/06/2017
-            arc_hdr = fits.getheader(rawdir+arcs[0])
-            crpix   = n_sp_pix / 2.0
-            crval   = arc_hdr['gratwave'] * 1e4 # in Angstroms
-            if arc_hdr['FILTER2'] == 'X_G0518':
-                cdelt = -0.094*1e4/n_sp_pix
-            if arc_hdr['FILTER2'] == 'J_G0517':
-                cdelt = 0.113*1e4/n_sp_pix
-            log.info('## CRVAL : %.1f ' % crval)
-            log.info('## CDELT : %.1f  CRPIX : %.1f' % (cdelt,crpix))
-
-            iraf.gnirs.nswavelength('rnc@'+arc_list, outprefix='',
-                                    outspectra='wrnc@'+arc_list,
-                                    crval=crval, cdelt=cdelt, crpix=crpix,
-                                    coordlist="gnirs$data/argon.dat",
-                                    database='database/',
-                                    fl_inter=no, cradius=20, threshold=50.0,
-                                    order=2)
+            log.info("## In order to perform interactive calibration, open up")
+            log.info("## a PyRAF terminal in an anaconda IRAF environment")
+            log.info("## 'cd' into "+rawdir)
+            log.info("## Execute the following command :")
+            log.info("## execfile('wave_cal_arcs.py')")
+            t_out = raw_input("## Hit RETURN when arc wavelength calibration is completed")
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nswavelength on rnc arc data')
