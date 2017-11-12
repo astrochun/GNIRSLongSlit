@@ -33,7 +33,7 @@ bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
 co_dirname = os.path.dirname(__file__)
 
-def arc_check(path, arcs=[''], out_pdf='', silent=False, verbose=True):
+def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=True):
 
     '''
     Generate plot illustrating wavelength calibration from IRAF database
@@ -49,6 +49,9 @@ def arc_check(path, arcs=[''], out_pdf='', silent=False, verbose=True):
 
     out_pdf : str
       Filename for output PDF. Do NOT include full path
+
+    stack : boolean
+      Indicate whether to use stacked arc data. Default: False
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -78,20 +81,29 @@ def arc_check(path, arcs=[''], out_pdf='', silent=False, verbose=True):
        - Better labeling of lines
        - xlim, ylim set
        - Adjust PDF paper size
+
+    Modified by Chun Ly, 11 November 2017
+     - Added stack keyword option to use stacked arc products
     '''
     
     if silent == False: log.info('### Begin arc_check : '+systime())
 
-    if arcs[0] == '':
-        arc_list = path + 'arc.lis'
-        if silent == False: log.info('### Reading : '+arc_list)
-        arcs = np.loadtxt(arc_list, dtype=type(str))
+    # Mod on 11/11/2017
+    if stack == True:
+        rnc_files = [path + 'arc_stack.fits']
+        d_files = [path+'database/idwarc_stack_SCI_1_']
+    else:
+        if arcs[0] == '':
+            arc_list = path + 'arc.lis'
+            if silent == False: log.info('### Reading : '+arc_list)
+            arcs = np.loadtxt(arc_list, dtype=type(str))
 
-    n_arcs = len(arcs)
 
-    rnc_files = [path+'rnc'+file0 for file0 in arcs]
-    d_files   = [path+'database/idwrnc'+file0.replace('.fits','_SCI_1_') \
-                 for file0 in arcs]
+        rnc_files = [path+'rnc'+file0 for file0 in arcs]
+        d_files   = [path+'database/idwrnc'+file0.replace('.fits','_SCI_1_') \
+                     for file0 in arcs]
+
+    n_arcs = len(rnc_files) # Mod on 11/11/2017
 
     out_pdf = path+'arc_check.pdf' if out_pdf == '' else path+out_pdf
     pp = PdfPages(out_pdf)
