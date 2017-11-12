@@ -360,6 +360,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Bug with average arcs stack - Not formatted for gnirs pipeline
     Modified by Chun Ly, 11 November 2017
      - Modify wave_cal sub-routine to handle interactive fitting from PyRAF
+     - Change call to QA_wave_cal.arc_check() to use stacked arc products
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -590,7 +591,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         iraf.chdir(cdir)
 
-        QA_wave_cal.arc_check(rawdir, arcs=arcs) # + on 25/05/2017
+        QA_wave_cal.arc_check(rawdir, stack=True) # Mod on 11/11/2017
 
         # Transform arc data to illustrate expected location of arc lines |  + on 15/06/2017
         iraf.chdir(rawdir)
