@@ -363,6 +363,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Change call to QA_wave_cal.arc_check() to use stacked arc products
     Modified by Chun Ly, 12 November 2017
      - Use stacked arc products in call to nsfitcoords and nswavelength
+     - Change call to QA_wave_cal.arc_check2() to include stacked arc products
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -622,7 +623,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## Will not run nstransform on frnc arc stacked data')
 
         iraf.chdir(cdir)
-        QA_wave_cal.arc_check2(rawdir, arcs=arcs) # + on 25/05/2017
+
+        # + on 25/05/2017, Mod on 12/11/2017
+        QA_wave_cal.arc_check2(rawdir, arcs=arcs, stack=True)
 
         # Wavelength calibration with OH skylines
         # + on 13/07/2017
