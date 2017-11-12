@@ -300,7 +300,7 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
     if silent == False: log.info('### End OH_check : '+systime())
 #enddef
 
-def arc_check2(path, arcs=[''], out_pdf='', silent=False, verbose=True):
+def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=True):
 
     '''
     Generate plot illustrating expected location of arc lines to
@@ -314,6 +314,9 @@ def arc_check2(path, arcs=[''], out_pdf='', silent=False, verbose=True):
 
     arcs : str or list (Optional)
       List of raw filenames for the arc data (e.g., 'N20170101S0111.fits')
+
+    stack : boolean
+      Indicate whether to include stacked arc data. Default: False
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -330,6 +333,8 @@ def arc_check2(path, arcs=[''], out_pdf='', silent=False, verbose=True):
      - Started as a copy of OH_check
     Modified by Chun Ly, 17 July 2017
      - Fix bug with arcs handling
+    Modified by Chun Ly, 12 November 2017
+     - Added stack keyword option to include stacked arc products
     '''
 
     if silent == False: log.info('### Begin arc_check2 : '+systime())
@@ -347,9 +352,15 @@ def arc_check2(path, arcs=[''], out_pdf='', silent=False, verbose=True):
         if silent == False: log.info('### Reading : '+arcs_list)
         arcs = np.loadtxt(arcs_list, dtype=type(str))
 
-    n_arcs = len(arcs)
-
     tfrnc_files = [path+'tfrnc'+file0 for file0 in arcs]
+
+    # + on 12/11/2017
+    if stack == True:
+        arcs0        = [path + 'arc_stack.fits']
+        tfrnc_files0 = [path + 'tfarc_stack.fits']
+
+        arcs         = arcs0 + arcs
+        tfrnc_files  = tfrnc_files0 + tfrnc_files
 
     chk = [file0 for file0 in tfrnc_files if exists(file0) == True]
     if len(chk) == 0:
@@ -358,8 +369,9 @@ def arc_check2(path, arcs=[''], out_pdf='', silent=False, verbose=True):
         log.warn('### Exiting!!!')
         return
 
-    out_pdf = path+'arc_check2.pdf' if out_pdf == '' else path+out_pdf
+    n_arcs = len(arcs) # Moved lower on 12/11/2017
 
+    out_pdf = path+'arc_check2.pdf' if out_pdf == '' else path+out_pdf
     pp = PdfPages(out_pdf)
 
     for nn in xrange(n_arcs):
