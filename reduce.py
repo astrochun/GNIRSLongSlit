@@ -361,6 +361,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 11 November 2017
      - Modify wave_cal sub-routine to handle interactive fitting from PyRAF
      - Change call to QA_wave_cal.arc_check() to use stacked arc products
+    Modified by Chun Ly, 12 November 2017
+     - Use stacked arc products in call to nsfitcoords and nswavelength
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -595,26 +597,29 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Transform arc data to illustrate expected location of arc lines |  + on 15/06/2017
         iraf.chdir(rawdir)
-        do_run = iraf_get_subset.check_prefix('frnc', arc_list, path=rawdir)
+
+        # Mod on 12/11/2017
+        do_run = 0
+        if not exists('farc_stack.fits'): do_run = 1
         if do_run:
-            log.info("## Running nsfitcoords on arc data")
-            iraf.gnirs.nsfitcoords('rnc@'+arc_list, outprefix='',
-                                   outspectra='frnc@'+arc_list,
-                                   lamp='wrnc'+arcs[0],
-                                   database='database/')
+            log.info("## Running nsfitcoords on arc stacked data")
+            iraf.gnirs.nsfitcoords('arc_stack.fits', outprefix='',
+                                   outspectra='farc_stack.fits',
+                                   lamp='warc_stack.fits', database='database/')
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nsfitcoords on rnc arc data')
+            log.warn('## Will not run nsfitcoords on rnc arc stacked data')
 
-        do_run = iraf_get_subset.check_prefix('tfrnc', arc_list, path=rawdir)
+        # Mod on 12/11/2017
+        do_run = 0
+        if not exists('tfarc_stack.fits'): do_run = 1
         if do_run:
             log.info("## Running nstransform on arc data")
-            iraf.gnirs.nstransform('frnc@'+arc_list, outprefix='',
-                                   outspectra='tfrnc@'+arc_list,
-                                   database='database/')
+            iraf.gnirs.nstransform('farc_stack.fits', outprefix='',
+                                   outspectra='tfarc_stack.fits', database='database/')
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nstransform on frnc arc data')
+            log.warn('## Will not run nstransform on frnc arc stacked data')
 
         iraf.chdir(cdir)
         QA_wave_cal.arc_check2(rawdir, arcs=arcs) # + on 25/05/2017
