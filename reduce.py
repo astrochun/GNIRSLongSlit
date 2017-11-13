@@ -38,9 +38,10 @@ iraf.gemini.gnirs.unlearn()
 iraf.set(stdimage="imt4096")
 
 import iraf_get_subset # + on 26/04/2017
-import file_handling # + on 07/05/2017
-import QA_wave_cal # + on 25/05/2017
-import OH_stack # + on 13/07/2017
+import file_handling   # + on 07/05/2017
+import QA_wave_cal     # + on 25/05/2017
+import OH_stack        # + on 13/07/2017
+import wave_cal_script # + on 12/11/2017
 
 # + on 14/09/2017
 import remove_bias_level
@@ -364,6 +365,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 12 November 2017
      - Use stacked arc products in call to nsfitcoords and nswavelength
      - Change call to QA_wave_cal.arc_check2() to include stacked arc products
+     - Call wave_cal_script to generate .py script for interactive wavelength
+       calibration with arc stacked data
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -579,6 +582,15 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     if wave_cal:
         iraf.chdir(rawdir) # + on 20/05/2017
         log.info("## Performing interactive wavelength calibration on arc data")
+
+        # + on 12/11/2017
+        script_file = 'wave_cal_arcs.py'
+        if not exists(script_file):
+            wave_cal_script.main(rawdir, line_source='arcs')
+        else:
+            log.info('## File exists!!! : '+script_file)
+            log.info('## Will not override!!!')
+
         do_run = 0
         if not exists('warc_stack.fits'): do_run = 1
         if do_run:
@@ -586,7 +598,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.info("## a PyRAF terminal in an anaconda IRAF environment")
             log.info("## 'cd' into "+rawdir)
             log.info("## Execute the following command :")
-            log.info("## execfile('wave_cal_arcs.py')")
+            log.info("## execfile('"+script_file+"')")
             t_out = raw_input("## Hit RETURN when arc wavelength calibration is completed")
         else:
             log.warn('## Files exist!!!')
