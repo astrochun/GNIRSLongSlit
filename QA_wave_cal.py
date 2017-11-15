@@ -84,12 +84,16 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
 
     Modified by Chun Ly, 11 November 2017
      - Added stack keyword option to use stacked arc products
+
+    Modified by Chun Ly, 15 November 2017
+     - Bug fix: Incorrect replace
     '''
     
     if silent == False: log.info('### Begin arc_check : '+systime())
 
     # Mod on 11/11/2017
     if stack == True:
+        arcs      = ['arc_stack.fits'] # + on 15/11/2017
         rnc_files = [path + 'arc_stack.fits']
         d_files = [path+'database/idwarc_stack_SCI_1_']
     else:
@@ -133,6 +137,7 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
         for cc in xrange(n_cols):
             temp = str0[beg_mark[cc]].split(' ')[1]
             temp = temp.replace('wrnc'+arcs[nn].replace('.fits','[SCI,1]['),'')
+            temp = temp.replace('w'+arcs[nn].replace('.fits','[SCI,1]['),'') # + on 15/11/2017
             x_cols[cc] = np.int(temp.split(',')[0])
 
             for rr in xrange(n_features[cc]): #beg_mark[cc]+1, func_mark[cc]):
