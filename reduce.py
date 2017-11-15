@@ -369,6 +369,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
        calibration with arc stacked data
     Modified by Chun Ly, 15 November 2017
      - Bug fix: 'arcs' -> 'arc'
+     - Bug fix: 'arcs' -> 'arc' for filename
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -586,7 +587,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         log.info("## Performing interactive wavelength calibration on arc data")
 
         # + on 12/11/2017
-        script_file = 'wave_cal_arcs.py'
+        script_file = 'wave_cal_arc.py'
         if not exists(script_file):
             wave_cal_script.main(rawdir, line_source='arc')
         else:
