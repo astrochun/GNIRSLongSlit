@@ -367,6 +367,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Change call to QA_wave_cal.arc_check2() to include stacked arc products
      - Call wave_cal_script to generate .py script for interactive wavelength
        calibration with arc stacked data
+    Modified by Chun Ly, 15 November 2017
+     - Bug fix: 'arcs' -> 'arc'
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -586,7 +588,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         # + on 12/11/2017
         script_file = 'wave_cal_arcs.py'
         if not exists(script_file):
-            wave_cal_script.main(rawdir, line_source='arcs')
+            wave_cal_script.main(rawdir, line_source='arc')
         else:
             log.info('## File exists!!! : '+script_file)
             log.info('## Will not override!!!')
