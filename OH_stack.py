@@ -112,6 +112,8 @@ def run(rawdir, silent=False, verbose=False):
     Created by Chun Ly, 25 June 2017
     Modified by Chun Ly, 20 September 2017
      - Call check_path()
+    Modified by Chun Ly, 16 November 2017
+     - Change prefix: rnc to rbnc
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -122,18 +124,19 @@ def run(rawdir, silent=False, verbose=False):
     if silent == False: log.info('### Reading : '+obj_list)
     objs = np.loadtxt(obj_list, dtype=type(str))
 
-    rnc_files = [rawdir+'rnc'+file0.replace('.fits','.OH.fits') for
-                 file0 in objs]
+    rbnc_files = [rawdir+'rbnc'+file0.replace('.fits','.OH.fits') for
+                 file0 in objs] # Mod on 16/11/2017
 
-    hdu0 = fits.open(rnc_files[0])
-    hdr  = fits.getheader(rnc_files[0], extname='SCI')
+    # Mod on 16/11/2017
+    hdu0 = fits.open(rbnc_files[0])
+    hdr  = fits.getheader(rbnc_files[0], extname='SCI')
     naxis1 = hdr['NAXIS1']
     naxis2 = hdr['NAXIS2']
 
-    arr0 = np.zeros((len(rnc_files), naxis2, naxis1))
-    for ii in range(len(rnc_files)):
+    arr0 = np.zeros((len(rbnc_files), naxis2, naxis1)) # Mod on 16/11/2017
+    for ii in range(len(rbnc_files)):
         if verbose == True: log.info('### Reading : '+obj_list)
-        t_data = fits.getdata(rnc_files[ii], extname='SCI')
+        t_data = fits.getdata(rbnc_files[ii], extname='SCI') # Mod on 16/11/2017
         t_med0 = np.median(t_data, axis=0) # Median along columns
         # Remove median along columns
         med_off = np.repeat(t_med0, naxis2).reshape(naxis1,naxis2).transpose()
