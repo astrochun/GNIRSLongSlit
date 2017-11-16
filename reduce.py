@@ -370,6 +370,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 15 November 2017
      - Bug fix: 'arcs' -> 'arc'
      - Bug fix: 'arcs' -> 'arc' for filename
+
+    Modified by Chun Ly, 16 November 2017
+     - Minor documentation
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -605,7 +608,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             t_out = raw_input("## Hit RETURN when arc wavelength calibration is completed")
         else:
             log.warn('## Files exist!!!')
-            log.warn('## Will not run nswavelength on rnc arc data')
+            log.warn('## Will not run nswavelength on rnc arc stacked data')
 
         iraf.chdir(cdir)
 
