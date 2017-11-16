@@ -87,6 +87,9 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
 
     Modified by Chun Ly, 15 November 2017
      - Bug fix: Incorrect replace
+
+    Modified by Chun Ly, 16 November 2017
+     - Change prefix: rnc to rbnc
     '''
     
     if silent == False: log.info('### Begin arc_check : '+systime())
@@ -103,8 +106,9 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
             arcs = np.loadtxt(arc_list, dtype=type(str))
 
 
-        rnc_files = [path+'rnc'+file0 for file0 in arcs]
-        d_files   = [path+'database/idwrnc'+file0.replace('.fits','_SCI_1_') \
+        # Mod on 16/11/2017
+        rnc_files = [path+'rbnc'+file0 for file0 in arcs]
+        d_files   = [path+'database/idwrbnc'+file0.replace('.fits','_SCI_1_') \
                      for file0 in arcs]
 
     n_arcs = len(rnc_files) # Mod on 11/11/2017
@@ -136,7 +140,8 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
         l_val0, l_val = np.zeros((n_cols,n_max)), np.zeros((n_cols,n_max))
         for cc in xrange(n_cols):
             temp = str0[beg_mark[cc]].split(' ')[1]
-            temp = temp.replace('wrnc'+arcs[nn].replace('.fits','[SCI,1]['),'')
+            # Mod on 16/11/2017
+            temp = temp.replace('wrbnc'+arcs[nn].replace('.fits','[SCI,1]['),'')
             temp = temp.replace('w'+arcs[nn].replace('.fits','[SCI,1]['),'') # + on 15/11/2017
             x_cols[cc] = np.int(temp.split(',')[0])
 
