@@ -347,6 +347,8 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
      - Fix bug with arcs handling
     Modified by Chun Ly, 12 November 2017
      - Added stack keyword option to include stacked arc products
+    Modified by Chun Ly, 16 November 2017
+     - Change prefix: tfrnc to tfrbnc
     '''
 
     if silent == False: log.info('### Begin arc_check2 : '+systime())
@@ -364,7 +366,7 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
         if silent == False: log.info('### Reading : '+arcs_list)
         arcs = np.loadtxt(arcs_list, dtype=type(str))
 
-    tfrnc_files = [path+'tfrnc'+file0 for file0 in arcs]
+    tfrnc_files = [path+'tfrbnc'+file0 for file0 in arcs] # Mod on 16/11/2017
 
     # + on 12/11/2017
     if stack == True:
