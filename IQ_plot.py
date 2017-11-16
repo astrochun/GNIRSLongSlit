@@ -164,6 +164,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
     Modified by Chun Ly, 14 July 2017
      - Fix tick mark locations
      - Fix y limit range for extreme outliers
+    Modified by Chun Ly, 16 November 2017
+     - Change prefix: rnc to rbnc
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -194,7 +196,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
 
         # Mod on 06/06/2017
         if skysub == True:
-            files = ['rnc'+file0 for file0 in files]
+            files = ['brnc'+file0 for file0 in files] # Mod on 16/11/2017
             out_pdf = path+'IQ_plot.skysub.pdf' if out_pdf == '' else \
                       path+out_pdf
         else:
