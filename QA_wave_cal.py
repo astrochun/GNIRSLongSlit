@@ -227,6 +227,8 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
        images or those without skysubtraction (OH skylines more visible)
     Modified by Chun Ly, 26 June 2017
      - Plot more OH skylines (change threshold for OH_mark)
+    Modified by Chun Ly, 16 November 2017
+     - Change prefix: tfrnc to tfrbnc
     '''
 
     if silent == False: log.info('### Begin OH_check : '+systime())
@@ -249,7 +251,7 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
 
     n_obj = len(objs)
 
-    tfrnc_files = [path+'tfrnc'+file0 for file0 in objs]
+    tfrnc_files = [path+'tfrbnc'+file0 for file0 in objs] # Mod on 16/11/2017
 
     # + on 20/05/2017
     chk = [file0 for file0 in tfrnc_files if exists(file0) == True]
