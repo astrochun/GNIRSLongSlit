@@ -49,13 +49,14 @@ def main(rawdir, line_source='', silent=False, verbose=True):
     Created by Chun Ly, 7-8 October 2017
     Modified by Chun Ly, 8 November 2017
      - Specify lampspec and outspec
+    Modified by Chun Ly, 16 November 2017
+     - Handle line_source == 'OH'
+     - Generalized arrays: arc -> frame
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
 
     rawdir = check_path(rawdir)
-
-    arc_list  = rawdir+'arc.lis'
 
     if line_source == '':
         log.warn("## Must specify line_source keyword: ")
@@ -76,14 +77,17 @@ def main(rawdir, line_source='', silent=False, verbose=True):
 
     f0.writelines("\n".join(line0)+"\n")
 
-    arcs = np.loadtxt(arc_list, dtype=type(str))
-    arc_hdr = fits.getheader(rawdir+arcs[0])
+    if line_source == 'arc': frame_list = rawdir+'arc.lis'
+    if line_source == 'OH':  frame_list = rawdir+'obj.OH.lis'
 
-    crpix    = n_sp_pix / 2.0
-    crval    = arc_hdr['gratwave'] * 1e4 # in Angstroms
-    if arc_hdr['FILTER2'] == 'X_G0518':
+    frames    = np.loadtxt(frame_list, dtype=type(str))
+    frame_hdr = fits.getheader(rawdir+frames[0])
+
+    crpix = n_sp_pix / 2.0
+    crval = frame_hdr['gratwave'] * 1e4 # in Angstroms
+    if frame_hdr['FILTER2'] == 'X_G0518':
         cdelt = -0.094*1e4/n_sp_pix
-    if arc_hdr['FILTER2'] == 'J_G0517':
+    if frame_hdr['FILTER2'] == 'J_G0517':
         cdelt = -0.113*1e4/n_sp_pix
     log.info('## CRVAL : %.1f ' % crval)
     log.info('## CDELT : %.1f  CRPIX : %.1f' % (cdelt,crpix))
