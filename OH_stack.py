@@ -184,6 +184,8 @@ def wave_cal(rawdir, silent=False, verbose=False):
      - Call check_path()
     Modified by Chun Ly, 16 November 2017
      - Call wave_cal_script to get PyRAF code
+    Modified by Chun Ly, 16 November 2017
+     - Bug fix: indentation typo with else statement
     '''
 
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -212,9 +214,9 @@ def wave_cal(rawdir, silent=False, verbose=False):
         log.info("## Execute the following command :")
         log.info("## execfile('"+script_file+"')")
         t_out = raw_input("## Hit RETURN when OH wavelength calibration is completed")
-        else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nswavelength on OH stacked data')
+    else:
+        log.warn('## Files exist!!!')
+        log.warn('## Will not run nswavelength on OH stacked data')
 
     iraf.chdir(cdir)
 #enddef
