@@ -373,6 +373,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     Modified by Chun Ly, 16 November 2017
      - Minor documentation
+    Modified by Chun Ly, 17 November 2017
+     - Call wave_cal() and transform() of OH_stack
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -649,6 +651,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         # + on 13/07/2017
         log.info("## Performing non-interactive wavelength calibration on OH data")
         OH_stack.run(rawdir)
+        OH_stack.wave_cal(rawdir)  # + on 17/11/2017
+        OH_stack.transform(rawdir) # + on 17/11/2017
     #end wave_cal
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
