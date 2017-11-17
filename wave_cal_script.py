@@ -52,9 +52,13 @@ def main(rawdir, line_source='', silent=False, verbose=True):
     Modified by Chun Ly, 16 November 2017
      - Handle line_source == 'OH'
      - Generalized arrays: arc -> frame
+     - Specify GNIRS log file
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
+
+    timestamp = systime().replace(':','.')
+    logfile   = rawdir+'gnirs_'+timestamp+'.log'
 
     rawdir = check_path(rawdir)
 
@@ -74,6 +78,7 @@ def main(rawdir, line_source='', silent=False, verbose=True):
              'iraf.gemini.unlearn()', 'iraf.gemini.gemtools.unlearn()',
              'iraf.gemini.gnirs.unlearn()', 'iraf.set(stdimage="imt4096")',
              'iraf.gemini.nsheaders("gnirs")']
+    #'iraf.gemini.gnirs.logfile = "%s"' % logfile] # + on 16/11/2017
 
     f0.writelines("\n".join(line0)+"\n")
 
@@ -106,15 +111,16 @@ def main(rawdir, line_source='', silent=False, verbose=True):
     line2 = ["coordlist = '%s'" % coordlist,
              "database  = '%s'" % database,
              "lampspec  = '%s_stack.fits'"  % line_source,
-             "outspec   = 'w%s_stack.fits'" % line_source]
+             "outspec   = 'w%s_stack.fits'" % line_source,
+             "logfile   = '%s'" % logfile] # + on 16/11/2017
 
     f0.writelines("\n".join(line2)+"\n")
 
-    # Mod on 08/11/2017
+    # Mod on 08/11/2017, 16/11/2017
     cmd = "iraf.gnirs.nswavelength(lampspec, outprefix='',"+\
           "outspectra=outspec, crval=crval, cdelt=cdelt, crpix=crpix, "+\
           "coordlist=coordlist, database=database, fl_inter='yes',"+\
-          "cradius=20, threshold=50.0, order=2)"
+          "cradius=20, threshold=50.0, order=2, logfile=logfile)"
 
     f0.write(cmd+'\n')
     f0.close()
