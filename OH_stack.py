@@ -182,6 +182,8 @@ def wave_cal(rawdir, silent=False, verbose=False):
     Created by Chun Ly, 13 July 2017
     Modified by Chun Ly, 20 September 2017
      - Call check_path()
+    Modified by Chun Ly, 16 November 2017
+     - Call wave_cal_script to get PyRAF code
     '''
 
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -192,25 +194,29 @@ def wave_cal(rawdir, silent=False, verbose=False):
     logfile   = rawdir+'gnirs_'+timestamp+'.log'
     iraf.gemini.gnirs.logfile = logfile
 
-    log.info("## Raw data is located in : %s" % rawdir)
+    # + on 16/11/2017
+    script_file = 'wave_cal_OH.py'
+    if not exists(script_file):
+        wave_cal_script.main(rawdir, line_source='OH')
+    else:
+        log.info('## File exists!!! : '+script_file)
+        log.info('## Will not override!!!')
 
-    hdr0  = fits.getheader('OH_stack.fits')
-    crpix = n_sp_pix / 2.0
-    crval = hdr0['gratwave'] * 1e4 # in Angstroms
-    if hdr0['FILTER2'] == 'X_G0518':
-        cdelt = -0.094*1e4/n_sp_pix
-    if hdr0['FILTER2'] == 'J_G0517':
-        cdelt = -0.113*1e4/n_sp_pix
-    if silent == False:
-        log.info('## CRVAL : %.1f ' % crval)
-        log.info('## CDELT : %.1f  CRPIX : %.1f' % (cdelt,crpix))
+    # + on 16/11/2017
+    do_run = 0
+    if not exists('wOH_stack.fits'): do_run = 1
+    if do_run:
+        log.info("## In order to perform interactive calibration, open up")
+        log.info("## a PyRAF terminal in an anaconda IRAF environment")
+        log.info("## 'cd' into "+rawdir)
+        log.info("## Execute the following command :")
+        log.info("## execfile('"+script_file+"')")
+        t_out = raw_input("## Hit RETURN when OH wavelength calibration is completed")
+        else:
+            log.warn('## Files exist!!!')
+            log.warn('## Will not run nswavelength on OH stacked data')
 
-    iraf.gnirs.nswavelength('OH_stack.fits', outprefix='',
-                            outspectra='wOH_stack.fits',
-                            crval=crval, cdelt=cdelt, crpix=crpix,
-                            coordlist=OH_file, database='database_OH/',
-                            fl_inter='no', cradius=20, threshold=25.0,
-                            order=4)
+    iraf.chdir(cdir)
 #enddef
 
 def transform(rawdir, silent=False, verbose=False):
