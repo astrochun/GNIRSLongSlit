@@ -158,7 +158,7 @@ def run(rawdir, silent=False, verbose=False):
     if silent == False: log.info('### End run : '+systime())
 #enddef
 
-def wave_cal(rawdir, silent=False, verbose=False):
+def wave_cal(rawdir, cdir, silent=False, verbose=False):
     '''
     Run gnirs.nswavelength on OH_stack 2-D FITS image for wavelength
     calibration
@@ -187,6 +187,8 @@ def wave_cal(rawdir, silent=False, verbose=False):
      - Call wave_cal_script to get PyRAF code
     Modified by Chun Ly, 16 November 2017
      - Bug fix: indentation typo with else statement
+    Modified by Chun Ly, 20 November 2017
+     - Bug fix: Pass in cdir
     '''
 
     rawdir = check_path(rawdir) # + on 20/09/2017

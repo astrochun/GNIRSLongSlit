@@ -663,7 +663,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         # + on 13/07/2017
         log.info("## Performing non-interactive wavelength calibration on OH data")
         OH_stack.run(rawdir)
-        OH_stack.wave_cal(rawdir)  # + on 17/11/2017
+        OH_stack.wave_cal(rawdir, cdir)  # + on 17/11/2017
         OH_stack.transform(rawdir) # + on 17/11/2017
     #end wave_cal
 
