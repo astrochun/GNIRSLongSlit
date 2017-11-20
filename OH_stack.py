@@ -21,7 +21,6 @@ import glob
 # + on 04/07/2017
 from matplotlib import pyplot as plt
 from pylab import subplots_adjust
-
 from astropy import log
 
 # + on 04/07/2017
@@ -35,6 +34,8 @@ from check_path import main as check_path
 
 # + on 04/07/2017
 from pyraf import iraf #from reduce import iraf
+
+import wave_cal_script # + on 20/11/2017
 
 iraf.gemini(_doprint=0)
 iraf.gemini.gnirs(_doprint=0)
