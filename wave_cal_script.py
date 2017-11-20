@@ -53,6 +53,8 @@ def main(rawdir, line_source='', silent=False, verbose=True):
      - Handle line_source == 'OH'
      - Generalized arrays: arc -> frame
      - Specify GNIRS log file
+    Modified by Chun Ly, 20 November 2017
+     - Bug fix: prefix needed for [frames] for line_source == OH
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -86,6 +88,9 @@ def main(rawdir, line_source='', silent=False, verbose=True):
     if line_source == 'OH':  frame_list = rawdir+'obj.OH.lis'
 
     frames    = np.loadtxt(frame_list, dtype=type(str))
+    if line_source == 'OH':
+        frames = ['rbnc'+file0 for file0 in frames]
+
     frame_hdr = fits.getheader(rawdir+frames[0])
 
     crpix = n_sp_pix / 2.0
