@@ -192,17 +192,25 @@ def normalize_flat(flatfile, out_pdf='', silent=True, verbose=False):
 
 #enddef
 
-def computeStatistics(flat_files):
+def computeStatistics(rawdir, flat_files):
     '''
+    rawdir : str
+      Path to raw files. Must end in a '/'
     
     Parameters
     ---------
     flat_files : list(str)
         list of flat files to be analyzed
+
+    Notes
+    -----
+    Modified by Chun Ly, 20 November 2017
+     - Fix bug with not having full path for flat_files list
     '''
+
     stats = []
     for image in flat_files:
-        hdu = fits.open(image)
+        hdu = fits.open(rawdir + image) # Mod on 20/11/2017
         data = hdu['SCI'].data[:,160:800] #160-800 pixel range to exclude bias level
         stats.append(sigma_clipped_stats(data))
     stats = np.array(stats)
@@ -375,6 +383,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Minor documentation
     Modified by Chun Ly, 17 November 2017
      - Call wave_cal() and transform() of OH_stack
+    Modified by Chun Ly, 20 November 2017
+     - Pass rawdir into computeStatistics()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -512,7 +522,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.warn('## File exists!!! : '+tmpflat)
 
         # tmpflat must not exist prior to call of run() for this call to succeed
-        good = computeStatistics(flat_files)
+        good = computeStatistics(rawdir, flat_files) # Mod on 20/11/2017
         
         if len(good) > 0:
             log.info('## Flat files to use : ')
