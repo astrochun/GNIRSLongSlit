@@ -385,6 +385,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call wave_cal() and transform() of OH_stack
     Modified by Chun Ly, 20 November 2017
      - Pass rawdir into computeStatistics()
+     - Always define flat_files list in do_flat if statement
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -512,10 +513,11 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     # Step 2 - Create flat | + on 26/04/2017
     if do_flat:
         log.info("## Creating super flat")
-        flats     = np.loadtxt(flat_list, dtype=type(str)) # Mod on 06/05/2017
-        tmpflat   = rawdir+'tmpflat'
+        flats      = np.loadtxt(flat_list, dtype=type(str)) # Mod on 06/05/2017
+        flat_files = ['bnc'+file0 for file0 in flats] # Mod on 06/05/2017 | Mod on 10/05/2017
+
+        tmpflat = rawdir+'tmpflat'
         if not exists(tmpflat):
-            flat_files = ['bnc'+file0 for file0 in flats] # Mod on 06/05/2017 | Mod on 10/05/2017
             if silent == False: log.info('## Writing : '+tmpflat)
             np.savetxt(tmpflat, flat_files, fmt='%s')
         else:
