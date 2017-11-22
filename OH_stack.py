@@ -248,6 +248,8 @@ def transform(rawdir, silent=False, verbose=False):
     Created by Chun Ly, 4 July 2017
     Modified by Chun Ly, 20 September 2017
      - Call check_path()
+    Modified by Chun Ly, 22 November 2017
+     - Add file checking and log.warn calls
     '''
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
@@ -256,13 +258,23 @@ def transform(rawdir, silent=False, verbose=False):
 
     iraf.chdir(rawdir)
     log.info("## Running nsfitcoords on OH_stack")
-    iraf.gnirs.nsfitcoords('wOH_stack.fits', outprefix='',
-                           outspectra='fOH_stack.fits',
-                           lamp='wOH_stack.fits', database='database_OH/')
+    outfile1 = rawdir + 'fOH_stack.fits'
+    if not exists(outfile1):
+        iraf.gnirs.nsfitcoords('wOH_stack.fits', outprefix='',
+                               outspectra='fOH_stack.fits',
+                               lamp='wOH_stack.fits', database='database_OH/')
+    else:
+        log.warn('## File exists!!! : '+outfile1)
+        log.warn('## Will not run nsfitcoords on OH stacked data')
 
-    iraf.gnirs.nstransform('fOH_stack.fits', outprefix='',
-                           outspectra='tfOH_stack.fits',
-                           database='database_OH/')
+    outfile2 = rawdir + 'tfOH_stack.fits'
+    if not exists(outfile2):
+        iraf.gnirs.nstransform('fOH_stack.fits', outprefix='',
+                               outspectra='tfOH_stack.fits',
+                               database='database_OH/')
+        log.warn('## File exists!!! : '+outfile2)
+        log.warn('## Will not run nstransform on OH stacked data')
+
     iraf.chdir(cdir)
 #enddef
 
