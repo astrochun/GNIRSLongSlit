@@ -386,6 +386,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 20 November 2017
      - Pass rawdir into computeStatistics()
      - Always define flat_files list in do_flat if statement
+     - Pass cdir into OH_stack.wave_cal()
+    Modified by Chun Ly, 22 November 2017
+     - Call OH_stack.plot_spec in wave_cal if statement
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -665,6 +668,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         OH_stack.run(rawdir)
         OH_stack.wave_cal(rawdir, cdir)  # + on 17/11/2017
         OH_stack.transform(rawdir) # + on 17/11/2017
+        OH_stack.plot_spec(rawdir) # + on 22/11/2017
     #end wave_cal
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
