@@ -224,7 +224,8 @@ def computeStatistics(rawdir, flat_files):
 
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0, skysub=0,
-        fitcoords=0, combine=0, extract=0, silent=False, verbose=True):
+        fitcoords=0, combine=0, extract=0, calib_line='OH', silent=False,
+        verbose=True):
 
     '''
     Main function to run the IRAF Gemini reduction package on GNIRS data
@@ -233,6 +234,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     ----------
     rawdir : str
       Path to raw files. Must end in a '/'
+
+    calib_line : str
+      Indication for using OH sky lines or arc lines calibration
+      Either 'OH' or 'arc'. Default: 'OH'
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -389,6 +394,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Pass cdir into OH_stack.wave_cal()
     Modified by Chun Ly, 22 November 2017
      - Call OH_stack.plot_spec in wave_cal if statement
+    Modified by Chun Ly, 25 November 2017
+     - Add optional calib_line keyword option
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
