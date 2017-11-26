@@ -396,6 +396,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call OH_stack.plot_spec in wave_cal if statement
     Modified by Chun Ly, 25 November 2017
      - Add optional calib_line keyword option
+     - Define dbase and lamp0 variables
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -427,6 +428,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     log.info('do_arcs = %i  wave_cal  = %i' % (do_arcs, wave_cal))
     log.info('skysub  = %i  fitcoords = %i' % (skysub, fitcoords))
     log.info('combine = %i  extract   = %i' % (combine, extract))
+    log.info('calib_line = %s' % (calib_line)) # + on 25/11/2017
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
@@ -473,7 +475,14 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     # + on 26/04/2017
     all_lis = np.loadtxt(all_list, dtype=type(str)) # Mod on 06/05/2017
     n_all   = len(all_lis)
-    
+
+    # + on 25/11/2017
+    if calib_line == 'OH':
+        dbase = 'database_OH/'
+    if calib_line == 'arc':
+        dbase = 'database/'
+    lamp0 = 'w'+calib_line+'_stack.fits'
+
     # Step 1 - Prepare GNIRS data | + on 26/04/2017
     if prepare:
         log.info("## Preparing GNIRS data")
