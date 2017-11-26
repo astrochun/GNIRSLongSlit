@@ -399,6 +399,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Define dbase and lamp0 variables
      - Use calib_line settings for nsfitcoords and nstransform on telluric dataset
      - Use calib_line settings for nsfitcoords and nstransform on sky-subtracted sci dataset
+     - Use calib_line settings for nsfitcoords and nstransform on sci OH dataset
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -801,8 +802,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.info("## Running nsfitcoords on science OH data")
             iraf.gnirs.nsfitcoords('rbnc@'+OH_obj_list, outprefix='',
                                    outspectra='frbnc@'+OH_obj_list,
-                                   lamp='wrnc'+arcs[0],
-                                   database='database/')
+                                   lamp=lamp0, database=dbase) # Mod on 25/11/2017
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nsfitcoords on rbnc sci OH data')
@@ -813,7 +813,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.info("## Running nstransform on science OH data")
             iraf.gnirs.nstransform('frbnc@'+OH_obj_list, outprefix='',
                                    outspectra='tfrbnc@'+OH_obj_list,
-                                   database='database/')
+                                   database=dbase) # Mod on 25/11/2017
         else:
             log.warn('## Files exist!!!')
             log.warn('## Will not run nstransform on frbnc sci OH data')
