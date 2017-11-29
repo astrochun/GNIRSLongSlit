@@ -250,6 +250,8 @@ def transform(rawdir, silent=False, verbose=False):
      - Call check_path()
     Modified by Chun Ly, 22 November 2017
      - Add file checking and log.warn calls
+    Modified by Chun Ly, 29 November 2017
+     - Bug fix: Missing else statement
     '''
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
@@ -272,6 +274,7 @@ def transform(rawdir, silent=False, verbose=False):
         iraf.gnirs.nstransform('fOH_stack.fits', outprefix='',
                                outspectra='tfOH_stack.fits',
                                database='database_OH/')
+    else:
         log.warn('## File exists!!! : '+outfile2)
         log.warn('## Will not run nstransform on OH stacked data')
 
