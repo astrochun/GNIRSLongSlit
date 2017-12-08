@@ -36,6 +36,9 @@ from astropy.stats import sigma_clipped_stats # + on 10/03/2017
 from . import gnirs_2017a #targets0
 
 import dir_check
+
+import glog # + on 08/12/2017
+
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
 def main(file_list, path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
@@ -79,6 +82,8 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True, overwrite=
     Modified by Chun Ly, 1 June 2017
      - Added overwrite keyword option to overwrite file. Default is not to
        overwrite .pdf files
+    Modified by Chun Ly, 8 December 2017
+     - Import glog and call for stdout and ASCII logging
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
@@ -88,9 +93,15 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True, overwrite=
 
     out_pdf_default = out_pdf
 
+    timestamp = systime().replace(':','.') # + on 08/12/2017
+
     # Mod on 23/03/2017
     for path in list_path:
-        if silent == False: log.info('## Reading : '+path+file_list)
+        # + on 08/12/2017
+        logfile  = path+'QA_plot_'+timestamp+'.log'
+        mylogger = glog.log0(logfile)._get_logger()
+
+        if silent == False: mylogger.info('Reading : '+path+file_list) # Mod on 08/12/2017
         files   = np.loadtxt(path+file_list, dtype=type(str)).tolist()
         n_files = len(files)
 
@@ -101,20 +112,20 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True, overwrite=
 
         hdr_info_file = path+'hdr_info.tbl'
         if exists(hdr_info_file):
-            if silent == False: log.info('## Reading : '+hdr_info_file)
+            if silent == False: mylogger.info('Reading : '+hdr_info_file) # Mod on 08/12/2017
             tab0 = asc.read(hdr_info_file, format='fixed_width_two_line')
             idx1, idx2 = match_nosort_str(files, tab0['filename'])
             tab0 = tab0[idx2]
         else:
-            if silent == False: log.warn('## File not found : '+hdr_info_file)
+            if silent == False: mylogger.warn('File not found : '+hdr_info_file) # Mod on 08/12/2017
 
         if overwrite == False and exists(out_pdf):
-            log.warn('## File exists!! Will not overwrite '+out_pdf)
+            mylogger.warn('File exists!! Will not overwrite '+out_pdf) # Mod on 08/12/2017
         else:
             pp = PdfPages(out_pdf)
 
             for nn in xrange(n_files):
-                if silent == False: log.info('## Reading : '+files[nn])
+                if silent == False: mylogger.info('Reading : '+files[nn]) # Mod on 08/12/2017
                 # h0  = fits.getheader(path+files[nn], 0)
                 # im0 = fits.getdata(path+files[nn], 1)
                 hdu0 = fits.open(path+files[nn])
@@ -149,7 +160,7 @@ def main(file_list, path0='', out_pdf='', silent=False, verbose=True, overwrite=
 
                     gc.savefig(pp, format='pdf')
 
-            if silent == False: log.info('## Writing : '+out_pdf)
+            if silent == False: mylogger.info('Writing : '+out_pdf) # Mod on 08/12/2017
             pp.close()
         #endelse
 
