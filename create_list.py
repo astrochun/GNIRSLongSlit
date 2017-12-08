@@ -24,6 +24,8 @@ from . import gnirs_2017a #targets0
 
 import dir_check
 
+import glog # + on 08/12/2017
+
 def main(path0, silent=False, verbose=True, overwrite=False):
 
     '''
@@ -79,22 +81,29 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Minor fix for when no science data is available
     Modified by Chun Ly, 1 June 2017
      - Added overwrite keyword option to overwrite file
+    Modified by Chun Ly, 8 December 2017
+     - Import glog and call for stdout and ASCII logging
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
+
+    timestamp = systime().replace(':','.') # + on 08/12/2017
 
     # + on 23/03/2017
     dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
     # Mod on 23/03/2017
     for path in list_path:
+        logfile  = path+'create_list_'+timestamp+'.log'
+        mylogger = glog.log0(logfile)._get_logger()
+
         infile = path + 'hdr_info.tbl'
         if not exists(infile):
-            log.warning('### File does not exist : '+infile)
-            log.warning('### Exiting!!! '+systime())
+            mylogger.warning('File does not exist : '+infile)
+            mylogger.warning('Exiting!!! '+systime())
             return
     
-        if silent == False: log.info('### Reading: '+infile)
+        if silent == False: mylogger.info('Reading: '+infile)
         tab0 = asc.read(infile, format='fixed_width_two_line')
         len0 = len(tab0)
         r0   = xrange(len0)
@@ -131,25 +140,25 @@ def main(path0, silent=False, verbose=True, overwrite=False):
         # Mod on 10/04/2017
         prefix, index = [], []
         if len(i_arc)  == 0:
-            log.warn('## No ARC data found!')
+            mylogger.warn('No ARC data found!')
         else:
             prefix.append('arc')
             index.append(i_arc)
 
         if len(i_flat) == 0:
-            log.warn('## No FLAT data found!')
+            mylogger.warn('No FLAT data found!')
         else:
             prefix.append('flat')
             index.append(i_flat)
 
         if len(i_tell) == 0:
-            log.warn('## No Telluric data found!')
+            mylogger.warn('No Telluric data found!')
         else:
             prefix.append('telluric')
             index.append(i_tell)
 
         if len(i_sci)  == 0:
-            log.warn('## No science data found!')
+            mylogger.warn('No science data found!')
         else:
             prefix.append('obj')
             prefix.append('sky')
@@ -165,9 +174,9 @@ def main(path0, silent=False, verbose=True, overwrite=False):
                 for idx in b: QA[idx] = a # Mod on 16/05/2017
             outfile = path+a+'.lis'
             if overwrite == False and exists(outfile):
-                log.warn('File exists! Will not write '+outfile+'!!')
+                mylogger.warn('File exists! Will not write '+outfile+'!!')
             else:
-                if silent == False: log.info('## Writing : '+outfile)
+                if silent == False: mylogger.info('## Writing : '+outfile)
                 np.savetxt(outfile, tab0['filename'][b], fmt='%s')
                 #asc.write will not work. Will not produce single column
                 #asc.write(tab0[b], outfile, overwrite=True,
@@ -178,11 +187,11 @@ def main(path0, silent=False, verbose=True, overwrite=False):
         if len(i_all) > 0:
             outfile0 = path+'all.lis'
             if overwrite == False and exists(outfile0):
-                log.warn('File exists! Will not write all.lis!!')
+                mylogger.warn('File exists! Will not write all.lis!!')
             else:
-                if silent == False: log.info('## Writing : '+outfile0)
+                if silent == False: mylogger.info('## Writing : '+outfile0)
                 np.savetxt(outfile0, tab0['filename'][i_all], fmt='%s')
-        else: log.warn('Will not write all.lis!!')
+        else: mylogger.warn('Will not write all.lis!!')
 
         # Later + on 05/03/2017
         col0 = Column(QA, name='QA')
@@ -192,15 +201,15 @@ def main(path0, silent=False, verbose=True, overwrite=False):
         outfile2 = infile.replace('.tbl', '.QA.tbl')
         if silent == False:
             if overwrite == False and exists(outfile2):
-                log.warn('File exists! Will not write '+outfile2+'!!')
+                mylogger.warn('File exists! Will not write '+outfile2+'!!')
             else:
                 if not exists(outfile2):
-                    log.info('## Writing : '+outfile2)
-                else: log.info('## Overwriting : '+outfile2)
+                    mylogger.info('## Writing : '+outfile2)
+                else: mylogger.info('## Overwriting : '+outfile2)
                 asc.write(tab0, outfile2, format='fixed_width_two_line',
                           overwrite=True)
 
-    if silent == False: log.info('### End main : '+systime())
+    if silent == False: mylogger.info('End main : '+systime())
 #enddef
 
 def zcalbase_gal_gemini_2017a():
