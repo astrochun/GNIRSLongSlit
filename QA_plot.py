@@ -284,6 +284,8 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
     Modified by Chun Ly, 2 June 2017
      - Added overwrite keyword option to overwrite file. Default is not to
        overwrite .pdf files
+    Modified by Chun Ly, 8 December 2017
+     - Import glog and call for stdout and ASCII logging
     '''
 
     if silent == False: log.info('### Begin clean_QA : '+systime())
@@ -293,8 +295,14 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
 
     out_pdf_default = out_pdf # + on 15/05/2017
 
+    timestamp = systime().replace(':','.') # + on 08/12/2017
+
     # Mod on 23/03/2017
     for path in list_path:
+        # + on 08/12/2017
+        logfile  = path+'QA_plot_'+timestamp+'.log'
+        mylogger = glog.log0(logfile)._get_logger()
+
         if out_pdf == '':
             out_pdf = path+'QA_plot.clean.pdf'
         else:
@@ -307,12 +315,12 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
         n_files = len(files)
 
         if overwrite == False and exists(out_pdf):
-            log.warn('## File exists!! Will not overwrite '+out_pdf)
+            mylogger.warn('File exists!! Will not overwrite '+out_pdf)
         else:
             pp = PdfPages(out_pdf)
 
             for nn in xrange(n_files):
-                if silent == False: log.info('## Reading : '+files[nn])
+                if silent == False: mylogger.info('Reading : '+files[nn])
                 orig_file = files[nn].replace('cN','N')
 
                 im1 = fits.getdata(orig_file)
@@ -360,7 +368,7 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
 
                 fig.savefig(pp, format='pdf')
 
-            if silent == False: log.info('## Writing : '+out_pdf)
+            if silent == False: mylogger.info('Writing : '+out_pdf)
             pp.close()
         #endelse
         out_pdf = out_pdf_default
