@@ -17,10 +17,9 @@ sh.setLevel(logging.INFO)
 sh.setFormatter(formatter)
 #sh.handler_set = True
 
-
-def log0(LOG_FILENAME):
+class log0:
     '''
-    Main function to log information to stdout and ASCII file
+    Main class to log information to stdout and ASCII file
 
     Parameters
     ----------
@@ -37,18 +36,33 @@ def log0(LOG_FILENAME):
     Notes
     -----
     Created by Chun Ly, 7 December 2017
+
+    Modified by Chun Ly, 8 December 2017
+     - Switch from function to class to avoid repeated stdout entries due to
+       calling of handlers
     '''
 
-    fh = logging.FileHandler(LOG_FILENAME)
-    fh.setLevel(logging.INFO)
-    fh.setFormatter(formatter)
+    def __init__(self,file):
+        self.LOG_FILENAME = file
+        self._log = self._get_logger()
 
-    # create Logging object
-    mylogger = logging.getLogger('MyLogger')
-    mylogger.setLevel(logging.DEBUG)
-    mylogger.addHandler(sh)    # enabled: stdout
-    mylogger.addHandler(fh)    # enabled: file
-    mylogger.propagate = False
+    def _get_logger(self):
+        loglevel = logging.INFO
+        log = logging.getLogger(__name__)
+        if not getattr(log, 'handler_set', None):
+            log.setLevel(logging.INFO)
+            sh = logging.StreamHandler()
+            sh.setFormatter(formatter)
+            log.addHandler(sh)
+
+            fh = logging.FileHandler(self.LOG_FILENAME)
+            fh.setLevel(logging.INFO)
+            fh.setFormatter(formatter)
+            log.addHandler(fh)
+
+            log.setLevel(loglevel)
+            log.handler_set = True
+        return log
 
     #debug = mylogger.debug
     #info = mylogger.info
@@ -56,5 +70,5 @@ def log0(LOG_FILENAME):
     #error = mylogger.error
     #critical = mylogger.critical
 
-    return mylogger
+    #return mylogger
 #enddef
