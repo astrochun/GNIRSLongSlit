@@ -24,6 +24,8 @@ from . import gnirs_2017a #targets0
 
 import dir_check
 
+import glog # + on 08/12/2017
+
 def get_offsets(path0, silent=True, verbose=False):
 
     '''
@@ -119,22 +121,30 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Call dir_check.main() to handle multiple date directories
     Modified by Chun Ly, 11 May 2017
      - Handle longer filter1 and filter2 FITS values
+    Modified by Chun Ly,  8 December 2017
+     - Import glog and call for stdout and ASCII logging
     '''
 
     if silent == False: log.info('### Begin main : '+systime())
 
+    timestamp = systime().replace(':','.') # + on 08/12/2017
     # + on 23/03/2017
     dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
     # Mod on 23/03/2017
     for path in list_path:
+        # + on 08/12/2017
+        logfile  = path+'hdr_info_'+timestamp+'.log'
+        mylogger = glog.log0(logfile)._get_logger()
+
         outfile = path + 'hdr_info.tbl'
 
         # Mod later on 04/03/2017 to not overwrite file
         # Mod on 05/03/2017 to always print out this warning
         if overwrite == False and exists(outfile):
-            log.warning('## File exists : '+outfile)
-            log.warning('## Not over-writing!!! ')
+            # Mod on 08/12/2017
+            mylogger.warning('## File exists : '+outfile)
+            mylogger.warning('## Not over-writing!!! ')
         else:
             fits_files = glob.glob(path+'N*fits')
             n_files = len(fits_files)
@@ -158,7 +168,7 @@ def main(path0, silent=False, verbose=True, overwrite=False):
                         h0['FILTER1'], h0['FILTER2'], h0['SLIT']]
                 tab0.add_row(vec0)
 
-            if silent == False: log.info('## Writing : '+outfile)
+            if silent == False: mylogger.info('## Writing : '+outfile) # Mod on 08/12/2017
             asc.write(tab0, outfile, format='fixed_width_two_line')
         #endelse
     #endfor
