@@ -140,7 +140,8 @@ def compute_weights(rawdir, out_pdf='', silent=True, verbose=False):
     if silent == False: log.info('### End compute_weights : '+systime())
 #enddef
 
-def normalize_flat(flatfile, out_pdf='', silent=True, verbose=False):
+def normalize_flat(flatfile, out_pdf='', rawdir='', mylogger=None, silent=True,
+                   verbose=False):
     '''
     Plot up flat average and fix weird flats (broad dip)
 
@@ -162,13 +163,22 @@ def normalize_flat(flatfile, out_pdf='', silent=True, verbose=False):
     Notes
     -----
     Created by Chun Ly, 16 June 2017
+
+    Modified by Chun Ly, 10 December 2017
+     - Implement glog logging, allow rawdir and mylogger keywords
     '''
 
-    if silent == False: log.info('### Begin normalize_flat : '+systime())
+    # + on 10/12/2017
+    if type(mylogger) == type(None):
+        logfile  = rawdir+'reduce.log'
+        mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False:
+        mylogger.info('Begin normalize_flat : '+systime())
 
     path0 = os.path.dirname(flatfile)+'/'
 
-    if silent == False: log.info('### Reading : '+flatfile)
+    if silent == False: mylogger.info('Reading : '+flatfile)
     hdu0 = fits.open(flatfile)
     im0  = hdu0['SCI'].data
 
@@ -187,10 +197,10 @@ def normalize_flat(flatfile, out_pdf='', silent=True, verbose=False):
     subplots_adjust(left=0.1, right=0.975, top=0.99, bottom=0.1)
     if out_pdf == '': out_pdf = path0 + 'normalize_flat.pdf'
 
-    if silent == False: log.info('### Writing : '+out_pdf)
+    if silent == False: mylogger.info('Writing : '+out_pdf)
     fig.savefig(out_pdf)
 
-    if silent == False: log.info('### End normalize_flat : '+systime())
+    if silent == False: mylogger.info('End normalize_flat : '+systime())
 
 #enddef
 
