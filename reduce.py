@@ -50,6 +50,8 @@ import examine_median
 # + on 20/09/2017
 from check_path import main as check_path
 
+import glog # + on 10/12/2017
+
 co_filename = __file__ # + on 05/05/2017
 yes, no = 'yes', 'no' # + on 26/04/2017
 
@@ -398,8 +400,11 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Add optional calib_line keyword option
      - Define dbase and lamp0 variables
      - Use calib_line settings for nsfitcoords and nstransform on telluric dataset
-     - Use calib_line settings for nsfitcoords and nstransform on sky-subtracted sci dataset
+     - Use calib_line settings for nsfitcoords and nstransform on sky-subtracted
+       sci dataset
      - Use calib_line settings for nsfitcoords and nstransform on sci OH dataset
+    Modified by Chun Ly, 10 December 2017
+     - Import glog and call for stdout and ASCII logging
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -426,12 +431,16 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         wave_cal, skysub = 1, 1
         extract, combine, fitcoords = 1, 1, 1
 
-    # + on 11/07/2017
-    log.info('prepare = %i  do_flat   = %i' % (prepare, do_flat))
-    log.info('do_arcs = %i  wave_cal  = %i' % (do_arcs, wave_cal))
-    log.info('skysub  = %i  fitcoords = %i' % (skysub, fitcoords))
-    log.info('combine = %i  extract   = %i' % (combine, extract))
-    log.info('calib_line = %s' % (calib_line)) # + on 25/11/2017
+    # + on 10/12/2017
+    logfile  = rawdir+'reduce.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    # + on 11/07/2017. Mod on 10/12/2017
+    mylogger.info('prepare = %i  do_flat   = %i' % (prepare, do_flat))
+    mylogger.info('do_arcs = %i  wave_cal  = %i' % (do_arcs, wave_cal))
+    mylogger.info('skysub  = %i  fitcoords = %i' % (skysub, fitcoords))
+    mylogger.info('combine = %i  extract   = %i' % (combine, extract))
+    mylogger.info('calib_line = %s' % (calib_line)) # + on 25/11/2017
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
@@ -442,21 +451,22 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     logfile   = rawdir+'gnirs_'+timestamp+'.log'
     iraf.gemini.gnirs.logfile = logfile
 
-    log.info("## Raw data is located in : %s" % rawdir)
+    mylogger.info("## Raw data is located in : %s" % rawdir) # Mod on 10/12/2017
 
-    log.info("## GNIRS logfile : "+logfile) # + on 05/05/2017
+    mylogger.info("## GNIRS logfile : "+logfile) # + on 05/05/2017. Mod on 10/12/2017
 
     # Save reduce.py for each run | + on 05/05/2017
     reduce_file = 'reduce_'+timestamp+'.py'
-    log.info("## GNIRSLongSlit.reduce script : " + reduce_file)
+    mylogger.info("## GNIRSLongSlit.reduce script : " + reduce_file) # Mod on 10/12/2017
     os.system('cp -a '+co_filename+' '+rawdir+reduce_file)
 
     # Check for cleanir files first | Later + on 26/04/2017
     c_files = glob.glob(rawdir+'cN*fits') # Mod on 06/05/2017, 07/06/2017
     if len(c_files) == 0:
-        log.warn("## No cleanir files (cN*fits) available")
-        log.warn("## Need to execute symlink.run()") # + on 05/05/2017
-        log.warn("## ABORTING!!!")
+        # Mod on 10/12/2017
+        mylogger.warn("## No cleanir files (cN*fits) available")
+        mylogger.warn("## Need to execute symlink.run()") # + on 05/05/2017
+        mylogger.warn("## ABORTING!!!")
         return
     #endif
 
