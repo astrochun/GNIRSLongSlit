@@ -406,6 +406,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 10 December 2017
      - Import glog and call for stdout and ASCII logging
      - glog implementation in prepare, do_flat, do_arcs steps
+     - glog implementation in wave_cal, skysub, fitcoords steps
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -638,15 +639,15 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     # Step 4 : Perform wavelength calibration | + on 05/05/2017, Mod on 11/11/2017
     if wave_cal:
         iraf.chdir(rawdir) # + on 20/05/2017
-        log.info("## Performing interactive wavelength calibration on arc data")
+        mylogger.info("Performing interactive wavelength calibration on arc data")
 
         # + on 12/11/2017
         script_file = 'wave_cal_arc.py'
         if not exists(script_file):
             wave_cal_script.main(rawdir, line_source='arc')
         else:
-            log.info('## File exists!!! : '+script_file)
-            log.info('## Will not override!!!')
+            mylogger.info('File exists!!! : '+script_file)
+            mylogger.info('Will not override!!!')
 
         do_run = 0
         if not exists('warc_stack.fits'): do_run = 1
@@ -658,8 +659,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             log.info("## execfile('"+script_file+"')")
             t_out = raw_input("## Hit RETURN when arc wavelength calibration is completed")
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nswavelength on rnc arc stacked data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nswavelength on rnc arc stacked data')
 
         iraf.chdir(cdir)
 
@@ -672,24 +673,24 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_run = 0
         if not exists('farc_stack.fits'): do_run = 1
         if do_run:
-            log.info("## Running nsfitcoords on arc stacked data")
+            mylogger.info("Running nsfitcoords on arc stacked data")
             iraf.gnirs.nsfitcoords('arc_stack.fits', outprefix='',
                                    outspectra='farc_stack.fits',
                                    lamp='warc_stack.fits', database='database/')
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nsfitcoords on rnc arc stacked data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nsfitcoords on rnc arc stacked data')
 
         # Mod on 12/11/2017
         do_run = 0
         if not exists('tfarc_stack.fits'): do_run = 1
         if do_run:
-            log.info("## Running nstransform on arc data")
+            mylogger.info("Running nstransform on arc data")
             iraf.gnirs.nstransform('farc_stack.fits', outprefix='',
                                    outspectra='tfarc_stack.fits', database='database/')
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nstransform on frnc arc stacked data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nstransform on frnc arc stacked data')
 
         iraf.chdir(cdir)
 
@@ -698,7 +699,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Wavelength calibration with OH skylines
         # + on 13/07/2017
-        log.info("## Performing non-interactive wavelength calibration on OH data")
+        mylogger.info("Performing non-interactive wavelength calibration on OH data")
         OH_stack.run(rawdir)
         OH_stack.wave_cal(rawdir, cdir)  # + on 17/11/2017
         OH_stack.transform(rawdir) # + on 17/11/2017
@@ -707,7 +708,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
     if skysub:
-        log.info("## Performing sky subtraction on telluric data")
+        mylogger.info("Performing sky subtraction on telluric data")
 
         # Mod on 10/09/2017
         fl_flat   = yes
@@ -720,11 +721,11 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                 fl_nsappwave=no, fl_sky=yes, fl_flat=fl_flat,
                                 flatimage=flatimage)
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nsreduce on bnc telluric data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nsreduce on bnc telluric data')
 
         # Step 5b : Sky subtract science data | + on 16/05/2017
-        log.info("## Performing sky subtraction on science data")
+        mylogger.info("Performing sky subtraction on science data")
         do_run = iraf_get_subset.check_prefix('rbnc', obj_list, path=rawdir)
         if do_run:
             iraf.gnirs.nsreduce(rawdir+'bnc@'+obj_list, outprefix='',
@@ -733,8 +734,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                 skyimages=rawdir+'bnc@'+sky_list,
                                 fl_flat=fl_flat, flatimage=flatimage)
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nsreduce on bnc sci data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nsreduce on bnc sci data')
 
 
         examine_median.run(rawdir, 'skysub') # + on 15/09/2017
@@ -744,10 +745,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         obj = np.loadtxt(obj_list, dtype=type(str)) # Mod on 06/05/2017
         if not exists(OH_obj_list):
             OH_obj_lists = [file0.replace('.fits','.OH.fits') for file0 in obj]
-            if silent == False: log.info('## Writing : '+OH_obj_list)
+            if silent == False: mylogger.info('Writing : '+OH_obj_list)
             np.savetxt(OH_obj_list, OH_obj_lists, fmt='%s')
         else:
-            log.warn('## File exists!!! : '+OH_obj_list)
+            mylogger.warn('File exists!!! : '+OH_obj_list)
 
         do_run = iraf_get_subset.check_prefix('rbnc', OH_obj_list, path=rawdir)
         if do_run:
@@ -758,8 +759,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                 fl_flat=fl_flat, flatimage=flatimage)
 
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nsreduce on bnc sci OH data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nsreduce on bnc sci OH data')
 
         examine_median.run(rawdir, 'flat') # + on 15/09/2017
     #end skysub
@@ -770,68 +771,68 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         iraf.chdir(rawdir)
         do_run = iraf_get_subset.check_prefix('frbnc', tell_list, path=rawdir)
         if do_run:
-            log.info("## Running nsfitcoords on telluric data")
+            mylogger.info("Running nsfitcoords on telluric data")
             iraf.gnirs.nsfitcoords('rbnc@'+tell_list, outprefix='',
                                    outspectra='frbnc@'+tell_list,
                                    lamp=lamp0, database=dbase) # Mod on 25/11/2017
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nsfitcoords on rbnc telluric data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nsfitcoords on rbnc telluric data')
 
         do_run = iraf_get_subset.check_prefix('tfrbnc', tell_list, path=rawdir)
         if do_run:
-            log.info("## Running nstransform on telluric data")
+            mylogger.info("Running nstransform on telluric data")
             iraf.gnirs.nstransform('frbnc@'+tell_list, outprefix='',
                                    outspectra='tfrbnc@'+tell_list,
                                    database=dbase) # Mod on 25/11/2017
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nstransform on frbnc telluric data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nstransform on frbnc telluric data')
 
         # Step 6b : Apply wavelength solution to science data | + on 17/05/2017
         # Science data
         do_run = iraf_get_subset.check_prefix('frbnc', obj_list, path=rawdir)
         if do_run:
-            log.info("## Running nsfitcoords on science data")
+            mylogger.info("Running nsfitcoords on science data")
             iraf.gnirs.nsfitcoords('rbnc@'+obj_list, outprefix='',
                                    outspectra='frbnc@'+obj_list,
                                    lamp=lamp0, database=dbase) # Mod on 25/11/2017
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nsfitcoords on rbnc science data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nsfitcoords on rbnc science data')
 
         do_run = iraf_get_subset.check_prefix('tfrbnc', obj_list, path=rawdir)
         if do_run:
-            log.info("## Running nstransform on science data")
+            mylogger.info("Running nstransform on science data")
             iraf.gnirs.nstransform('frbnc@'+obj_list, outprefix='',
                                    outspectra='tfrbnc@'+obj_list,
                                    database=dbase) # Mod on 25/11/2017
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nstransform on frbnc science data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nstransform on frbnc science data')
 
         # Apply wavelength solution to unsubtracted science data
         # + on 02/06/2017
         do_run = iraf_get_subset.check_prefix('frbnc', OH_obj_list, path=rawdir)
         if do_run:
-            log.info("## Running nsfitcoords on science OH data")
+            mylogger.info("Running nsfitcoords on science OH data")
             iraf.gnirs.nsfitcoords('rbnc@'+OH_obj_list, outprefix='',
                                    outspectra='frbnc@'+OH_obj_list,
                                    lamp=lamp0, database=dbase) # Mod on 25/11/2017
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nsfitcoords on rbnc sci OH data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nsfitcoords on rbnc sci OH data')
 
         # + on 02/06/2017
         do_run = iraf_get_subset.check_prefix('tfrbnc', OH_obj_list, path=rawdir)
         if do_run:
-            log.info("## Running nstransform on science OH data")
+            mylogger.info("Running nstransform on science OH data")
             iraf.gnirs.nstransform('frbnc@'+OH_obj_list, outprefix='',
                                    outspectra='tfrbnc@'+OH_obj_list,
                                    database=dbase) # Mod on 25/11/2017
         else:
-            log.warn('## Files exist!!!')
-            log.warn('## Will not run nstransform on frbnc sci OH data')
+            mylogger.warn('Files exist!!!')
+            mylogger.warn('Will not run nstransform on frbnc sci OH data')
 
         iraf.chdir(cdir)
         QA_wave_cal.OH_check(rawdir, skysub=False) # + 02/06/2017
