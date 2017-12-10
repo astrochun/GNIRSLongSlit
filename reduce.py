@@ -408,35 +408,37 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - glog implementation in prepare, do_flat, do_arcs steps
      - glog implementation in wave_cal, skysub, fitcoords steps
      - glog implementation in combine, extract steps
+     - Move up mylogger definition, pass tot0==0 warnings to mylogger
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
 
     rawdir = check_path(rawdir) # + on 20/09/2017
 
+    # + on 10/12/2017
+    logfile  = rawdir+'reduce.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
     # + on 16/05/2017
     tot0 = sum([do_all, prepare, do_flat, do_arcs, wave_cal, skysub,
                 fitcoords, combine, extract])
     if tot0 == 0:
-        log.warn('## No GNIRS functions are being called!!!')
-        log.warn('## Run with do_all=1 or either of these keywords set to 1 : ')
-        log.warn('## prepare  : Execute nsprepare on all.lis')
-        log.warn('## do_flat  : Create superflat')
-        log.warn('## do_arcs  : nsreduce arc data')
-        log.warn('## wave_cal : Wavelength calibration')
-        log.warn('## skysub   : Skysubtraction - telluric and science data')
-        log.warn('## fitcoords: nsfitcoords, nstransform on telluric and science data')
-        log.warn('## combine  : nscombine telluric and science data')
-        log.warn('## extract  : nsextract telluric data')
+        Mod on 10/12/2017
+        mylogger.warn('No GNIRS functions are being called!!!')
+        mylogger.warn('Run with do_all=1 or either of these keywords set to 1 : ')
+        mylogger.warn('prepare  : Execute nsprepare on all.lis')
+        mylogger.warn('do_flat  : Create superflat')
+        mylogger.warn('do_arcs  : nsreduce arc data')
+        mylogger.warn('wave_cal : Wavelength calibration')
+        mylogger.warn('skysub   : Skysubtraction - telluric and science data')
+        mylogger.warn('fitcoords: nsfitcoords, nstransform on telluric and science data')
+        mylogger.warn('combine  : nscombine telluric and science data')
+        mylogger.warn('extract  : nsextract telluric data')
         return
     if do_all:
         prepare, do_flat, do_arcs = 1, 1, 1
         wave_cal, skysub = 1, 1
         extract, combine, fitcoords = 1, 1, 1
-
-    # + on 10/12/2017
-    logfile  = rawdir+'reduce.log'
-    mylogger = glog.log0(logfile)._get_logger()
 
     # + on 11/07/2017. Mod on 10/12/2017
     mylogger.info('prepare = %i  do_flat   = %i' % (prepare, do_flat))
