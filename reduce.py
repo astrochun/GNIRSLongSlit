@@ -405,6 +405,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Use calib_line settings for nsfitcoords and nstransform on sci OH dataset
     Modified by Chun Ly, 10 December 2017
      - Import glog and call for stdout and ASCII logging
+     - glog implementation in prepare, do_flat, do_arcs steps
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -451,22 +452,22 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     logfile   = rawdir+'gnirs_'+timestamp+'.log'
     iraf.gemini.gnirs.logfile = logfile
 
-    mylogger.info("## Raw data is located in : %s" % rawdir) # Mod on 10/12/2017
+    mylogger.info("Raw data is located in : %s" % rawdir) # Mod on 10/12/2017
 
-    mylogger.info("## GNIRS logfile : "+logfile) # + on 05/05/2017. Mod on 10/12/2017
+    mylogger.info("GNIRS logfile : "+logfile) # + on 05/05/2017. Mod on 10/12/2017
 
     # Save reduce.py for each run | + on 05/05/2017
     reduce_file = 'reduce_'+timestamp+'.py'
-    mylogger.info("## GNIRSLongSlit.reduce script : " + reduce_file) # Mod on 10/12/2017
+    mylogger.info("GNIRSLongSlit.reduce script : " + reduce_file) # Mod on 10/12/2017
     os.system('cp -a '+co_filename+' '+rawdir+reduce_file)
 
     # Check for cleanir files first | Later + on 26/04/2017
     c_files = glob.glob(rawdir+'cN*fits') # Mod on 06/05/2017, 07/06/2017
     if len(c_files) == 0:
         # Mod on 10/12/2017
-        mylogger.warn("## No cleanir files (cN*fits) available")
-        mylogger.warn("## Need to execute symlink.run()") # + on 05/05/2017
-        mylogger.warn("## ABORTING!!!")
+        mylogger.warn("No cleanir files (cN*fits) available")
+        mylogger.warn("Need to execute symlink.run()") # + on 05/05/2017
+        mylogger.warn("ABORTING!!!")
         return
     #endif
 
@@ -498,13 +499,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 1 - Prepare GNIRS data | + on 26/04/2017
     if prepare:
-        log.info("## Preparing GNIRS data")
+        mylogger.info("Preparing GNIRS data") # Mod on 10/12/2017
 
         nc_files = glob.glob(rawdir+'ncN*fits') # Mod on 06/05/2017
         n_nc     = len(nc_files)
 
         if n_nc == n_all:
-            log.warn("## Files exist! Will not run nsprepare!!")
+            mylogger.warn("Files exist! Will not run nsprepare!!") # Mod on 10/12/2017
         else:
             fl_forcewcs = yes
             if n_nc == 0:
@@ -523,7 +524,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 Warns if files do not exist. Need to implement a way to run
                 nsprepare for a subset of data (need to include certain frames)
                 '''
-                log.warn("## The following files do not exist: ")
+                mylogger.warn("The following files do not exist: ") # Mod on 10/12/2017
                 iraf_get_subset.main(rawdir, 'nc', all_lis=all_lis, silent=True)
                 #outfile = 'nc_sub.lis'
                 #iraf_get_subset.main(rawdir, 'nc', outfile, all_lis=all_lis)
@@ -544,23 +545,24 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 2 - Create flat | + on 26/04/2017
     if do_flat:
-        log.info("## Creating super flat")
+        mylogger.info("Creating super flat") # Mod on 10/12/2017
         flats      = np.loadtxt(flat_list, dtype=type(str)) # Mod on 06/05/2017
         flat_files = ['bnc'+file0 for file0 in flats] # Mod on 06/05/2017 | Mod on 10/05/2017
 
         tmpflat = rawdir+'tmpflat'
         if not exists(tmpflat):
-            if silent == False: log.info('## Writing : '+tmpflat)
+            if silent == False: mylogger.info('Writing : '+tmpflat) # Mod on 10/12/2017
             np.savetxt(tmpflat, flat_files, fmt='%s')
         else:
-            log.warn('## File exists!!! : '+tmpflat)
+            mylogger.warn('File exists!!! : '+tmpflat) # Mod on 10/12/2017
 
         # tmpflat must not exist prior to call of run() for this call to succeed
         good = computeStatistics(rawdir, flat_files) # Mod on 20/11/2017
         
         if len(good) > 0:
-            log.info('## Flat files to use : ')
-            log.info(', '.join(flats[good]))
+            # Mod on 10/12/2017
+            mylogger.info('Flat files to use : ')
+            mylogger.info(', '.join(flats[good]))
             np.savetxt(flats_rev, flats[good], fmt='%s')
 
         # + on 04/05/2017 | Mod on 05/05/2017
@@ -573,7 +575,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                 fl_sky=no, fl_cut=yes, fl_flat=no, fl_dark=no,
                                 fl_nsappwave=no)
         else:
-            log.warn("## Files exist! Will not run nsreduce!!")
+            mylogger.warn("Files exist! Will not run nsreduce!!") # Mod on 10/12/2017
 
         # + on 05/05/2017
         # Mod on 10/09/2017
@@ -581,8 +583,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         if not exists(flatfile):
             iraf.gnirs.nsflat(rawdir+'rbnc@'+flats_rev, flatfile=flatfile)
         else:
-            log.warn('## File exists!!! : '+flatfile_orig)
-            log.warn('## Will not run nsflat')
+            # Mod on 10/12/2017
+            mylogger.warn('File exists!!! : '+flatfile_orig)
+            mylogger.warn('Will not run nsflat')
 
         # Generate normalized flat plot | + on 11/07/2017
         normalize_flat(flatfile) # Mod on 10/09/2017, 14/09/2017
@@ -592,7 +595,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     arcs = np.loadtxt(arc_list, dtype=type(str)) # Mod on 06/05/2017
 
     if do_arcs:
-        log.info("## Reducing arc data")
+        mylogger.info("Reducing arc data") # Mod on 10/12/2017
         do_run = iraf_get_subset.check_prefix('rnc', arc_list, path=rawdir)
         if do_run:
             # Mod on 06/05/2017
@@ -601,14 +604,16 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                 fl_sky=no, fl_cut=yes, fl_flat=no,
                                 fl_dark=no) #fl_nsappwave=no)
         else:
-            log.warn('## File exists!!!')
-            log.warn('## Will not run nsreduce on arc data')
+            # Mod on 10/12/2017
+            mylogger.warn('File exists!!!')
+            mylogger.warn('Will not run nsreduce on arc data')
 
         # Combine arcs together | + on 07/11/2017
         arc_stack_file = rawdir+'arc_stack.fits'
         if exists(arc_stack_file):
-            log.warn('## File exists!!!')
-            log.warn('## Will NOT override '+arc_stack_file)
+            # Mod on 10/12/2017
+            mylogger.warn('File exists!!!')
+            mylogger.warn('Will NOT override '+arc_stack_file)
         else:
             a_files   = [rawdir+'rnc'+file0 for file0 in arcs]
             n_a_files = len(a_files)
@@ -625,7 +630,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             t_hdu['SCI'].data = arcs_avg
             t_hdu['VAR'].data = arcs_var
             if silent == False:
-                log.info('### Writing : '+arc_stack_file)
+                mylogger.info('Writing : '+arc_stack_file) # Mod on 10/12/2017
             t_hdu.writeto(arc_stack_file, output_verify='ignore') # Mod on 08/11/2017
 
     #end do_arcs
