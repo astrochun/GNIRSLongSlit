@@ -407,6 +407,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Import glog and call for stdout and ASCII logging
      - glog implementation in prepare, do_flat, do_arcs steps
      - glog implementation in wave_cal, skysub, fitcoords steps
+     - glog implementation in combine, extract steps
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -842,31 +843,31 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     # Step 7: Combine 2-D spectra | + on 17/05/2017
     if combine:
         if not exists(tell_comb):
-            log.info("## Running nscombine on telluric data")
+            mylogger.info("Running nscombine on telluric data")
             iraf.gnirs.nscombine(rawdir+'tfrbnc@'+tell_list, output=tell_comb,
                                  fl_cross=yes, tolerance=0.1)
         else:
-            log.warn('## File exists : '+tell_comb+' !!!')
-            log.warn('## Will not run nscombine on tfrbnc telluric data')
+            mylogger.warn('File exists : '+tell_comb+' !!!')
+            mylogger.warn('Will not run nscombine on tfrbnc telluric data')
 
         if not exists(obj_comb):
-            log.info("## Running nscombine on science data")
+            mylogger.info("Running nscombine on science data")
             iraf.gnirs.nscombine(rawdir+'tfrbnc@'+obj_list, output=obj_comb,
                                  fl_cross=yes, tolerance=0.1)
         else:
-            log.warn('## File exists : '+obj_comb+' !!!')
-            log.warn('## Will not run nscombine on tfrbnc science data')
+            mylogger.warn('File exists : '+obj_comb+' !!!')
+            mylogger.warn('Will not run nscombine on tfrbnc science data')
 
     # Step 8: Extract 1-D spectra | + on 17/05/2017
     if extract:
         outspec = tell_comb.replace('tell','xtell')
         if not exists(outspec):
-            log.info("## Running nsextract on telluric data")
+            mylogger.info("Running nsextract on telluric data")
             iraf.gnirs.nsextract(tell_comb, outspectra=outspec,
                                  database=rawdir+'database/')
         else:
-            log.warn('## File exists : '+outspec+' !!!')
-            log.warn('## Will not run nsextract on comb_tell.fits')
+            mylogger.warn('File exists : '+outspec+' !!!')
+            mylogger.warn('Will not run nsextract on comb_tell.fits')
 
     #os.chdir(cdir) # + on 06/05/2017
 
