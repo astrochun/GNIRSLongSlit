@@ -420,6 +420,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - glog implementation in combine, extract steps
      - Move up mylogger definition, pass tot0==0 warnings to mylogger
      - Minor bug fix
+     - Pass mylogger to normalize_flat()
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -603,7 +604,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             mylogger.warn('Will not run nsflat')
 
         # Generate normalized flat plot | + on 11/07/2017
-        normalize_flat(flatfile) # Mod on 10/09/2017, 14/09/2017
+        # Mod on 10/09/2017, 14/09/2017, 10/12/2017
+        normalize_flat(flatfile, rawdir=rawdir, mylogger=mylogger)
     #end do_flat
 
     # Step 3 : Reduce arcs | + on 05/05/2017
