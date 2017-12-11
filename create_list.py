@@ -86,6 +86,7 @@ def main(path0, silent=False, verbose=True, overwrite=False):
     Modified by Chun Ly, 10 December 2017
      - Adjust glog logging to a default file in path0, move up mylogger
        definition
+     - Minor mylogger text changes
     '''
 
     logfile  = path0+'create_list.log'
@@ -177,7 +178,7 @@ def main(path0, silent=False, verbose=True, overwrite=False):
             if overwrite == False and exists(outfile):
                 mylogger.warn('File exists! Will not write '+outfile+'!!')
             else:
-                if silent == False: mylogger.info('## Writing : '+outfile)
+                if silent == False: mylogger.info('Writing : '+outfile)
                 np.savetxt(outfile, tab0['filename'][b], fmt='%s')
                 #asc.write will not work. Will not produce single column
                 #asc.write(tab0[b], outfile, overwrite=True,
@@ -190,7 +191,7 @@ def main(path0, silent=False, verbose=True, overwrite=False):
             if overwrite == False and exists(outfile0):
                 mylogger.warn('File exists! Will not write all.lis!!')
             else:
-                if silent == False: mylogger.info('## Writing : '+outfile0)
+                if silent == False: mylogger.info('Writing : '+outfile0)
                 np.savetxt(outfile0, tab0['filename'][i_all], fmt='%s')
         else: mylogger.warn('Will not write all.lis!!')
 
@@ -205,8 +206,8 @@ def main(path0, silent=False, verbose=True, overwrite=False):
                 mylogger.warn('File exists! Will not write '+outfile2+'!!')
             else:
                 if not exists(outfile2):
-                    mylogger.info('## Writing : '+outfile2)
-                else: mylogger.info('## Overwriting : '+outfile2)
+                    mylogger.info('Writing : '+outfile2)
+                else: mylogger.info('Overwriting : '+outfile2)
                 asc.write(tab0, outfile2, format='fixed_width_two_line',
                           overwrite=True)
 
