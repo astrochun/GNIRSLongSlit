@@ -83,20 +83,21 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Added overwrite keyword option to overwrite file
     Modified by Chun Ly, 8 December 2017
      - Import glog and call for stdout and ASCII logging
+    Modified by Chun Ly, 10 December 2017
+     - Adjust glog logging to a default file in path0, move up mylogger
+       definition
     '''
 
-    if silent == False: log.info('### Begin main : '+systime())
+    logfile  = path0+'create_list.log'
+    mylogger = glog.log0(logfile)._get_logger()
 
-    timestamp = systime().replace(':','.') # + on 08/12/2017
+    if silent == False: mylogger.info('### Begin main : '+systime())
 
     # + on 23/03/2017
     dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
     # Mod on 23/03/2017
     for path in list_path:
-        logfile  = path+'create_list_'+timestamp+'.log'
-        mylogger = glog.log0(logfile)._get_logger()
-
         infile = path + 'hdr_info.tbl'
         if not exists(infile):
             mylogger.warning('File does not exist : '+infile)
@@ -209,7 +210,7 @@ def main(path0, silent=False, verbose=True, overwrite=False):
                 asc.write(tab0, outfile2, format='fixed_width_two_line',
                           overwrite=True)
 
-    if silent == False: mylogger.info('End main : '+systime())
+    if silent == False: mylogger.info('### End main : '+systime())
 #enddef
 
 def zcalbase_gal_gemini_2017a():
