@@ -125,26 +125,24 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Import glog and call for stdout and ASCII logging
     '''
 
-    if silent == False: log.info('### Begin main : '+systime())
+    # Moved up on 10/12/2017
+    logfile  = path0+'hdr_info.log'
+    mylogger = glog.log0(logfile)._get_logger()
 
-    timestamp = systime().replace(':','.') # + on 08/12/2017
-    # + on 23/03/2017
+    if silent == False: mylogger.info('### Begin main : '+systime())
+
     dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
     # Mod on 23/03/2017
     for path in list_path:
-        # + on 08/12/2017
-        logfile  = path+'hdr_info_'+timestamp+'.log'
-        mylogger = glog.log0(logfile)._get_logger()
-
         outfile = path + 'hdr_info.tbl'
 
         # Mod later on 04/03/2017 to not overwrite file
         # Mod on 05/03/2017 to always print out this warning
         if overwrite == False and exists(outfile):
             # Mod on 08/12/2017
-            mylogger.warning('## File exists : '+outfile)
-            mylogger.warning('## Not over-writing!!! ')
+            mylogger.warning('File exists : '+outfile)
+            mylogger.warning('Not over-writing!!! ')
         else:
             fits_files = glob.glob(path+'N*fits')
             n_files = len(fits_files)
@@ -159,7 +157,7 @@ def main(path0, silent=False, verbose=True, overwrite=False):
 
             for nn in xrange(n_files):
                 basename = os.path.basename(fits_files[nn])
-                if verbose == True: log.info('## Reading : '+basename)
+                if silent == False: mylogger.info('Reading : '+basename)
                 h0 = fits.getheader(fits_files[nn])
                 # Mod on 05/03/2017 to include airmass
                 vec0 = [basename, h0['DATALAB'], h0['DATE-OBS']+'T'+h0['UT'],
@@ -168,12 +166,12 @@ def main(path0, silent=False, verbose=True, overwrite=False):
                         h0['FILTER1'], h0['FILTER2'], h0['SLIT']]
                 tab0.add_row(vec0)
 
-            if silent == False: mylogger.info('## Writing : '+outfile) # Mod on 08/12/2017
+            if silent == False: mylogger.info('Writing : '+outfile) # Mod on 08/12/2017
             asc.write(tab0, outfile, format='fixed_width_two_line')
         #endelse
     #endfor
 
-    if silent == False: log.info('### End main : '+systime())
+    if silent == False: mylogger.info('### End main : '+systime())
 #enddef
 
 def zcalbase_gal_gemini_2017a(offsets=False):
