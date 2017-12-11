@@ -419,6 +419,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - glog implementation in wave_cal, skysub, fitcoords steps
      - glog implementation in combine, extract steps
      - Move up mylogger definition, pass tot0==0 warnings to mylogger
+     - Minor bug fix
     '''
     
     if silent == False: log.info('### Begin run : '+systime())
@@ -433,7 +434,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     tot0 = sum([do_all, prepare, do_flat, do_arcs, wave_cal, skysub,
                 fitcoords, combine, extract])
     if tot0 == 0:
-        Mod on 10/12/2017
+        # Mod on 10/12/2017
         mylogger.warn('No GNIRS functions are being called!!!')
         mylogger.warn('Run with do_all=1 or either of these keywords set to 1 : ')
         mylogger.warn('prepare  : Execute nsprepare on all.lis')
