@@ -87,6 +87,7 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Adjust glog logging to a default file in path0, move up mylogger
        definition
      - Minor mylogger text changes
+     - Pass mylogger to dir_check.main()
     '''
 
     logfile  = path0+'create_list.log'
@@ -95,7 +96,8 @@ def main(path0, silent=False, verbose=True, overwrite=False):
     if silent == False: mylogger.info('### Begin main : '+systime())
 
     # + on 23/03/2017
-    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
+    dir_list, list_path = dir_check.main(path0, mylogger=mylogger,
+                                         silent=silent, verbose=verbose)
 
     # Mod on 23/03/2017
     for path in list_path:
