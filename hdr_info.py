@@ -131,6 +131,7 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Handle longer filter1 and filter2 FITS values
     Modified by Chun Ly,  8 December 2017
      - Import glog and call for stdout and ASCII logging
+     - Pass mylogger to dir_check.main()
     '''
 
     # Moved up on 10/12/2017
@@ -139,7 +140,8 @@ def main(path0, silent=False, verbose=True, overwrite=False):
 
     if silent == False: mylogger.info('### Begin main : '+systime())
 
-    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
+    dir_list, list_path = dir_check.main(path0, mylogger=mylogger,
+                                         silent=silent, verbose=verbose)
 
     # Mod on 23/03/2017
     for path in list_path:
