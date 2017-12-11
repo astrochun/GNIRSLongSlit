@@ -26,7 +26,7 @@ import dir_check
 
 import glog # + on 08/12/2017
 
-def get_offsets(path0, silent=True, verbose=False):
+def get_offsets(path0, mylogger=None, silent=True, verbose=False):
 
     '''
     Function to get offsets from FITS header and write it to ASCII file
@@ -50,7 +50,15 @@ def get_offsets(path0, silent=True, verbose=False):
     Notes
     -----
     Created by Chun Ly, 30 May 2017
+    Modified by Chun Ly, 10 December 2017
+     - Implement glog logging, allow mylogger keyword input
     '''
+
+    # + on 10/12/2017
+    if type(mylogger) == type(None):
+        mylog, clog = 0, log
+    else:
+        mylog, clog = 1, mylogger
 
     if silent == False: log.info('### Begin get_offsets : '+systime())
 
@@ -60,8 +68,9 @@ def get_offsets(path0, silent=True, verbose=False):
         outfile = path + 'sci_offsets.tbl'
 
         if exists(outfile):
-            log.warning('## File exists : '+outfile)
-            log.warning('## Not over-writing!!! ')
+            # Mod on 10/12/2017
+            clog.warning('File exists : '+outfile)
+            clog.warning('Not over-writing!!! ')
         else:
             fits_files = np.loadtxt(path+'obj.lis', dtype=type(str))
             fits_files = [path+file0 for file0 in fits_files] # Bug fix
@@ -79,13 +88,12 @@ def get_offsets(path0, silent=True, verbose=False):
                         h0['POFFSET'], h0['QOFFSET']]
                 tab0.add_row(vec0)
 
-            if silent == False: log.info('## Writing : '+outfile)
+            if silent == False: clog.info('Writing : '+outfile)
             asc.write(tab0, outfile, format='fixed_width_two_line')
         #endelse
     #endfor
 
-    if silent == False: log.info('### End get_offsets : '+systime())
-
+    if silent == False: clog.info('### End get_offsets : '+systime())
 #enddef
 
 def main(path0, silent=False, verbose=True, overwrite=False):
