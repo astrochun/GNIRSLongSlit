@@ -40,6 +40,8 @@ class log0:
     Modified by Chun Ly, 8 December 2017
      - Switch from function to class to avoid repeated stdout entries due to
        calling of handlers
+    Modified by Chun Ly, 14 December 2017
+     - Fix class instance call to write to separate files with multiple calls
     '''
 
     def __init__(self,file):
@@ -48,7 +50,7 @@ class log0:
 
     def _get_logger(self):
         loglevel = logging.INFO
-        log = logging.getLogger(__name__)
+        log = logging.getLogger(self.LOG_FILENAME) # + Mod on 14/12/2017
         if not getattr(log, 'handler_set', None):
             log.setLevel(logging.INFO)
             sh = logging.StreamHandler()
