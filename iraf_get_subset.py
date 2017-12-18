@@ -17,6 +17,8 @@ import numpy as np
 
 from astropy import log
 
+import glog
+
 def main(path, final_prefix, outfile='', all_lis=[], all_file='', 
          silent=False, verbose=True):
 
@@ -67,7 +69,7 @@ def main(path, final_prefix, outfile='', all_lis=[], all_file='',
 #enddef
 
 def check_prefix(final_prefix, input_lis, list_path='', path='',
-                 silent=False, verbose=True):
+                 mylogger=None, silent=False, verbose=True):
     '''
     Check if specific files from an input list exist with given prefix
 
@@ -109,12 +111,20 @@ def check_prefix(final_prefix, input_lis, list_path='', path='',
     Modified by Chun Ly, 2 June 2017
      - Changed path -> list_path for input_lis
      - path is now for individual frames from the input_lis
+    Modified by Chun Ly, 18 December 2017
+     - Implement glog logging, allow mylogger keyword input
     '''
 
-    if silent == False: log.info('### Begin check_prefix : '+systime())
+    # + on 18/12/2017
+    if type(mylogger) == type(None):
+        mylog, clog = 0, log
+    else:
+        mylog, clog = 1, mylogger
+
+    if silent == False: clog.info('### Begin check_prefix : '+systime())
 
     input_lis0 = list_path+input_lis
-    if silent == False: log.info('### Reading : '+input_lis0)
+    if silent == False: clog.info('Reading : '+input_lis0) # Mod on 18/12/2017
     files = np.loadtxt(input_lis0, dtype=type(str))
 
     f_exist = [file0 for file0 in files if
@@ -125,15 +135,16 @@ def check_prefix(final_prefix, input_lis, list_path='', path='',
     do_run = 0
 
     if len(f_exist) == 0:
-        log.warn('### No files exist')
+        clog.warn('No files exist') # Mod on 18/12/2017
         do_run = 1
     else:
+        # Mod on 18/12/2017
         if len(f_exist) != len(files):
-            log.warn('### Some files do not exist!')
-            log.warn(', '.join(f_noexist))
+            clog.warn('Some files do not exist!')
+            clog.warn(', '.join(f_noexist))
         else:
-            log.info('### All files exist!!!')
+            clog.info('All files exist!!!')
 
-    if silent == False: log.info('### End check_prefix : '+systime())
+    if silent == False: clog.info('End check_prefix : '+systime())
     return do_run
 #enddef
