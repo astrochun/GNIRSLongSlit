@@ -23,7 +23,9 @@ from check_path import main as check_path
 
 from astropy import log
 
-def run(rawdir, style, silent=False, verbose=True):
+import glog
+
+def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     '''
     Main function to generate median plots for various steps in the data
     reduction
@@ -58,7 +60,15 @@ def run(rawdir, style, silent=False, verbose=True):
      - Add if statements for style = 'skysub'
     Modified by Chun Ly, 20 September 2017
      - Call check_path()
+    Modified by Chun Ly, 18 December 2017
+     - Implement glog logging, allow mylogger keyword input
     '''
+
+    # + on 18/12/2017
+    if type(mylogger) == type(None):
+        mylog, clog = 0, log
+    else:
+        mylog, clog = 1, mylogger
 
     rawdir = check_path(rawdir) # + on 20/09/2017
 
@@ -68,11 +78,11 @@ def run(rawdir, style, silent=False, verbose=True):
 
     if style == 'skysub': prefix = 'rbnc' # + on 15/09/2017
 
-    if silent == False: log.info('### Begin run : '+systime())
+    if silent == False: clog.info('### Begin run : '+systime())
 
 
     infile = rawdir+'obj.lis'
-    if silent == False: log.info('### Reading : '+infile)    
+    if silent == False: clog.info('Reading : '+infile)
     files0 = np.loadtxt(infile, dtype=type(str)).tolist()
     files0 = [rawdir+prefix+file0 for file0 in files0]
 
@@ -90,8 +100,8 @@ def run(rawdir, style, silent=False, verbose=True):
     ax.legend(fontsize=6, frameon=False)
 
     out_pdf = rawdir+'median_plot_'+style+'.pdf'
-    if silent == False: log.info('### Writing : '+out_pdf)
+    if silent == False: clog.info('Writing : '+out_pdf)
     fig.savefig(out_pdf)
 
-    if silent == False: log.info('### End run : '+systime())
+    if silent == False: clog.info('### End run : '+systime())
 #enddef
