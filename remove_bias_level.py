@@ -22,7 +22,9 @@ from check_path import main as check_path
 from astropy.table import Table
 from astropy import log
 
-def run(rawdir, files0=[''], silent=False, verbose=False):
+import glog
+
+def run(rawdir, files0=[''], mylogger=None, silent=False, verbose=False):
 
     '''
     Main function to execute removal of bias in individual GNIRS images
@@ -50,9 +52,18 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
      - Change files0 to not include full path
     Modified by Chun Ly, 20 September 2017
      - Call check_path()
+    Modified by Chun Ly, 18 December 2017
+     - Implement glog logging, allow mylogger keyword input
+     - Fix indentation for End info log
     '''
 
-    if silent == False: log.info('### Begin run : '+systime())
+    # + on 18/12/2017
+    if type(mylogger) == type(None):
+        mylog, clog = 0, log
+    else:
+        mylog, clog = 1, mylogger
+
+    if silent == False: clog.info('### Begin run : '+systime())
 
     rawdir = check_path(rawdir) # + on 20/09/2017
 
@@ -69,9 +80,9 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
     for nn in range(n_files0):
         outfile = rawdir+files0[nn].replace('ncN','bncN') # Mod on 14/09/2017
         if exists(outfile):
-            log.warn('Will not overwrite file : '+outfile)
+            clog.warn('Will not overwrite file : '+outfile)
         else:
-            if verbose == True: log.info('## Reading : '+outfile)
+            if verbose == True: clog.info('Reading : '+outfile)
             hdu = fits.open(rawdir+files0[nn]) # Mod on 14/09/2017
 
             if ('BIAS_FIX' in hdu['SCI'].header) == False:
@@ -102,7 +113,7 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
                 im0[     0:qysize,     0:qxsize] -= bias_LL
                 im0[     0:qysize,qxsize:naxis1] -= bias_LR
 
-                if verbose == True: log.info('## Writing : '+outfile)
+                if verbose == True: clog.info('Writing : '+outfile)
                 hdu['SCI'].data = im0
                 hdu['SCI'].header['BIAS_FIX'] = 'Yes'
                 hdu.writeto(outfile, overwrite=True, output_verify='ignore')
@@ -114,9 +125,9 @@ def run(rawdir, files0=[''], silent=False, verbose=False):
         tab0   = Table(arr0, names=names0)
 
         tab_outfile = rawdir+'bias_levels.tbl'
-        if silent == False: log.info('### Writing : '+tab_outfile)        
+        if silent == False: clog.info('Writing : '+tab_outfile)
         asc.write(tab0, tab_outfile, format='fixed_width_two_line')
-        
-        if silent == False: log.info('### End run : '+systime())
+
+    if silent == False: clog.info('### End run : '+systime())
 #enddef
 
