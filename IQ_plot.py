@@ -31,6 +31,8 @@ from . import gnirs_2017a #targets0
 
 import dir_check # + on 11/04/2017
 
+import glog # + on 18/12/2017
+
 pscale = 0.15 # arcseconds per pixel
 
 # From: https://www.gemini.edu/sciops/telescopes-and-sites/observing-condition-constraints
@@ -166,9 +168,15 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Fix y limit range for extreme outliers
     Modified by Chun Ly, 16 November 2017
      - Change prefix: rnc to rbnc
+    Modified by Chun Ly, 18 December 2017
+     - Import glog and call for stdout and ASCII logging
     '''
 
-    if silent == False: log.info('### Begin main : '+systime())
+    # + on 18/12/2017
+    logfile  = path0+'IQ_plot.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin main : '+systime())
 
     # + on 11/04/2017
     dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
@@ -182,13 +190,13 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
         for file0 in file_lis:
             # Mod on 13/04/2017
             if exists(path+file0):
-                if silent == False: log.info('## Reading : '+path+file0)
+                if silent == False: mylogger.info('Reading : '+path+file0)
                 t_files = np.loadtxt(path+file0, dtype=type(str)).tolist()
                 # Bug fix - 10/05/2017
                 if type(t_files) == str: t_files = [t_files]
                 files += t_files
             else:
-                if silent == False: log.info('## File not found : '+path+file0)
+                if silent == False: mylogger.info('File not found : '+path+file0)
 
         files.sort()
 
@@ -204,12 +212,12 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                       path+out_pdf
 
         if overwrite == False and exists(out_pdf):
-            log.warn('## File exists!! Will not overwrite '+out_pdf)
+            mylogger.warn('File exists!! Will not overwrite '+out_pdf)
         else:
             pp = PdfPages(out_pdf)
 
             for nn in xrange(n_files):
-                if silent == False: log.info('## Reading : '+files[nn])
+                if silent == False: mylogger.info('Reading : '+files[nn])
                 hdr0 = fits.getheader(path+files[nn])
                 # Mod on 06/06/2017
                 if skysub == False:
@@ -306,13 +314,13 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                                     right=0.975, wspace=0.03, hspace=0.05)
                     fig.savefig(pp, format='pdf')
             #endfor
-            if silent == False: log.info('## Writing : '+out_pdf)
+            if silent == False: mylogger.info('Writing : '+out_pdf)
             pp.close()
         #endelse
         out_pdf = out_pdf_default
     #endfor
 
-    if silent == False: log.info('### End main : '+systime())
+    if silent == False: mylogger.info('### End main : '+systime())
 #enddef
 
 def zcalbase_gal_gemini_2017a_raw():
