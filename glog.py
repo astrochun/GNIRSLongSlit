@@ -3,6 +3,12 @@ glog
 ====
 
 Routine to log information to stdout and ASCII file
+
+To execute:
+from GNIRSLongSlit import glog
+
+logfile = '/path/mylog.log'
+mylogger = glog.log0(logfile)._get_logger()
 """
 
 import logging, sys
@@ -20,6 +26,10 @@ sh.setFormatter(formatter)
 class log0:
     '''
     Main class to log information to stdout and ASCII file
+
+    To execute:
+    logfile = '/path/mylog.log'
+    mylogger = log0(logfile)._get_logger()
 
     Parameters
     ----------
@@ -42,6 +52,8 @@ class log0:
        calling of handlers
     Modified by Chun Ly, 14 December 2017
      - Fix class instance call to write to separate files with multiple calls
+    Modified by Chun Ly, 17 December 2017
+     - Documentation update
     '''
 
     def __init__(self,file):
