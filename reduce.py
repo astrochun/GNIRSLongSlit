@@ -423,6 +423,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Pass mylogger to normalize_flat()
     Modified by Chun Ly, 18 December 2017
      - Add begin and end QA_clean logging to glog logfile
+     - Pass mylogger to iraf_get_subset.check_prefix() calls
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -584,8 +585,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             np.savetxt(flats_rev, flats[good], fmt='%s')
 
         # + on 04/05/2017 | Mod on 05/05/2017
-        # Mod on 06/05/2017
-        do_run = iraf_get_subset.check_prefix('rbnc', flats_rev, path=rawdir)
+        # Mod on 06/05/2017, 18/12/2017
+        do_run = iraf_get_subset.check_prefix('rbnc', flats_rev, path=rawdir,
+                                              mylogger=mylogger)
         if do_run:
             # Mod on 06/05/2017
             iraf.gnirs.nsreduce(rawdir+'bnc@'+flats_rev, outprefix='',
@@ -615,7 +617,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     if do_arcs:
         mylogger.info("Reducing arc data") # Mod on 10/12/2017
-        do_run = iraf_get_subset.check_prefix('rnc', arc_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('rnc', arc_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             # Mod on 06/05/2017
             iraf.gnirs.nsreduce(rawdir+'nc@'+arc_list, outprefix='',
@@ -732,7 +735,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         fl_flat   = yes
         flatimage = flatfile
 
-        do_run = iraf_get_subset.check_prefix('rbnc', tell_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('rbnc', tell_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             iraf.gnirs.nsreduce(rawdir+'bnc@'+tell_list, outprefix='',
                                 outimages=rawdir+'rbnc@'+tell_list,
@@ -744,7 +748,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Step 5b : Sky subtract science data | + on 16/05/2017
         mylogger.info("Performing sky subtraction on science data")
-        do_run = iraf_get_subset.check_prefix('rbnc', obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('rbnc', obj_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             iraf.gnirs.nsreduce(rawdir+'bnc@'+obj_list, outprefix='',
                                 outimages=rawdir+'rbnc@'+obj_list,
@@ -768,7 +773,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             mylogger.warn('File exists!!! : '+OH_obj_list)
 
-        do_run = iraf_get_subset.check_prefix('rbnc', OH_obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('rbnc', OH_obj_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             # Mod on 15/09/2017
             iraf.gnirs.nsreduce(rawdir+'bnc@'+obj_list, outprefix='',
@@ -787,7 +793,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     if fitcoords:
         # Telluric data
         iraf.chdir(rawdir)
-        do_run = iraf_get_subset.check_prefix('frbnc', tell_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('frbnc', tell_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             mylogger.info("Running nsfitcoords on telluric data")
             iraf.gnirs.nsfitcoords('rbnc@'+tell_list, outprefix='',
@@ -797,7 +804,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             mylogger.warn('Files exist!!!')
             mylogger.warn('Will not run nsfitcoords on rbnc telluric data')
 
-        do_run = iraf_get_subset.check_prefix('tfrbnc', tell_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('tfrbnc', tell_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             mylogger.info("Running nstransform on telluric data")
             iraf.gnirs.nstransform('frbnc@'+tell_list, outprefix='',
@@ -809,7 +817,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Step 6b : Apply wavelength solution to science data | + on 17/05/2017
         # Science data
-        do_run = iraf_get_subset.check_prefix('frbnc', obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('frbnc', obj_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             mylogger.info("Running nsfitcoords on science data")
             iraf.gnirs.nsfitcoords('rbnc@'+obj_list, outprefix='',
@@ -819,7 +828,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             mylogger.warn('Files exist!!!')
             mylogger.warn('Will not run nsfitcoords on rbnc science data')
 
-        do_run = iraf_get_subset.check_prefix('tfrbnc', obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('tfrbnc', obj_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             mylogger.info("Running nstransform on science data")
             iraf.gnirs.nstransform('frbnc@'+obj_list, outprefix='',
@@ -831,7 +841,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Apply wavelength solution to unsubtracted science data
         # + on 02/06/2017
-        do_run = iraf_get_subset.check_prefix('frbnc', OH_obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('frbnc', OH_obj_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             mylogger.info("Running nsfitcoords on science OH data")
             iraf.gnirs.nsfitcoords('rbnc@'+OH_obj_list, outprefix='',
@@ -842,7 +853,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             mylogger.warn('Will not run nsfitcoords on rbnc sci OH data')
 
         # + on 02/06/2017
-        do_run = iraf_get_subset.check_prefix('tfrbnc', OH_obj_list, path=rawdir)
+        do_run = iraf_get_subset.check_prefix('tfrbnc', OH_obj_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             mylogger.info("Running nstransform on science OH data")
             iraf.gnirs.nstransform('frbnc@'+OH_obj_list, outprefix='',
