@@ -178,6 +178,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Change prefix: rnc to rbnc
     Modified by Chun Ly, 18 December 2017
      - Import glog and call for stdout and ASCII logging
+     - Pass mylogger to compute_fwhm()
     '''
 
     # + on 18/12/2017
@@ -233,7 +234,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                 else:
                     im0 = fits.getdata(path+files[nn], 'sci')
 
-                bins, fwhm0, stack0_shift = compute_fwhm(im0)
+                # Mod on 18/12/2017
+                bins, fwhm0, stack0_shift = compute_fwhm(im0, mylogger=mylogger)
 
                 row = nn % 2
                 if row == 0: fig, ax0 = plt.subplots(2, 1)
