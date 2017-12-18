@@ -424,6 +424,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 18 December 2017
      - Add begin and end QA_clean logging to glog logfile
      - Pass mylogger to iraf_get_subset.check_prefix() calls
+     - Pass mylogger to remove_bias_level.run()
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -557,7 +558,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         files0 += np.loadtxt(obj_list, dtype=type(str)).tolist()
         files0 += np.loadtxt(tell_list, dtype=type(str)).tolist()
         files0 = ['nc'+file0 for file0 in files0]
-        remove_bias_level.run(rawdir, files0)
+        remove_bias_level.run(rawdir, files0, mylogger=mylogger)
         examine_median.run(rawdir, 'orig')
         examine_median.run(rawdir, 'bias')
     #end prepare
