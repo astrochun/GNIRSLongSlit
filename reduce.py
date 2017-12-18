@@ -421,15 +421,17 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Move up mylogger definition, pass tot0==0 warnings to mylogger
      - Minor bug fix
      - Pass mylogger to normalize_flat()
+    Modified by Chun Ly, 18 December 2017
+     - Add begin and end QA_clean logging to glog logfile
     '''
     
-    if silent == False: log.info('### Begin run : '+systime())
-
     rawdir = check_path(rawdir) # + on 20/09/2017
 
     # + on 10/12/2017
     logfile  = rawdir+'reduce.log'
     mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin run : '+systime())
 
     # + on 16/05/2017
     tot0 = sum([do_all, prepare, do_flat, do_arcs, wave_cal, skysub,
@@ -886,6 +888,6 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     #os.chdir(cdir) # + on 06/05/2017
 
-    if silent == False: log.info('### End run : '+systime())
+    if silent == False: mylogger.info('### End run : '+systime())
 #enddef
 
