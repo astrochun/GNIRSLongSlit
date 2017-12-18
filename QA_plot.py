@@ -289,23 +289,24 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
        overwrite .pdf files
     Modified by Chun Ly, 8 December 2017
      - Import glog and call for stdout and ASCII logging
+    Modified by Chun Ly, 17 December 2017
+     - Change glog logging to common path
+     - Add begin and end QA_clean logging to glog logfile
     '''
 
-    if silent == False: log.info('### Begin clean_QA : '+systime())
+    # Moved up on 17/12/2017
+    logfile  = path0+'QA_plot.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin clean_QA : '+systime())
 
     # + on 23/03/2017 | Mod on 26/04/2017
     dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
     out_pdf_default = out_pdf # + on 15/05/2017
 
-    timestamp = systime().replace(':','.') # + on 08/12/2017
-
     # Mod on 23/03/2017
     for path in list_path:
-        # + on 08/12/2017
-        logfile  = path+'QA_plot_'+timestamp+'.log'
-        mylogger = glog.log0(logfile)._get_logger()
-
         if out_pdf == '':
             out_pdf = path+'QA_plot.clean.pdf'
         else:
@@ -377,7 +378,7 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
         out_pdf = out_pdf_default
     #endfor
 
-    if silent == False: log.info('### End clean_QA : '+systime())
+    if silent == False: mylogger.info('### End clean_QA : '+systime())
 #enddef
 
 def QA_combine(path0, targets0, out_pdf='', silent=False, verbose=True):
