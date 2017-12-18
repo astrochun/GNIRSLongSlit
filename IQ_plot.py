@@ -42,7 +42,7 @@ FWHM_IQ_J = [0.40, 0.60, 0.85, 1.40]
 def gauss1d(x, a0, a, x0, sigma):
     return a0 + a * np.exp(-(x - x0)**2 / (2 * sigma**2))
 
-def compute_fwhm(im0):
+def compute_fwhm(im0, mylogger=None):
     '''
     Determines FWHM as a function of y-pixel or wavelength. Uses the brightest
     source in the longslit spectra, and computes a median profile with a bin
@@ -70,7 +70,15 @@ def compute_fwhm(im0):
      - Fix interp1d failure when outside bound limits
     Modified by Chun Ly, 11 May 2017
      - Handle RuntimeError with curve_fit
+    Modified by Chun Ly, 18 December 2017
+     - Implement glog logging, allow mylogger keyword input
     '''
+
+    # + on 18/12/2017
+    if type(mylogger) == type(None):
+        mylog, clog = 0, log
+    else:
+        mylog, clog = 1, mylogger
 
     # First find the peak of the nearby star
     med_arr = np.median(im0, axis=0) # Average along columns
@@ -102,7 +110,7 @@ def compute_fwhm(im0):
             popt, pcov = curve_fit(gauss1d, x, y, p0=p0)
             fwhm0[bb] = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
         except RuntimeError:
-            log.warn('## Optimal parameters not found from curve_fit, %i' % bb)
+            clog.warn('Optimal parameters not found from curve_fit, %i !!' % bb)
             fwhm0[bb] = np.nan
 
         # Later + on 10/03/2017
