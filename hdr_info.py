@@ -52,6 +52,9 @@ def get_offsets(path0, mylogger=None, silent=True, verbose=False):
     Created by Chun Ly, 30 May 2017
     Modified by Chun Ly, 10 December 2017
      - Implement glog logging, allow mylogger keyword input
+    Modified by Chun Ly, 17 December 2017
+     - Minor fix: log -> clog
+     - Call dir_check with mylogger input
     '''
 
     # + on 10/12/2017
@@ -60,9 +63,15 @@ def get_offsets(path0, mylogger=None, silent=True, verbose=False):
     else:
         mylog, clog = 1, mylogger
 
-    if silent == False: log.info('### Begin get_offsets : '+systime())
+    if silent == False: clog.info('### Begin get_offsets : '+systime())
 
-    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
+    # Mod on 17/12/2017
+    if not mylog:
+        dir_list, list_path = dir_check.main(path0, silent=silent,
+                                             verbose=verbose)
+    else:
+        dir_list, list_path = dir_check.main(path0, silent=silent,
+                                             verbose=verbose, mylogger=clog)
 
     for path in list_path:
         outfile = path + 'sci_offsets.tbl'
