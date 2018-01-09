@@ -364,13 +364,19 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
      - Added stack keyword option to include stacked arc products
     Modified by Chun Ly, 16 November 2017
      - Change prefix: tfrnc to tfrbnc
+    Modified by Chun Ly,  9 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
 
-    if silent == False: log.info('### Begin arc_check2 : '+systime())
+    # + on 09/01/2018
+    logfile  = path0+'QA_wave_cal.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin arc_check2 : '+systime())
 
     arc_file = co_dirname+'/argon.dat'
     if exists(arc_file):
-        if silent == False: log.info('### Reading : '+arc_file)
+        if silent == False: mylogger.info('Reading : '+arc_file)
         arc_data   = asc.read(arc_file, format='commented_header')
         arc_lines  = arc_data['Line'].data
         arc_source = arc_data['Source'].data
@@ -378,7 +384,7 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
     if arcs[0] == '':
         arcs_list = path + 'arc.lis'
 
-        if silent == False: log.info('### Reading : '+arcs_list)
+        if silent == False: mylogger.info('Reading : '+arcs_list)
         arcs = np.loadtxt(arcs_list, dtype=type(str))
 
     tfrnc_files = [path+'tfrbnc'+file0 for file0 in arcs] # Mod on 16/11/2017
@@ -393,9 +399,9 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
 
     chk = [file0 for file0 in tfrnc_files if exists(file0) == True]
     if len(chk) == 0:
-        log.warn('### Files not found!!!')
-        log.warn('### '+', '.join(file0))
-        log.warn('### Exiting!!!')
+        mylogger.warn('Files not found!!!')
+        mylogger.warn(', '.join(file0))
+        mylogger.warn('Exiting!!!')
         return
 
     n_arcs = len(arcs) # Moved lower on 12/11/2017
@@ -436,7 +442,7 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
         #endif
     #endfor
 
-    if silent == False: log.info('### Writing : '+out_pdf)
+    if silent == False: mylogger.info('Writing : '+out_pdf)
     pp.close()
-    if silent == False: log.info('### End arc_check2 : '+systime())
+    if silent == False: mylogger.info('### End arc_check2 : '+systime())
 #enddef
