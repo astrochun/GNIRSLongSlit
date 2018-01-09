@@ -107,9 +107,15 @@ def delete(path0, silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 22 March 2017
+    Modified by Chun Ly, 8 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
 
-    if silent == False: log.info('### Begin delete : '+systime())
+    # + on 08/01/2018
+    logfile  = path0+'symlink.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin delete : '+systime())
 
     files, n_files = get_files(path0, silent=silent, verbose=verbose)
 
@@ -121,9 +127,9 @@ def delete(path0, silent=False, verbose=True):
                 log.info(cmd0)
                 os.system(cmd0)
             else:
-                log.info('## File is from cleanir: '+c_file)
+                mylogger.info('File is from cleanir: '+c_file)
 
-    if silent == False: log.info('### End delete : '+systime())
+    if silent == False: mylogger.info('### End delete : '+systime())
 #enddef
 
 def run(path0, silent=False, verbose=True):
