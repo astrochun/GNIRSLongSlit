@@ -62,7 +62,7 @@ def main(rawdir, line_source='', silent=False, verbose=True):
     '''
 
     # + on 09/01/2018
-    logfile  = path0+'QA_wave_cal.log'
+    logfile  = rawdir+'QA_wave_cal.log'
     mylogger = glog.log0(logfile)._get_logger()
 
     if silent == False: mylogger.info('### Begin main : '+systime())
