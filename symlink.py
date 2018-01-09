@@ -155,12 +155,19 @@ def run(path0, silent=False, verbose=True):
     Created by Chun Ly, 22 March 2017
     Modified by Chun Ly, 23 March 2017
      - Call dir_check.main() to handle multiple date directories
+    Modified by Chun Ly, 8 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
-    
-    if silent == False: log.info('### Begin run : '+systime())
+
+    # + on 08/01/2018
+    logfile  = path0+'symlink.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin run : '+systime())
 
     # + on 23/03/2017
-    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
+    dir_list, list_path = dir_check.main(path0, mylogger=mylogger,
+                                         silent=silent, verbose=verbose)
 
     # Mod on 23/03/2017
     for path in list_path:
@@ -169,16 +176,16 @@ def run(path0, silent=False, verbose=True):
         for nn in xrange(n_files):
             c_file = path+'c'+files[nn]
             if exists(c_file):
-                log.warn('File exists : '+c_file)
+                mylogger.warn('File exists : '+c_file)
             else:
                 cmd0 = 'ln -fs '+files[nn]+' '+c_file
                 if silent == False:
-                    log.info(cmd0)
+                    mylogger.info(cmd0)
                 os.system(cmd0)
         #endfor
     #endfor
 
-    if silent == False: log.info('### End run : '+systime())
+    if silent == False: mylogger.info('### End run : '+systime())
 #enddef
 
 def zcalbase_gal_gemini_2017a():
