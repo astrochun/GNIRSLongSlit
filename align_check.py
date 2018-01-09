@@ -236,11 +236,21 @@ def mask_bad_pixels(im0):
     im0[bpmy,bpmx] = np.nan
     return im0
 
-def find_gnirs_window_mean(infile):
+def find_gnirs_window_mean(infile, mylogger=None):
     # + on 04/04/2017
     # Using a mean approach to get the GNIRS window
+    '''
+    Modified by Chun Ly, 9 January 2018
+    - Implement glog logging, allow mylogger keyword
+    '''
 
-    log.info('## Reading : '+infile)
+    # + on 09/01/2018
+    if type(mylogger) == type(None):
+        mylog, clog = 0, log
+    else:
+        mylog, clog = 1, mylogger
+
+    mylog.info('## Reading : '+infile) # Mod on 09/01/2018
     im0  = fits.getdata(infile)
     hdr0 = fits.getheader(infile, ext=0)
 
@@ -269,7 +279,7 @@ def find_gnirs_window_mean(infile):
     info0  = 'x_min=%i, x_max=%i, y_min=%i, y_max=%i ' % \
              (x_min, x_max, y_min, y_max)
     info0 += 'x_cen=%.2f, y_cen=%.2f' % (x_cen, y_cen)
-    log.info(info0)
+    mylog.info(info0) # Mod on 09/01/2018
     return x_min, x_max, y_min, y_max, x_cen, y_cen
 #enddef
 
