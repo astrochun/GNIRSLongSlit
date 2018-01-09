@@ -400,6 +400,7 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
      - Add overwrite option to prevent overwriting file
     Modified by Chun Ly, 9 January 2018
      - Import glog and call for stdout and ASCII logging
+     - Pass mylogger to find_gnirs_window_mean(), find_gnirs_window()
     '''
 
     # + on 09/01/2018
@@ -450,8 +451,8 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
                 win_ref_file = path + tab0['filename'][win_ref_idx[0]]
                 mylogger.info('Reference image for finding GNIRS window : '+win_ref_file)
 
-                x_min, x_max, y_min, y_max, \
-                    x_cen, y_cen = find_gnirs_window_mean(win_ref_file)
+                x_min, x_max, y_min, y_max, x_cen, \
+                    y_cen = find_gnirs_window_mean(win_ref_file, mylogger=mylogger)
             else:
                 mylogger.info('Using telluric image as reference')
                 win_ref_file = path+tab0['filename'][0]
@@ -481,7 +482,7 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
                     fig, ax_arr = plt.subplots(nrows=nrows, ncols=ncols)
 
                 #med0, x_min, x_max, y_min, \
-                #    y_max, x_cen, y_cen = find_gnirs_window(t_files[1])
+                #    y_max, x_cen, y_cen = find_gnirs_window(t_files[1], mylogger=mylogger)
 
                 # Later + on 24/03/2017 | Mod on 04/04/2017
                 xcen, ycen = find_star(t_files[-1], pos=pos_cen, find_size2d=new_size)
