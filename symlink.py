@@ -161,6 +161,7 @@ def run(path0, silent=False, verbose=True):
      - Call dir_check.main() to handle multiple date directories
     Modified by Chun Ly, 8 January 2018
      - Import glog and call for stdout and ASCII logging
+     - Pass mylogger to get_files()
     '''
 
     # + on 08/01/2018
@@ -175,7 +176,8 @@ def run(path0, silent=False, verbose=True):
 
     # Mod on 23/03/2017
     for path in list_path:
-        files, n_files = get_files(path, silent=silent, verbose=verbose)
+        files, n_files = get_files(path, mylogger=mylogger, silent=silent,
+                                   verbose=verbose)
 
         for nn in xrange(n_files):
             c_file = path+'c'+files[nn]
