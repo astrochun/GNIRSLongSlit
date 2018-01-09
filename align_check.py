@@ -388,7 +388,8 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
 
     if silent == False: mylogger.info('### Begin main : '+systime())
     
-    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
+    dir_list, list_path = dir_check.main(path0, mylogger=mylogger, silent=silent,
+                                         verbose=verbose)
 
     out_pdf_default = out_pdf
     for path in list_path:
