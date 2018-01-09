@@ -28,6 +28,8 @@ from astropy.visualization.mpl_normalize import ImageNormalize
 
 import aplpy # + on 19/05/2017
 
+import glog # + on 09/01/2018
+
 from pylab import subplots_adjust
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
@@ -90,9 +92,16 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
 
     Modified by Chun Ly, 16 November 2017
      - Change prefix: rnc to rbnc
+
+    Modified by Chun Ly,  9 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
-    
-    if silent == False: log.info('### Begin arc_check : '+systime())
+
+    # + on 09/01/2018
+    logfile  = path0+'QA_wave_cal.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin arc_check : '+systime())
 
     # Mod on 11/11/2017
     if stack == True:
@@ -102,7 +111,7 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
     else:
         if arcs[0] == '':
             arc_list = path + 'arc.lis'
-            if silent == False: log.info('### Reading : '+arc_list)
+            if silent == False: mylogger.info('Reading : '+arc_list)
             arcs = np.loadtxt(arc_list, dtype=type(str))
 
 
@@ -192,7 +201,7 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
     #endfor
 
     pp.close()
-    if silent == False: log.info('### End arc_check : '+systime())
+    if silent == False: mylogger.info('### End arc_check : '+systime())
 #enddef
 
 def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
