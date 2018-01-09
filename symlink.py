@@ -111,6 +111,7 @@ def delete(path0, silent=False, verbose=True):
     Created by Chun Ly, 22 March 2017
     Modified by Chun Ly, 8 January 2018
      - Import glog and call for stdout and ASCII logging
+     - Pass mylogger to get_files()
     '''
 
     # + on 08/01/2018
@@ -119,7 +120,8 @@ def delete(path0, silent=False, verbose=True):
 
     if silent == False: mylogger.info('### Begin delete : '+systime())
 
-    files, n_files = get_files(path0, silent=silent, verbose=verbose)
+    files, n_files = get_files(path0, mylogger=mylogger, silent=silent,
+                               verbose=verbose)
 
     for nn in xrange(n_files):
         c_file = path0+'c'+files[nn]
