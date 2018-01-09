@@ -333,7 +333,13 @@ def plot_spec(rawdir, out_pdf='', silent=False, verbose=False):
      - Overlay Rousselot (2000) model spectrum
     Modified by Chun Ly, 20 September 2017
      - Call check_path()
+    Modified by Chun Ly, 9 January 2018
+     - Implement glog stdout and ASCII logging
     '''
+
+    # + on 09/01/2018
+    logfile  = rawdir+'OH_stack.log'
+    mylogger = glog.log0(logfile)._get_logger()
 
     rawdir = check_path(rawdir) # + on 20/09/2017
 
@@ -355,7 +361,7 @@ def plot_spec(rawdir, out_pdf='', silent=False, verbose=False):
     fig, ax = plt.subplots()
 
     if exists(OH_file):
-        if silent == False: log.info('### Reading : '+OH_file)
+        if silent == False: mylogger.info('Reading : '+OH_file)
         OH_data  = np.loadtxt(OH_file)
         OH_lines = OH_data[:,0] / 1E4
         OH_int   = OH_data[:,1]
