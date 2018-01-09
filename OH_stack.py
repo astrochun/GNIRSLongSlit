@@ -197,7 +197,13 @@ def wave_cal(rawdir, cdir, silent=False, verbose=False):
      - Bug fix: indentation typo with else statement
     Modified by Chun Ly, 20 November 2017
      - Bug fix: Pass in cdir
+    Modified by Chun Ly, 9 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
+
+    # + on 09/01/2018
+    logfile  = rawdir+'OH_stack.log'
+    mylogger = glog.log0(logfile)._get_logger()
 
     rawdir = check_path(rawdir) # + on 20/09/2017
 
@@ -212,22 +218,25 @@ def wave_cal(rawdir, cdir, silent=False, verbose=False):
     if not exists(script_file):
         wave_cal_script.main(rawdir, line_source='OH')
     else:
-        log.info('## File exists!!! : '+script_file)
-        log.info('## Will not override!!!')
+        # Mod on 09/01/2018
+        mylogger.info('File exists!!! : '+script_file)
+        mylogger.info('Will not override!!!')
 
     # + on 16/11/2017
     do_run = 0
     if not exists('wOH_stack.fits'): do_run = 1
     if do_run:
-        log.info("## In order to perform interactive calibration, open up")
-        log.info("## a PyRAF terminal in an anaconda IRAF environment")
-        log.info("## 'cd' into "+rawdir)
-        log.info("## Execute the following command :")
-        log.info("## execfile('"+script_file+"')")
+        # Mod on 09/01/2018
+        mylogger.info("In order to perform interactive calibration, open up")
+        mylogger.info("a PyRAF terminal in an anaconda IRAF environment")
+        mylogger.info("'cd' into "+rawdir)
+        mylogger.info("Execute the following command :")
+        mylogger.info("execfile('"+script_file+"')")
         t_out = raw_input("## Hit RETURN when OH wavelength calibration is completed")
     else:
-        log.warn('## Files exist!!!')
-        log.warn('## Will not run nswavelength on OH stacked data')
+        # Mod on 09/01/2018
+        mylogger.warn('Files exist!!!')
+        mylogger.warn('Will not run nswavelength on OH stacked data')
 
     iraf.chdir(cdir)
 #enddef
