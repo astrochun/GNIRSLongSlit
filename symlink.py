@@ -31,7 +31,7 @@ import dir_check # + on 23/03/2017
 
 import glog # + on 08/01/2018
 
-def get_files(path0, silent=False, verbose=True):
+def get_files(path0, mylogger=None, silent=False, verbose=True):
     '''
     Simple function to get names of raw files
 
@@ -63,23 +63,25 @@ def get_files(path0, silent=False, verbose=True):
      - Import glog and call for stdout and ASCII logging
     '''
 
-    logfile  = path0+'symlink.log'
-    mylogger = glog.log0(logfile)._get_logger()
+    if type(mylogger) == type(None):
+        mylog, clog = 0, log
+    else:
+        mylog, clog = 1, mylogger
 
-    if silent == False: mylogger.info('### Begin get_files : '+systime())
+    if silent == False: mylog.info('### Begin get_files : '+systime())
 
     infile0 = path0+'all.lis'
     if not exists(infile0):
-        mylogger.warn('File does not exists!!! : '+infile0)
-        mylogger.warn('EXITING!!!')
+        mylog.warn('File does not exists!!! : '+infile0)
+        mylog.warn('EXITING!!!')
         return
 
     if silent == False:
-        mylogger.info('Reading : '+infile0)
+        mylog.info('Reading : '+infile0)
     files   = np.loadtxt(infile0, dtype=type(str)).tolist()
     n_files = len(files)
 
-    if silent == False: mylogger.info('### End get_files : '+systime())
+    if silent == False: mylog.info('### End get_files : '+systime())
 
     return files, n_files
 #enddef
