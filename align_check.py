@@ -286,9 +286,19 @@ def find_gnirs_window_mean(infile, mylogger=None):
 def find_gnirs_window(infile):
     # + on 30/03/2017
     # Mod on 01/04/2017 to figure out way to find GNIRS window
+    '''
+    Modified by Chun Ly, 9 January 2018
+    - Implement glog logging, allow mylogger keyword
+    '''
+
+    # + on 09/01/2018
+    if type(mylogger) == type(None):
+        mylog, clog = 0, log
+    else:
+        mylog, clog = 1, mylogger
 
     # Mod on 01/04/2017
-    log.info('## Reading : '+infile)
+    mylog.info('## Reading : '+infile) # Mod on 09/01/2018
     im0  = fits.getdata(infile)
     hdr0 = fits.getheader(infile, ext=0)
 
@@ -303,7 +313,7 @@ def find_gnirs_window(infile):
     if hdr0['NDAVGS'] == 16: v_min = 100
 
     i_y, i_x = np.where((im0_mask > v_min) & np.isfinite(im0_mask))
-    print len(i_y)
+    # print len(i_y)
     med0 = np.median(im0_mask[i_y,i_x])
 
     # + on 01/04/2017
@@ -315,7 +325,7 @@ def find_gnirs_window(infile):
     info0  = '## med0=%.2f, x_min=%i, x_max=%i, y_min=%i, y_max=%i ' % \
              (med0, x_min, x_max, y_min, y_max)
     info0 += 'x_cen=%.2f, y_cen=%.2f' % (x_cen, y_cen)
-    log.info(info0)
+    mylog.info(info0) # Mod on 09/01/2018
     return med0, x_min, x_max, y_min, y_max, x_cen, y_cen
 #enddef
 
