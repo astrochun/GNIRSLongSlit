@@ -18,6 +18,8 @@ yes, no  = 'yes', 'no'
 
 from astropy.io import fits
 
+import glog # + on 09/01/2018
+
 co_dirname = os.path.dirname(__file__)
 OH_file = co_dirname+'/rousselot2000.dat'
 
