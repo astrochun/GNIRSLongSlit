@@ -269,22 +269,29 @@ def transform(rawdir, silent=False, verbose=False):
      - Add file checking and log.warn calls
     Modified by Chun Ly, 29 November 2017
      - Bug fix: Missing else statement
+    Modified by Chun Ly, 9 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
+
+    # + on 09/01/2018
+    logfile  = rawdir+'OH_stack.log'
+    mylogger = glog.log0(logfile)._get_logger()
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
     rawdir = check_path(rawdir) # + on 20/09/2017
 
     iraf.chdir(rawdir)
-    log.info("## Running nsfitcoords on OH_stack")
+    mylogger.info("Running nsfitcoords on OH_stack") # Mod on 09/01/2018
     outfile1 = rawdir + 'fOH_stack.fits'
     if not exists(outfile1):
         iraf.gnirs.nsfitcoords('wOH_stack.fits', outprefix='',
                                outspectra='fOH_stack.fits',
                                lamp='wOH_stack.fits', database='database_OH/')
     else:
-        log.warn('## File exists!!! : '+outfile1)
-        log.warn('## Will not run nsfitcoords on OH stacked data')
+        # Mod on 09/01/2018
+        mylogger.warn('File exists!!! : '+outfile1)
+        mylogger.warn('Will not run nsfitcoords on OH stacked data')
 
     outfile2 = rawdir + 'tfOH_stack.fits'
     if not exists(outfile2):
@@ -292,8 +299,9 @@ def transform(rawdir, silent=False, verbose=False):
                                outspectra='tfOH_stack.fits',
                                database='database_OH/')
     else:
-        log.warn('## File exists!!! : '+outfile2)
-        log.warn('## Will not run nstransform on OH stacked data')
+        # Mod on 09/01/2018
+        mylogger.warn('File exists!!! : '+outfile2)
+        mylogger.warn('Will not run nstransform on OH stacked data')
 
     iraf.chdir(cdir)
 #enddef
