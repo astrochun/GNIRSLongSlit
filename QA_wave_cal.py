@@ -98,7 +98,7 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
     '''
 
     # + on 09/01/2018
-    logfile  = path0+'QA_wave_cal.log'
+    logfile  = path+'QA_wave_cal.log'
     mylogger = glog.log0(logfile)._get_logger()
 
     if silent == False: mylogger.info('### Begin arc_check : '+systime())
@@ -243,7 +243,7 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
     '''
 
     # + on 09/01/2018
-    logfile  = path0+'QA_wave_cal.log'
+    logfile  = path+'QA_wave_cal.log'
     mylogger = glog.log0(logfile)._get_logger()
 
     if silent == False: mylogger.info('### Begin OH_check : '+systime())
@@ -369,7 +369,7 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
     '''
 
     # + on 09/01/2018
-    logfile  = path0+'QA_wave_cal.log'
+    logfile  = path+'QA_wave_cal.log'
     mylogger = glog.log0(logfile)._get_logger()
 
     if silent == False: mylogger.info('### Begin arc_check2 : '+systime())
