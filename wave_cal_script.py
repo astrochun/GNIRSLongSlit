@@ -55,9 +55,15 @@ def main(rawdir, line_source='', silent=False, verbose=True):
      - Specify GNIRS log file
     Modified by Chun Ly, 20 November 2017
      - Bug fix: prefix needed for [frames] for line_source == OH
+    Modified by Chun Ly,  9 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
 
-    if silent == False: log.info('### Begin main : '+systime())
+    # + on 09/01/2018
+    logfile  = path0+'QA_wave_cal.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin main : '+systime())
 
     timestamp = systime().replace(':','.')
     logfile   = rawdir+'gnirs_'+timestamp+'.log'
@@ -65,14 +71,14 @@ def main(rawdir, line_source='', silent=False, verbose=True):
     rawdir = check_path(rawdir)
 
     if line_source == '':
-        log.warn("## Must specify line_source keyword: ")
-        log.warn("## line_source='arc' or line_source='OH'")
-        log.warn("## Exiting!!!")
+        mylogger.warn("Must specify line_source keyword: ")
+        mylogger.warn("line_source='arc' or line_source='OH'")
+        mylogger.warn("Exiting!!!")
         return
     else:
         out_script = rawdir + 'wave_cal_'+line_source+'.py'
 
-    if silent == False: log.info('### Writing : '+out_script)
+    if silent == False: mylogger.info('Writing : '+out_script)
 
     f0 = open(out_script, 'w')
 
@@ -99,8 +105,8 @@ def main(rawdir, line_source='', silent=False, verbose=True):
         cdelt = -0.094*1e4/n_sp_pix
     if frame_hdr['FILTER2'] == 'J_G0517':
         cdelt = -0.113*1e4/n_sp_pix
-    log.info('## CRVAL : %.1f ' % crval)
-    log.info('## CDELT : %.1f  CRPIX : %.1f' % (cdelt,crpix))
+    mylogger.info('## CRVAL : %.1f ' % crval)
+    mylogger.info('## CDELT : %.1f  CRPIX : %.1f' % (cdelt,crpix))
 
     line1 = ['crval = %f' % crval, 'crpix = %f' % crpix, 'cdelt = %f' % cdelt]
     f0.writelines("\n".join(line1)+"\n")
@@ -130,5 +136,5 @@ def main(rawdir, line_source='', silent=False, verbose=True):
     f0.write(cmd+'\n')
     f0.close()
 
-    if silent == False: log.info('### End main : '+systime())
+    if silent == False: mylogger.info('### End main : '+systime())
 #enddef
