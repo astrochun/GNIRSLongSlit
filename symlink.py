@@ -29,6 +29,8 @@ from . import gnirs_2017a
 
 import dir_check # + on 23/03/2017
 
+import glog # + on 08/01/2018
+
 def get_files(path0, silent=False, verbose=True):
     '''
     Simple function to get names of raw files
@@ -57,22 +59,27 @@ def get_files(path0, silent=False, verbose=True):
     Created by Chun Ly, 22 March 2017
     Modified by Chun Ly, 5 June 2017
      - Fix minor bug: infile -> infile0
+    Modified by Chun Ly, 8 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
 
-    if silent == False: log.info('### Begin get_files : '+systime())
+    logfile  = path0+'symlink.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin get_files : '+systime())
 
     infile0 = path0+'all.lis'
     if not exists(infile0):
-        log.warn('### File does not exists!!! : '+infile0)
-        log.warn('### EXITING!!!')
+        mylogger.warn('File does not exists!!! : '+infile0)
+        mylogger.warn('EXITING!!!')
         return
 
     if silent == False:
-        log.info('## Reading : '+infile0)
+        mylogger.info('Reading : '+infile0)
     files   = np.loadtxt(infile0, dtype=type(str)).tolist()
     n_files = len(files)
 
-    if silent == False: log.info('### End get_files : '+systime())
+    if silent == False: mylogger.info('### End get_files : '+systime())
 
     return files, n_files
 #enddef
