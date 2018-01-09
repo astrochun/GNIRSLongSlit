@@ -238,14 +238,20 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
      - Plot more OH skylines (change threshold for OH_mark)
     Modified by Chun Ly, 16 November 2017
      - Change prefix: tfrnc to tfrbnc
+    Modified by Chun Ly,  9 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
 
-    if silent == False: log.info('### Begin OH_check : '+systime())
+    # + on 09/01/2018
+    logfile  = path0+'QA_wave_cal.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin OH_check : '+systime())
 
     # + on 20/05/2017
     OH_file = co_dirname+'/rousselot2000.dat'
     if exists(OH_file):
-        if silent == False: log.info('### Reading : '+OH_file)
+        if silent == False: mylogger.info('Reading : '+OH_file)
         OH_data  = np.loadtxt(OH_file)
         OH_lines = OH_data[:,0]
         OH_int   = OH_data[:,1]
@@ -255,7 +261,7 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
         obj_list = path + 'obj.lis' if skysub == True else \
                    path + 'obj.OH.lis'
 
-        if silent == False: log.info('### Reading : '+obj_list)
+        if silent == False: mylogger.info('Reading : '+obj_list)
         objs = np.loadtxt(obj_list, dtype=type(str))
 
     n_obj = len(objs)
@@ -265,9 +271,9 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
     # + on 20/05/2017
     chk = [file0 for file0 in tfrnc_files if exists(file0) == True]
     if len(chk) == 0:
-        log.warn('### Files not found!!!')
-        log.warn('### '+', '.join(file0))
-        log.warn('### Exiting!!!')
+        mylogger.warn('Files not found!!!')
+        mylogger.warn(', '.join(file0))
+        mylogger.warn('Exiting!!!')
         return
 
     # Mod on 02/06/2017
@@ -316,9 +322,9 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
         #endif
     #endfor
 
-    if silent == False: log.info('### Writing : '+out_pdf)
+    if silent == False: mylogger.info('Writing : '+out_pdf)
     pp.close()
-    if silent == False: log.info('### End OH_check : '+systime())
+    if silent == False: mylogger.info('### End OH_check : '+systime())
 #enddef
 
 def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=True):
