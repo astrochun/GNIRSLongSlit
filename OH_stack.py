@@ -37,6 +37,8 @@ from pyraf import iraf #from reduce import iraf
 
 import wave_cal_script # + on 20/11/2017
 
+import glog # + on 09/01/2018
+
 iraf.gemini(_doprint=0)
 iraf.gemini.gnirs(_doprint=0)
 
@@ -115,14 +117,20 @@ def run(rawdir, silent=False, verbose=False):
      - Call check_path()
     Modified by Chun Ly, 16 November 2017
      - Change prefix: rnc to rbnc
+    Modified by Chun Ly, 9 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
-    
-    if silent == False: log.info('### Begin run : '+systime())
+
+    # + on 09/01/2018
+    logfile  = rawdir+'OH_stack.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin run : '+systime())
 
     rawdir = check_path(rawdir) # + on 20/09/2017
 
     obj_list = rawdir + 'obj.lis'
-    if silent == False: log.info('### Reading : '+obj_list)
+    if silent == False: mylogger.info('Reading : '+obj_list)
     objs = np.loadtxt(obj_list, dtype=type(str))
 
     rbnc_files = [rawdir+'rbnc'+file0.replace('.fits','.OH.fits') for
@@ -136,7 +144,7 @@ def run(rawdir, silent=False, verbose=False):
 
     arr0 = np.zeros((len(rbnc_files), naxis2, naxis1)) # Mod on 16/11/2017
     for ii in range(len(rbnc_files)):
-        if verbose == True: log.info('### Reading : '+obj_list)
+        if verbose == True: mylogger.info('Reading : '+obj_list)
         t_data = fits.getdata(rbnc_files[ii], extname='SCI') # Mod on 16/11/2017
         t_med0 = np.median(t_data, axis=0) # Median along columns
         # Remove median along columns
@@ -152,10 +160,10 @@ def run(rawdir, silent=False, verbose=False):
     outfile = rawdir+'OH_stack.fits'
     stat0   = 'Overwriting' if exists(outfile) else 'Writing'
     if silent == False:
-        log.info('## '+stat0+' : '+outfile)
+        mylogger.info(stat0+' : '+outfile)
     hdu0.writeto(outfile, output_verify='ignore', overwrite=True)
 
-    if silent == False: log.info('### End run : '+systime())
+    if silent == False: mylogger.info('### End run : '+systime())
 #enddef
 
 def wave_cal(rawdir, cdir, silent=False, verbose=False):
