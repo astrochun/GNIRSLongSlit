@@ -37,6 +37,8 @@ from ccdproc import cosmicray_lacosmic # + on 01/04/2017
 from itertools import groupby
 from operator import itemgetter
 
+import glog # + on 09/01/2018
+
 # For 2-D gaussian fitting | + on 05/04/2017
 # Mod on 26/04/2017 to use chun_codes instead
 from chun_codes import gauss2d
@@ -376,9 +378,15 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
      - Use slit image to find center when telluric data is only available
     Modified by Chun Ly, 3 July 2017
      - Add overwrite option to prevent overwriting file
+    Modified by Chun Ly, 9 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
-    
-    if silent == False: log.info('### Begin main : '+systime())
+
+    # + on 09/01/2018
+    logfile  = path0+'align_check.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin main : '+systime())
     
     dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
 
@@ -386,29 +394,29 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
     for path in list_path:
         infile = path + 'hdr_info.QA.tbl'
         if not exists(infile):
-            log.warning('### File does not exist : '+infile)
-            log.warning('### Exiting!!! '+systime())
+            mylogger.warning('File does not exist : '+infile)
+            mylogger.warning('Exiting!!! '+systime())
             return
 
         out_pdf = path+'align_check.pdf' if out_pdf == '' else path+out_pdf
 
         # Mod on 03/07/2017
         if overwrite == False and exists(out_pdf):
-            log.warn('## File exists!! Will not overwrite '+out_pdf)
+            mylogger.warn('File exists!! Will not overwrite '+out_pdf)
         else:
             pp = PdfPages(out_pdf)
 
-            if silent == False: log.info('### Reading: '+infile)
+            if silent == False: mylogger.info('Reading: '+infile)
             tab0 = asc.read(infile, format='fixed_width_two_line')
 
             align = [ii for ii in xrange(len(tab0)) if tab0['QA'][ii] == 'N/A']
             if silent == False:
-                log.info('## Number of alignment images found : '+str(len(align)))
+                mylogger.info('Number of alignment images found : '+str(len(align)))
 
             ID  = tab0['object'][align]
             ID0 = list(set(ID)) #Unique ID's
             if silent == False:
-                log.info('## Sources found : '+', '.join(ID0))
+                mylogger.info('Sources found : '+', '.join(ID0))
 
             # + on 04/04/2017
             win_ref_idx  = [tt for tt in xrange(len(tab0)) if
@@ -419,12 +427,12 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
             # Mod on 11/05/2017
             if len(win_ref_idx) > 0:
                 win_ref_file = path + tab0['filename'][win_ref_idx[0]]
-                log.info('## Reference image for finding GNIRS window : '+win_ref_file)
+                mylogger.info('Reference image for finding GNIRS window : '+win_ref_file)
 
                 x_min, x_max, y_min, y_max, \
                     x_cen, y_cen = find_gnirs_window_mean(win_ref_file)
             else:
-                log.info('## Using telluric image as reference')
+                mylogger.info('Using telluric image as reference')
                 win_ref_file = path+tab0['filename'][0]
                 slit_x0, slit_y0_lo, slit_y0_hi = get_slit_trace(win_ref_file)
                 x_min, x_max = min(slit_x0), max(slit_x0)
@@ -554,7 +562,7 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
                     # Compute FWHM of alignment star | + on 05/04/2017
                     if ('Acq_' not in tab0['slit'][jj_idx]) and \
                        (tab0['exptime'][jj_idx] == 3):
-                        log.info('## No source in slit : '+tab0['filename'][jj_idx])
+                        mylogger.info('No source in slit : '+tab0['filename'][jj_idx])
                     else:
                         # + on 06/04/2017
                         c_size2d     = u.Quantity((40, 40), u.pixel)
@@ -602,7 +610,7 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
 
         out_pdf = out_pdf_default
         
-    if silent == False: log.info('### End main : '+systime())
+    if silent == False: mylogger.info('### End main : '+systime())
 #enddef
 
 def zcalbase_gal_gemini_2017a():
