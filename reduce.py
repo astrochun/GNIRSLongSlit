@@ -38,7 +38,7 @@ iraf.gemini.gnirs.unlearn()
 iraf.set(stdimage="imt4096")
 
 import iraf_get_subset # + on 26/04/2017
-import file_handling   # + on 07/05/2017
+# import file_handling   # + on 07/05/2017
 import QA_wave_cal     # + on 25/05/2017
 import OH_stack        # + on 13/07/2017
 import wave_cal_script # + on 12/11/2017
