@@ -23,7 +23,7 @@ import glog # + on 09/01/2018
 co_dirname = os.path.dirname(__file__)
 OH_file = co_dirname+'/rousselot2000.dat'
 
-def main(rawdir, line_source='', silent=False, verbose=True):
+def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
 
     '''
     Main function for wave_cal_script
@@ -59,11 +59,14 @@ def main(rawdir, line_source='', silent=False, verbose=True):
      - Bug fix: prefix needed for [frames] for line_source == OH
     Modified by Chun Ly,  9 January 2018
      - Import glog and call for stdout and ASCII logging
+    Modified by Chun Ly,  9 January 2018
+     - Allow mylogger keyword
     '''
 
-    # + on 09/01/2018
-    logfile  = rawdir+'QA_wave_cal.log'
-    mylogger = glog.log0(logfile)._get_logger()
+    # Mod on 10/01/2018
+    if type(mylogger) == type(None):
+        logfile  = rawdir+'QA_wave_cal.log'
+        mylogger = glog.log0(logfile)._get_logger()
 
     if silent == False: mylogger.info('### Begin main : '+systime())
 
