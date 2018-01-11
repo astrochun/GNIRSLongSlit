@@ -20,7 +20,7 @@ from astropy import log
 import glog
 
 def main(path, final_prefix, outfile='', all_lis=[], all_file='', 
-         silent=False, verbose=True):
+         mylogger=None, silent=False, verbose=True):
 
     '''
     Check if files exist. If not, create a temporary ASCII file to execute
@@ -41,13 +41,21 @@ def main(path, final_prefix, outfile='', all_lis=[], all_file='',
     Notes
     -----
     Created by Chun Ly, 26 April 2017
+    Modified by Chun Ly, 10 January 2018
+     - Implement glog logging, allow mylogger keyword input
     '''
-    
-    if silent == False: log.info('### Begin main : '+systime())
+
+    # + on 10/01/2018
+    if type(mylogger) == type(None):
+        mylog, clog = 0, log
+    else:
+        mylog, clog = 1, mylogger
+
+    if silent == False: clog.info('### Begin main : '+systime())
 
     if len(all_lis) == 0 and all_file == '':
-        log.warn('## Must specify all_lis or all_file')
-        log.warn('## Aborting!!!')
+        clog.warn('Must specify all_lis or all_file')
+        clog.warn('Aborting!!!')
         return
     #endif
 
@@ -59,13 +67,13 @@ def main(path, final_prefix, outfile='', all_lis=[], all_file='',
     
     if len(no_files) > 0:
         if outfile != '':
-            if silent == False: log.info('## Writing : '+path+outfile)
+            if silent == False: clog.info('Writing : '+path+outfile)
             np.savetxt(path+outfile, no_files, fmt='%s')
         else:
             pref_name = [final_prefix+file0 for file0 in no_files]
             print pref_name
 
-    if silent == False: log.info('### End main : '+systime())
+    if silent == False: clog.info('### End main : '+systime())
 #enddef
 
 def check_prefix(final_prefix, input_lis, list_path='', path='',
