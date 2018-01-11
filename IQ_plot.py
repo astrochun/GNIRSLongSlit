@@ -179,6 +179,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
     Modified by Chun Ly, 18 December 2017
      - Import glog and call for stdout and ASCII logging
      - Pass mylogger to compute_fwhm()
+    Modified by Chun Ly, 11 January 2018
+     - Pass mylogger to dir_check.main()
     '''
 
     # + on 18/12/2017
@@ -188,7 +190,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
     if silent == False: mylogger.info('### Begin main : '+systime())
 
     # + on 11/04/2017
-    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
+    dir_list, list_path = dir_check.main(path0, mylogger=mylogger, silent=silent,
+                                         verbose=verbose)
 
     out_pdf_default = out_pdf
 
