@@ -426,6 +426,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Pass mylogger to iraf_get_subset.check_prefix() calls
      - Pass mylogger to remove_bias_level.run()
      - Pass mylogger to examine_median.run()
+    Modified by Chun Ly, 10 January 2018
+     - Pass mylogger to wave_cal_script.main()
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -667,7 +669,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         # + on 12/11/2017
         script_file = 'wave_cal_arc.py'
         if not exists(script_file):
-            wave_cal_script.main(rawdir, line_source='arc')
+            wave_cal_script.main(rawdir, line_source='arc', mylogger=mylogger)
         else:
             mylogger.info('File exists!!! : '+script_file)
             mylogger.info('Will not override!!!')
