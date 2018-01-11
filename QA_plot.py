@@ -292,6 +292,8 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
     Modified by Chun Ly, 17 December 2017
      - Change glog logging to common path
      - Add begin and end QA_clean logging to glog logfile
+    Modified by Chun Ly, 11 January 2018
+     - Pass mylogger to dir_check.main()
     '''
 
     # Moved up on 17/12/2017
@@ -301,7 +303,8 @@ def clean_QA(path0='', out_pdf='', silent=False, verbose=True, overwrite=False):
     if silent == False: mylogger.info('### Begin clean_QA : '+systime())
 
     # + on 23/03/2017 | Mod on 26/04/2017
-    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
+    dir_list, list_path = dir_check.main(path0, mylogger=mylogger, silent=silent,
+                                         verbose=verbose)
 
     out_pdf_default = out_pdf # + on 15/05/2017
 
