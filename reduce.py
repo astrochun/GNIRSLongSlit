@@ -428,6 +428,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Pass mylogger to examine_median.run()
     Modified by Chun Ly, 10 January 2018
      - Pass mylogger to wave_cal_script.main()
+     - Pass mylogger to iraf_get_subset.main()
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -548,7 +549,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 nsprepare for a subset of data (need to include certain frames)
                 '''
                 mylogger.warn("The following files do not exist: ") # Mod on 10/12/2017
-                iraf_get_subset.main(rawdir, 'nc', all_lis=all_lis, silent=True)
+                iraf_get_subset.main(rawdir, 'nc', all_lis=all_lis, mylogger=mylogger,
+                                     silent=True)
                 #outfile = 'nc_sub.lis'
                 #iraf_get_subset.main(rawdir, 'nc', outfile, all_lis=all_lis)
                 #iraf.gnirs.nsprepare(inimages="c@"+outfile, rawpath=rawdir,
