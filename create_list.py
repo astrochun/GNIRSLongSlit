@@ -88,6 +88,8 @@ def main(path0, silent=False, verbose=True, overwrite=False):
        definition
      - Minor mylogger text changes
      - Pass mylogger to dir_check.main()
+    Modified by Chun Ly, 12 January 2018
+     - Handle multiple telluric datasets
     '''
 
     logfile  = path0+'create_list.log'
@@ -123,6 +125,18 @@ def main(path0, silent=False, verbose=True, overwrite=False):
                   (obstype[ii] == 'OBJECT' and
                    ('HIP' in object0[ii] or 'HD' in object0[ii]) and
                    ('H2_' not in filter2[ii] and 'H_' not in filter2[ii]))]
+
+        # Identify when multiple sets of telluric data is available
+        # Broken based on filename | + on 12/01/2018
+        # tel_name = list(set(np.array(object0[i_tell])))
+        seq_tell = np.array([np.int(str0.replace('.fits','')[-4:]) for
+                             str0 in tab0['filename'][i_tell]])
+        seq_diff = seq_tell[1:] - seq_tell[0:-1]
+        # +1 to factor first skip for seq_diff
+        seq_break = [ii+1 for ii in range(len(seq_diff)) if seq_diff[ii] != 1]
+        if len(seq_break) > 0:
+            mylogger.warn('Multiple telluric star detected.')
+            mylogger.warn('Will split into separate files.')
 
         i_sci = [ii for ii in r0 if
                  (obstype[ii] == 'OBJECT' and
