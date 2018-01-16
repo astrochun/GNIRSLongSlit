@@ -90,6 +90,8 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Pass mylogger to dir_check.main()
     Modified by Chun Ly, 12 January 2018
      - Handle multiple telluric datasets
+    Modified by Chun Ly, 12 January 2018
+     - Handle multiple telluric datasets (cont'd) - Get indices for each dataset
     '''
 
     logfile  = path0+'create_list.log'
@@ -127,16 +129,27 @@ def main(path0, silent=False, verbose=True, overwrite=False):
                    ('H2_' not in filter2[ii] and 'H_' not in filter2[ii]))]
 
         # Identify when multiple sets of telluric data is available
-        # Broken based on filename | + on 12/01/2018
+        # Broken based on filename | + on 12/01/2018, Mod on 15/01/2018
         # tel_name = list(set(np.array(object0[i_tell])))
+        multi_tell = 0
+
         seq_tell = np.array([np.int(str0.replace('.fits','')[-4:]) for
                              str0 in tab0['filename'][i_tell]])
         seq_diff = seq_tell[1:] - seq_tell[0:-1]
         # +1 to factor first skip for seq_diff
         seq_break = [ii+1 for ii in range(len(seq_diff)) if seq_diff[ii] != 1]
         if len(seq_break) > 0:
+            multi_tell = 1
+            i_tell0 = []
             mylogger.warn('Multiple telluric star detected.')
             mylogger.warn('Will split into separate files.')
+            ss_start = [0] + seq_break # relative to i_tell
+            ss_end   = seq_break + [len(i_tell)]
+            for ss in range(len(ss_start)):
+                ss_idx = i_tell[ss_start[ss]:ss_end[ss]]
+                i_tell0.append(ss_idx)
+        else:
+            mylogger.info('Only one telluric star detected.')
 
         i_sci = [ii for ii in r0 if
                  (obstype[ii] == 'OBJECT' and
