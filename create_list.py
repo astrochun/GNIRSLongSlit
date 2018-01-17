@@ -90,8 +90,10 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Pass mylogger to dir_check.main()
     Modified by Chun Ly, 12 January 2018
      - Handle multiple telluric datasets
-    Modified by Chun Ly, 12 January 2018
+    Modified by Chun Ly, 15 January 2018
      - Handle multiple telluric datasets (cont'd) - Get indices for each dataset
+    Modified by Chun Ly, 16 January 2018
+     - Handle multiple telluric datasets (cont'd) - Update prefix and index lists
     '''
 
     logfile  = path0+'create_list.log'
@@ -185,8 +187,14 @@ def main(path0, silent=False, verbose=True, overwrite=False):
         if len(i_tell) == 0:
             mylogger.warn('No Telluric data found!')
         else:
-            prefix.append('telluric')
-            index.append(i_tell)
+            # Mod on 16/01/2018
+            if not multi_tell:
+                prefix.append('telluric')
+                index.append(i_tell)
+            else:
+                for ii in range(len(i_tell0)):
+                    prefix.append('telluric'+str(ii+1))
+                    index.append(i_tell0[ii])
 
         if len(i_sci)  == 0:
             mylogger.warn('No science data found!')
