@@ -52,7 +52,9 @@ from check_path import main as check_path
 
 import glog # + on 10/12/2017
 
-co_filename = __file__ # + on 05/05/2017
+# + on 05/05/2017
+# Mod on 16/01/2018: Bug fix - copy ASCII py code instead of binary .pyc
+co_filename = __file__.replace('.pyc','.py')
 yes, no = 'yes', 'no' # + on 26/04/2017
 
 n_sp_pix = 1022 # + on 12/06/2017
