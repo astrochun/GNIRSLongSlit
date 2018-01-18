@@ -94,6 +94,8 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Handle multiple telluric datasets (cont'd) - Get indices for each dataset
     Modified by Chun Ly, 16 January 2018
      - Handle multiple telluric datasets (cont'd) - Update prefix and index lists
+    Modified by Chun Ly, 17 January 2018
+     - Create telluric.lis even for multi-telluric case
     '''
 
     logfile  = path0+'create_list.log'
@@ -187,11 +189,11 @@ def main(path0, silent=False, verbose=True, overwrite=False):
         if len(i_tell) == 0:
             mylogger.warn('No Telluric data found!')
         else:
-            # Mod on 16/01/2018
-            if not multi_tell:
-                prefix.append('telluric')
-                index.append(i_tell)
-            else:
+            # Mod on 16/01/2018, 17/01/2018
+            # Always create telluric.lis for all tellurics
+            prefix.append('telluric')
+            index.append(i_tell)
+            if multi_tell:
                 for ii in range(len(i_tell0)):
                     prefix.append('telluric'+str(ii+1))
                     index.append(i_tell0[ii])
