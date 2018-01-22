@@ -433,6 +433,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Pass mylogger to iraf_get_subset.main()
     Modified by Chun Ly, 17 January 2018
      - Handle multiple telluric datasets (nsreduce, nsfitcoords, nstransform)
+    Modified by Chun Ly, 21 January 2018
+     - Handle multiple telluric datasets (nscombine)
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -516,8 +518,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         tell_full_list = [tell_list]
 
     # + on 17/05/2017
-    tell_comb = rawdir+'tell_comb.fits'
-    obj_comb  = rawdir+'obj_comb.fits'
+    tell_comb0 = rawdir+'tell_comb.fits'
+    obj_comb   = rawdir+'obj_comb.fits'
 
     # + on 26/04/2017
     all_lis = np.loadtxt(all_list, dtype=type(str)) # Mod on 06/05/2017
@@ -891,13 +893,20 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 7: Combine 2-D spectra | + on 17/05/2017
     if combine:
-        if not exists(tell_comb):
-            mylogger.info("Running nscombine on telluric data")
-            iraf.gnirs.nscombine(rawdir+'tfrbnc@'+tell_list, output=tell_comb,
-                                 fl_cross=yes, tolerance=0.1)
+        # Mod on 21/01/2018
+        for tt in range(len(tell_full_list)):
+            _list = tell_full_list[tt]
+            if len(tell_full_list) > 1:
+                tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
+            else:
+                tell_comb = tell_comb0
+            if not exists(tell_comb):
+                mylogger.info("Running nscombine on telluric data, "+_list)
+                iraf.gnirs.nscombine(rawdir+'tfrbnc@'+_list, output=tell_comb,
+                                     fl_cross=yes, tolerance=0.1)
         else:
             mylogger.warn('File exists : '+tell_comb+' !!!')
-            mylogger.warn('Will not run nscombine on tfrbnc telluric data')
+            mylogger.warn('Will not run nscombine on tfrbnc telluric data, '+_list)
 
         if not exists(obj_comb):
             mylogger.info("Running nscombine on science data")
