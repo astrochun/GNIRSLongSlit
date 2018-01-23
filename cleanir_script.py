@@ -69,6 +69,7 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
      - Fix to work with no date directory
     Modified by Chun Ly, 22 January 2018
      - Import glog and call for stdout and ASCII logging
+     - Pass mylogger to dir_check.main()
     '''
 
     logfile  = path0+'cleanir_script.log'
@@ -79,7 +80,8 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
     if clean_file == '': clean_file = 'clean.lis'
 
     # + on 15/05/2017
-    dir_list, list_path = dir_check.main(path0, silent=silent, verbose=verbose)
+    dir_list, list_path = dir_check.main(path0, mylogger=mylogger, silent=silent,
+                                         verbose=verbose)
 
     # Mod on 15/05/2017
     for date,path in zip(dir_list,list_path):
