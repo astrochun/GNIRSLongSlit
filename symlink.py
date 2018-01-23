@@ -112,6 +112,8 @@ def delete(path0, silent=False, verbose=True):
     Modified by Chun Ly, 8 January 2018
      - Import glog and call for stdout and ASCII logging
      - Pass mylogger to get_files()
+    Modified by Chun Ly, 22 January 2018
+     - Pass rm command strings to mylogger
     '''
 
     # + on 08/01/2018
@@ -128,7 +130,7 @@ def delete(path0, silent=False, verbose=True):
         if exists(c_file):
             if os.path.islink(c_file) == True:
                 cmd0 = 'rm '+c_file
-                log.info(cmd0)
+                mylogger.info(cmd0)
                 os.system(cmd0)
             else:
                 mylogger.info('File is from cleanir: '+c_file)
