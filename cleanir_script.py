@@ -26,6 +26,8 @@ from astropy import log
 
 import cleanir
 
+import glog # + on 22/01/2018
+
 # + on 12/03/2017
 from . import gnirs_2017a #targets0
 import dir_check # + on 15/05/2017
@@ -65,9 +67,14 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
      - Fix bug when only one file is found
     Modified by Chun Ly, 18 June 2017
      - Fix to work with no date directory
+    Modified by Chun Ly, 22 January 2018
+     - Import glog and call for stdout and ASCII logging
     '''
+
+    logfile  = path0+'cleanir_script.log'
+    mylogger = glog.log0(logfile)._get_logger()
     
-    if silent == False: log.info('### Begin run : '+systime())
+    if silent == False: mylogger.info('### Begin run : '+systime())
 
     if clean_file == '': clean_file = 'clean.lis'
 
@@ -78,10 +85,10 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
     for date,path in zip(dir_list,list_path):
         clean_file0 = path+clean_file
         if not exists(clean_file0):
-            log.warn('### File does not exist!!!')
-            log.info('### '+clean_file0)
+            mylogger.warn('File does not exist!!!')
+            mylogger.warn(clean_file0)
         else:
-            if silent == False: log.info('## Reading : '+clean_file0)
+            if silent == False: mylogger.info('Reading : '+clean_file0)
             files = np.loadtxt(clean_file0, dtype=type(str)).tolist()
             if type(files) == str: files = [files] # Bug fix. Mod on 30/05/2017
 
@@ -98,7 +105,7 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
             else:
                 if silent == False:
                     stat0 = 'Overwriting' if exists(out_script0) else 'Writing'
-                    log.info('## '+stat0+' : '+out_script0)
+                    mylogger.info(stat0+' : '+out_script0)
                 f = open(out_script0, 'w')
                 for ii in xrange(len(files)):
                     cmd1 = cmd0+' -afqo '+path+'c'+files[ii]+' '+path+files[ii]
@@ -108,7 +115,7 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
         #endelse
     #endfor
 
-    if silent == False: log.info('### End run : '+systime())
+    if silent == False: mylogger.info('End run : '+systime())
 #enddef
 
 def zcalbase_gal_gemini_2017a():
