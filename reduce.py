@@ -435,6 +435,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Handle multiple telluric datasets (nsreduce, nsfitcoords, nstransform)
     Modified by Chun Ly, 21 January 2018
      - Handle multiple telluric datasets (nscombine)
+    Modified by Chun Ly, 22 January 2018
+     - Call mylogger for arc wavelength calibration info
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -690,11 +692,11 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_run = 0
         if not exists('warc_stack.fits'): do_run = 1
         if do_run:
-            log.info("## In order to perform interactive calibration, open up")
-            log.info("## a PyRAF terminal in an anaconda IRAF environment")
-            log.info("## 'cd' into "+rawdir)
-            log.info("## Execute the following command :")
-            log.info("## execfile('"+script_file+"')")
+            mylogger.info("In order to perform interactive calibration, open up")
+            mylogger.info("a PyRAF terminal in an anaconda IRAF environment")
+            mylogger.info("'cd' into "+rawdir)
+            mylogger.info("Execute the following command :")
+            mylogger.info("execfile('"+script_file+"')")
             t_out = raw_input("## Hit RETURN when arc wavelength calibration is completed")
         else:
             mylogger.warn('Files exist!!!')
