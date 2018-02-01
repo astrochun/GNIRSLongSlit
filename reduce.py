@@ -920,14 +920,21 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 8: Extract 1-D spectra | + on 17/05/2017
     if extract:
-        outspec = tell_comb.replace('tell','xtell')
-        if not exists(outspec):
-            mylogger.info("Running nsextract on telluric data")
-            iraf.gnirs.nsextract(tell_comb, outspectra=outspec,
+        # Mod on 01/02/2018
+        for tt in range(len(tell_full_list)):
+            _list = tell_full_list[tt]
+            if len(tell_full_list)>1:
+                tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
+            else:
+                tell_comb = tell_comb0
+            outspec = tell_comb.replace('tell','xtell')
+            if not exists(outspec):
+                mylogger.info("Running nsextract on telluric data, "+_list)
+                iraf.gnirs.nsextract(tell_comb, outspectra=outspec,
                                  database=rawdir+'database/')
-        else:
-            mylogger.warn('File exists : '+outspec+' !!!')
-            mylogger.warn('Will not run nsextract on comb_tell.fits')
+            else:
+                mylogger.warn('File exists : '+outspec+' !!!')
+                mylogger.warn('Will not run nsextract on comb_tell.fits')
 
     #os.chdir(cdir) # + on 06/05/2017
 
