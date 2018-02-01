@@ -906,9 +906,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 mylogger.info("Running nscombine on telluric data, "+_list)
                 iraf.gnirs.nscombine(rawdir+'tfrbnc@'+_list, output=tell_comb,
                                      fl_cross=yes, tolerance=0.1)
-        else:
-            mylogger.warn('File exists : '+tell_comb+' !!!')
-            mylogger.warn('Will not run nscombine on tfrbnc telluric data, '+_list)
+            else:
+                mylogger.warn('File exists : '+tell_comb+' !!!')
+                mylogger.warn('Will not run nscombine on tfrbnc telluric data, '+_list)
 
         if not exists(obj_comb):
             mylogger.info("Running nscombine on science data")
