@@ -437,6 +437,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Handle multiple telluric datasets (nscombine)
     Modified by Chun Ly, 22 January 2018
      - Call mylogger for arc wavelength calibration info
+    Modified by Chun Ly, 02 February 2018
+     - Bug fix - Fix crash with nsextract with full path given
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -920,7 +922,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # Step 8: Extract 1-D spectra | + on 17/05/2017
     if extract:
-        # Mod on 01/02/2018
+        # Mod on 01/02/2018, 02/02/2018
+        iraf.chdir(rawdir)
         for tt in range(len(tell_full_list)):
             _list = tell_full_list[tt]
             if len(tell_full_list)>1:
@@ -930,11 +933,14 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             outspec = tell_comb.replace('tell','xtell')
             if not exists(outspec):
                 mylogger.info("Running nsextract on telluric data, "+_list)
-                iraf.gnirs.nsextract(tell_comb, outspectra=outspec,
-                                 database=rawdir+'database/')
+                iraf.gnirs.nsextract(os.path.basename(tell_comb),
+                                     outspectra=os.path.basename(outspec),
+                                     database='database/')
             else:
                 mylogger.warn('File exists : '+outspec+' !!!')
-                mylogger.warn('Will not run nsextract on comb_tell.fits')
+                mylogger.warn('Will not run nsextract on '+_list)
+
+        iraf.chdir(cdir)
 
     #os.chdir(cdir) # + on 06/05/2017
 
