@@ -241,7 +241,9 @@ def find_gnirs_window_mean(infile, mylogger=None):
     # Using a mean approach to get the GNIRS window
     '''
     Modified by Chun Ly, 9 January 2018
-    - Implement glog logging, allow mylogger keyword
+     - Implement glog logging, allow mylogger keyword
+    Modified by Chun Ly, 22 March 2018
+     - Bug fix : mylog -> clog
     '''
 
     # + on 09/01/2018
@@ -250,7 +252,7 @@ def find_gnirs_window_mean(infile, mylogger=None):
     else:
         mylog, clog = 1, mylogger
 
-    mylog.info('## Reading : '+infile) # Mod on 09/01/2018
+    clog.info('## Reading : '+infile) # Mod on 09/01/2018
     im0  = fits.getdata(infile)
     hdr0 = fits.getheader(infile, ext=0)
 
@@ -279,7 +281,7 @@ def find_gnirs_window_mean(infile, mylogger=None):
     info0  = 'x_min=%i, x_max=%i, y_min=%i, y_max=%i ' % \
              (x_min, x_max, y_min, y_max)
     info0 += 'x_cen=%.2f, y_cen=%.2f' % (x_cen, y_cen)
-    mylog.info(info0) # Mod on 09/01/2018
+    clog.info(info0) # Mod on 09/01/2018
     return x_min, x_max, y_min, y_max, x_cen, y_cen
 #enddef
 
@@ -289,6 +291,8 @@ def find_gnirs_window(infile):
     '''
     Modified by Chun Ly, 9 January 2018
     - Implement glog logging, allow mylogger keyword
+    Modified by Chun Ly, 22 March 2018
+     - Bug fix : mylog -> clog
     '''
 
     # + on 09/01/2018
@@ -298,7 +302,7 @@ def find_gnirs_window(infile):
         mylog, clog = 1, mylogger
 
     # Mod on 01/04/2017
-    mylog.info('## Reading : '+infile) # Mod on 09/01/2018
+    clog.info('## Reading : '+infile) # Mod on 09/01/2018
     im0  = fits.getdata(infile)
     hdr0 = fits.getheader(infile, ext=0)
 
@@ -325,7 +329,7 @@ def find_gnirs_window(infile):
     info0  = '## med0=%.2f, x_min=%i, x_max=%i, y_min=%i, y_max=%i ' % \
              (med0, x_min, x_max, y_min, y_max)
     info0 += 'x_cen=%.2f, y_cen=%.2f' % (x_cen, y_cen)
-    mylog.info(info0) # Mod on 09/01/2018
+    clog.info(info0) # Mod on 09/01/2018
     return med0, x_min, x_max, y_min, y_max, x_cen, y_cen
 #enddef
 
