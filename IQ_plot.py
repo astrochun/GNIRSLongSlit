@@ -183,6 +183,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Pass mylogger to dir_check.main()
     Modified by Chun Ly, 18 April 2018
      - Compute and report seeing at zenith
+     - Show FWHM @ Zenith on right y-axis
     '''
 
     # + on 18/12/2017
@@ -255,6 +256,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                                                      width=1, direction='in')
                 ax0[row].get_xaxis().set_tick_params(which='both', top=True,
                                                      width=1, direction='in')
+
 
                 # Compute average line profile from stack0_shift
                 # Later + on 10/03/2017
@@ -332,9 +334,17 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                     ax0[row].set_ylim([min(fwhm0)-0.025,max(fwhm0)+0.075])
                 ax0[row].minorticks_on()
 
+                # + on 18/04/2018
+                ax2 = ax0[row].twinx()
+                ax2.set_ylabel(r"FWHM @ Zenith [arcsec]")
+                ax2.set_ylim(np.array(ax0[row].get_ylim()) / airmass**0.6)
+                ax2.minorticks_on()
+                if row != 1:
+                    ax2.set_xticklabels([])
+
                 if row == 1 or nn == n_files-1:
                     subplots_adjust(left=0.10, bottom=0.10, top=0.975,
-                                    right=0.975, wspace=0.03, hspace=0.05)
+                                    right=0.90, wspace=0.03, hspace=0.05)
                     fig.savefig(pp, format='pdf')
             #endfor
             if silent == False: mylogger.info('Writing : '+out_pdf)
