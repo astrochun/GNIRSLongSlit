@@ -184,6 +184,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
     Modified by Chun Ly, 18 April 2018
      - Compute and report seeing at zenith
      - Show FWHM @ Zenith on right y-axis
+    Modified by Chun Ly, 19 April 2018
+     - Include airmass info in plots
     '''
 
     # + on 18/12/2017
@@ -292,7 +294,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                 # Axes labeling
                 ax0[row].set_ylabel('FWHM [arcsec]')
                 if row == 1:
-                    ax0[row].set_xlabel('Y [PIXELS]')
+                    ax0[row].set_xlabel('Y [pixel]')
                 else:
                     ax0[row].set_xticklabels([])
 
@@ -300,6 +302,10 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                 txt0 = files[nn]+'\nTarget: '+hdr0['OBJECT'] #.split(' ')[0]
                 ax0[row].annotate(txt0, [0.025,0.95], xycoords='axes fraction',
                                   ha='left', va='top')
+
+                # + on 19/04/2018
+                ax0[row].annotate('AM = %.3f' % airmass, [0.025,0.025],
+                                  xycoords='axes fraction', ha='left', va='bottom')
 
                 # Later + on 10/03/2017
                 if check_quality:
