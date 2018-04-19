@@ -181,6 +181,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Pass mylogger to compute_fwhm()
     Modified by Chun Ly, 11 January 2018
      - Pass mylogger to dir_check.main()
+    Modified by Chun Ly, 18 April 2018
+     - Compute and report seeing at zenith
     '''
 
     # + on 18/12/2017
@@ -237,6 +239,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                 else:
                     im0 = fits.getdata(path+files[nn], 'sci')
 
+                airmass = hdr0['AIRMASS'] # + on 18/04/2018
+
                 # Mod on 18/12/2017
                 bins, fwhm0, stack0_shift = compute_fwhm(im0, mylogger=mylogger)
 
@@ -268,14 +272,18 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                 p0 = [0.0, 1.0, 0.0, 2.0]
                 popt, pcov = curve_fit(gauss1d, x0_avg, avg_stack, p0=p0)
                 avg_fwhm0 = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
+                avg_fwhm_Z = avg_fwhm0 / airmass**0.6 # + on 18/04/2018
+
                 axi.plot(x0_avg*pscale, gauss1d(x0_avg, *popt), 'r--')
-                axi.annotate('FWHM = %.3f"' % avg_fwhm0, [0.50,0.025],
-                             xycoords='axes fraction', ha='center', va='bottom')
+                axi.annotate('FWHM = %.3f" (%.3f")' % (avg_fwhm0, avg_fwhm_Z),
+                             [0.50,0.025], xycoords='axes fraction', ha='center',
+                             va='bottom', fontsize=8)
                 ax0[row].axhline(y=avg_fwhm0, linewidth=2, color='r',
                                  linestyle='--', zorder=1)
 
                 # Median FWHM | Later + on 10/03/2017
                 med_fwhm0 = np.median(fwhm0[good])
+                med_fwhm0_Z = med_fwhm0 / airmass**0.6 # + on 18/04/2018
                 ax0[row].axhline(y=med_fwhm0, linewidth=2, color='g',
                              linestyle='--', zorder=1)
 
@@ -303,12 +311,14 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
 
                     txt0  = 'Req. IQ: %s [%.2f"]\n' % (req, FWHM_IQ_J[i_req])
                     txt0 += 'Raw IQ: %s [%.2f"]\n'  % (raw, FWHM_IQ_J[i_raw])
-                    if med_fwhm0 <= FWHM_IQ_J[i_raw]:
+
+                    # Mod on 18/04/2018
+                    if med_fwhm0_Z <= FWHM_IQ_J[i_raw]:
                         txt0 += 'PASS'
                     else:
-                        if med_fwhm0 <= FWHM_IQ_J[i_raw]*1.25:
+                        if med_fwhm0_Z <= FWHM_IQ_J[i_raw]*1.25:
                             txt0 += 'USABLE'
-                        if med_fwhm0 > FWHM_IQ_J[i_raw]*1.25:
+                        if med_fwhm0_Z > FWHM_IQ_J[i_raw]*1.25:
                             txt0 += 'FAIL'
 
                     ax0[row].annotate(txt0, [0.975,0.05], ha='right',
