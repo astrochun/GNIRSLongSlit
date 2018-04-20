@@ -16,7 +16,7 @@ import numpy as np
 
 import glob
 
-from . import gnirs_2017a
+from . import gnirs_2017a, gnirs_2017b
 import dir_check
 
 from astropy.table import Table
@@ -188,6 +188,33 @@ def zcalbase_gal_gemini_2017a():
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
 
     targets0 = gnirs_2017a
+
+    main(path0, targets0)
+
+#enddef
+
+def zcalbase_gal_gemini_all():
+    '''
+    Function to run main() to get summary table for ALL GNIRS observations
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    info.tbl : astropy.table.Table
+      Astropy ASCII tables outputted to each path
+
+    Notes
+    -----
+    Created by Chun Ly, 20 April 2018
+    '''
+
+    path0 = '/Users/cly/data/Observing/Gemini/Data/'
+
+    targets0 = gnirs_2017a + gnirs_2017b
+    targets0.sort()
 
     main(path0, targets0)
 
