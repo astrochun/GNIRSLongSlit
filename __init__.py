@@ -22,7 +22,8 @@ import GNIRSLongSlit as gnirsls
 
 # + on 12/03/2017
 gnirs_2017a = ['DEEP05', 'DEEP06', 'DEEP07', 'DEEP10', 'DEEP14', 'DEEP15',
-               'DEEP19', 'Keck03', 'Keck14', 'Keck27', 'MMT08', 'MMT37']
+               'DEEP17', 'DEEP18', 'DEEP19', 'Keck03', 'Keck14', 'Keck27',
+               'MMT08', 'MMT37']
 
 __all__ = [gnirs_2017a]
 
