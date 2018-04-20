@@ -70,6 +70,8 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
     Modified by Chun Ly, 22 January 2018
      - Import glog and call for stdout and ASCII logging
      - Pass mylogger to dir_check.main()
+    Modified by Chun Ly, 20 April 2018
+     - Change afq to rfq - row filtering generally produces better results
     '''
 
     logfile  = path0+'cleanir_script.log'
@@ -110,7 +112,7 @@ def run(path0, clean_file='', out_script='', silent=False, verbose=True,
                     mylogger.info(stat0+' : '+out_script0)
                 f = open(out_script0, 'w')
                 for ii in xrange(len(files)):
-                    cmd1 = cmd0+' -afqo '+path+'c'+files[ii]+' '+path+files[ii]
+                    cmd1 = cmd0+' -rfqo '+path+'c'+files[ii]+' '+path+files[ii]
                     f.write(cmd1+'\n')
                 f.close()
             #endelse
