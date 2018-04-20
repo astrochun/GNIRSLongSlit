@@ -61,6 +61,8 @@ def get_files(path0, mylogger=None, silent=False, verbose=True):
      - Fix minor bug: infile -> infile0
     Modified by Chun Ly, 8 January 2018
      - Import glog and call for stdout and ASCII logging
+    Modified by Chun Ly, 20 April 2018
+     - Bug fix: mylog -> clog
     '''
 
     if type(mylogger) == type(None):
@@ -68,20 +70,20 @@ def get_files(path0, mylogger=None, silent=False, verbose=True):
     else:
         mylog, clog = 1, mylogger
 
-    if silent == False: mylog.info('### Begin get_files : '+systime())
+    if silent == False: clog.info('### Begin get_files : '+systime())
 
     infile0 = path0+'all.lis'
     if not exists(infile0):
-        mylog.warn('File does not exists!!! : '+infile0)
-        mylog.warn('EXITING!!!')
+        clog.warn('File does not exists!!! : '+infile0)
+        clog.warn('EXITING!!!')
         return
 
     if silent == False:
-        mylog.info('Reading : '+infile0)
+        clog.info('Reading : '+infile0)
     files   = np.loadtxt(infile0, dtype=type(str)).tolist()
     n_files = len(files)
 
-    if silent == False: mylog.info('### End get_files : '+systime())
+    if silent == False: clog.info('### End get_files : '+systime())
 
     return files, n_files
 #enddef
