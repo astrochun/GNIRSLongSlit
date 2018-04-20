@@ -25,7 +25,9 @@ gnirs_2017a = ['DEEP05', 'DEEP06', 'DEEP07', 'DEEP10', 'DEEP14', 'DEEP15',
                'DEEP17', 'DEEP18', 'DEEP19', 'Keck03', 'Keck14', 'Keck27',
                'MMT08', 'MMT37']
 
-__all__ = [gnirs_2017a]
+gnirs_2017b = ['DEEP26', 'DEEP28']
+
+__all__ = [gnirs_2017a, gnirs_2017b]
 
 import hdr_info
 import create_list
