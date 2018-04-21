@@ -413,6 +413,8 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
     Modified by Chun Ly, 9 January 2018
      - Import glog and call for stdout and ASCII logging
      - Pass mylogger to find_gnirs_window_mean(), find_gnirs_window()
+    Modified by Chun Ly, 20 April 2018
+     - Pass mylogger to gauss2d_fit()
     '''
 
     # + on 09/01/2018
@@ -606,7 +608,7 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
                         im0_crop = Cutout2D(cutout.data, (c_xcen,c_ycen), c_size2d,
                                             mode='partial', fill_value=np.nan)
                         gauss2d_fit(im0_crop.data, hdr0, t_ax, c_slit_x0,
-                                    c_slit_y0_lo, c_slit_y0_hi) # Mod on 06/04/2017
+                                    c_slit_y0_lo, c_slit_y0_hi, mylogger=mylogger) # Mod on 06/04/2017
 
                     # Write each page separately | + on 05/04/2017
                     if len(t_idx) > (nrows*ncols):
