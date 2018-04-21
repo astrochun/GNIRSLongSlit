@@ -415,6 +415,7 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
      - Pass mylogger to find_gnirs_window_mean(), find_gnirs_window()
     Modified by Chun Ly, 20 April 2018
      - Pass mylogger to gauss2d_fit()
+     - Switch print statements to mylogger calls
     '''
 
     # + on 09/01/2018
@@ -478,8 +479,10 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
 
             pos_cen  = (x_cen, y_cen)
             new_size = u.Quantity((y_max-y_min, x_max-x_min), u.pixel)
-            print 'pos_cen : ', pos_cen
-            print 'new_size : ', new_size
+
+            # + on 20/04/2018
+            mylogger.info('pos_cen : %f ' % pos_cen)
+            mylogger.info('new_size : %f ' % new_size)
 
             for ii in xrange(len(ID0)):
                 t_idx = [tt for tt in xrange(len(tab0)) if
@@ -539,7 +542,7 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
                     bgd0, sig0 = np.median(temp), np.std(temp)
                     idx_y, idx_x = np.where(im0_clean > (bgd0 + 5*sig0))
                     med0 = np.median(im0_clean[idx_y,idx_x])
-                    print '## max0 : ', max0, ' med0 : ', med0
+                    mylogger.info('## max0 : %f   med0 : %f ' % (max0, med0))
                     if max0 > 50000:
                         z1, z2 = zscale.get_limits(cutout.data)
                         z2 = max0 # Change for better stretch for telluric star
