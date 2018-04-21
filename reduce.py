@@ -439,6 +439,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call mylogger for arc wavelength calibration info
     Modified by Chun Ly, 02 February 2018
      - Bug fix - Fix crash with nsextract with full path given
+    Modified by Chun Ly, 20 April 2018
+     - Pass mylogger to all examine_median.run() calls
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -782,7 +784,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             mylogger.warn('Files exist!!!')
             mylogger.warn('Will not run nsreduce on bnc sci data')
 
-        examine_median.run(rawdir, 'skysub') # + on 15/09/2017
+        examine_median.run(rawdir, 'skysub', mylogger=mylogger) # + on 15/09/2017
 
         # Run nsreduce without skysubtraction for wavelength check with OH
         # night skylines | + on 01/06/2017
@@ -807,7 +809,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             mylogger.warn('Files exist!!!')
             mylogger.warn('Will not run nsreduce on bnc sci OH data')
 
-        examine_median.run(rawdir, 'flat') # + on 15/09/2017
+        examine_median.run(rawdir, 'flat', mylogger=mylogger) # + on 15/09/2017
     #end skysub
 
     # Step 6a : Apply wavelength solution to telluric data | + on 17/05/2017
