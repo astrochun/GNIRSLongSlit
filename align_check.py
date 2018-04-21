@@ -103,7 +103,7 @@ def group_index(index0, find_max=False):
 
 #enddef
 
-def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi):
+def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi, mylogger=None):
     '''
     Execute 2-D Gaussian fit on image
 
@@ -137,7 +137,13 @@ def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi):
      - Determine how far source is from slit center
     Modified by Chun Ly, 3 July 2017
      - Fix ValueError with interp1d
+    Modified by Chun Ly, 20 April 2018
+     - Implement glog logging, allow mylogger keyword input
     '''
+
+    # + on 20/04/2018
+    clog = log if type(mylogger) == type(None) else mylogger
+
     sigG = 3.0
     max0 = np.nanmax(im0)
 
@@ -156,7 +162,8 @@ def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi):
 
         m_idx = np.where(im0 == max0)
         x_cen, y_cen = m_idx[1][0]-x_sz0, m_idx[0][0]-y_sz0
-        print '## cen : ', x_cen, y_cen
+        clog.info('## cen : %f %f ' % (x_cen, y_cen)) # Mod on 20/04/2018
+
         ini_guess = (max0, x_cen, y_cen, sigG, sigG, 0.0, 0.0)
         bounds = ((     0, -x_sz0, -y_sz0,    0,    0,       0, 0),
                   (np.inf,  x_sz0,  y_sz0, 10.0, 10.0, 2*np.pi, np.inf))
@@ -175,7 +182,8 @@ def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi):
         s_lo = f_lo(popt[1])-y_sz0
         s_hi = f_hi(popt[1])-y_sz0
         slit_off = (popt[2] - (s_lo+s_hi)/2.0) * pscale
-        print '## slit_off(arcsec) : ', slit_off
+
+        clog.info('## slit_off(arcsec) : %f' % slit_off) # Mod on 20/04/2018
         str0  = 'Slit offset : %.2f"\n' % slit_off
 
         str0 += 'Centroid: x=%.2f"  y=%.2f"\n' % (popt[1]*pscale, popt[2]*pscale)
