@@ -418,6 +418,7 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
      - Switch print statements to mylogger calls
     Modified by Chun Ly, 22 April 2018
      - Bug fix: mylogger calls mistakes
+     - Bug fix: mylogger calls mistakes (cont'd)
     '''
 
     # + on 09/01/2018
@@ -484,7 +485,8 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
 
             # + on 20/04/2018, Mod on 22/04/2018
             mylogger.info('pos_cen : (%f, %f) ' % (pos_cen[0], pos_cen[1]))
-            mylogger.info('new_size : (%f, %f) ' % (new_size[0], new_size[1]))
+            mylogger.info('new_size : [%f, %f] pix ' % (new_size[0].value,
+                                                        new_size[1].value))
 
             for ii in xrange(len(ID0)):
                 t_idx = [tt for tt in xrange(len(tab0)) if
