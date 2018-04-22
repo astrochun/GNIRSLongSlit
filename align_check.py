@@ -416,6 +416,8 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
     Modified by Chun Ly, 20 April 2018
      - Pass mylogger to gauss2d_fit()
      - Switch print statements to mylogger calls
+    Modified by Chun Ly, 22 April 2018
+     - Bug fix: mylogger calls mistakes
     '''
 
     # + on 09/01/2018
@@ -480,9 +482,9 @@ def main(path0, out_pdf='', silent=False, verbose=True, overwrite=False):
             pos_cen  = (x_cen, y_cen)
             new_size = u.Quantity((y_max-y_min, x_max-x_min), u.pixel)
 
-            # + on 20/04/2018
-            mylogger.info('pos_cen : %f ' % pos_cen)
-            mylogger.info('new_size : %f ' % new_size)
+            # + on 20/04/2018, Mod on 22/04/2018
+            mylogger.info('pos_cen : (%f, %f) ' % (pos_cen[0], pos_cen[1]))
+            mylogger.info('new_size : (%f, %f) ' % (new_size[0], new_size[1]))
 
             for ii in xrange(len(ID0)):
                 t_idx = [tt for tt in xrange(len(tab0)) if
