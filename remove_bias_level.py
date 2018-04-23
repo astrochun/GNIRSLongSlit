@@ -55,6 +55,8 @@ def run(rawdir, files0=[''], mylogger=None, silent=False, verbose=False):
     Modified by Chun Ly, 18 December 2017
      - Implement glog logging, allow mylogger keyword input
      - Fix indentation for End info log
+    Modified by Chun Ly, 23 April 2018
+     - Write tab_outfile only once (outside for loop)
     '''
 
     # + on 18/12/2017
@@ -119,14 +121,17 @@ def run(rawdir, files0=[''], mylogger=None, silent=False, verbose=False):
                 hdu.writeto(outfile, overwrite=True, output_verify='ignore')
             #endif
         #endelse
+    #endfor
 
-        arr0   = [files0, bias_offset0, bias_offset1, bias_offset2, bias_offset3]
-        names0 = names=('filename','bias_UL','bias_UR','bias_LL','bias_LR')
-        tab0   = Table(arr0, names=names0)
+    # Mod on 23/04/2018
+    arr0   = [files0, bias_offset0, bias_offset1, bias_offset2, bias_offset3]
+    names0 = names=('filename','bias_UL','bias_UR','bias_LL','bias_LR')
+    tab0   = Table(arr0, names=names0)
 
-        tab_outfile = rawdir+'bias_levels.tbl'
-        if silent == False: clog.info('Writing : '+tab_outfile)
-        asc.write(tab0, tab_outfile, format='fixed_width_two_line')
+    # Mod on 23/04/2018
+    tab_outfile = rawdir+'bias_levels.tbl'
+    if silent == False: clog.info('Writing : '+tab_outfile)
+    asc.write(tab0, tab_outfile, format='fixed_width_two_line')
 
     if silent == False: clog.info('### End run : '+systime())
 #enddef
