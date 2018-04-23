@@ -96,6 +96,8 @@ def main(path0, silent=False, verbose=True, overwrite=False):
      - Handle multiple telluric datasets (cont'd) - Update prefix and index lists
     Modified by Chun Ly, 17 January 2018
      - Create telluric.lis even for multi-telluric case
+    Modified by Chun Ly, 23 April 2018
+     - Handle no telluric data case
     '''
 
     logfile  = path0+'create_list.log'
@@ -137,23 +139,25 @@ def main(path0, silent=False, verbose=True, overwrite=False):
         # tel_name = list(set(np.array(object0[i_tell])))
         multi_tell = 0
 
-        seq_tell = np.array([np.int(str0.replace('.fits','')[-4:]) for
-                             str0 in tab0['filename'][i_tell]])
-        seq_diff = seq_tell[1:] - seq_tell[0:-1]
-        # +1 to factor first skip for seq_diff
-        seq_break = [ii+1 for ii in range(len(seq_diff)) if seq_diff[ii] != 1]
-        if len(seq_break) > 0:
-            multi_tell = 1
-            i_tell0 = []
-            mylogger.warn('Multiple telluric star detected.')
-            mylogger.warn('Will split into separate files.')
-            ss_start = [0] + seq_break # relative to i_tell
-            ss_end   = seq_break + [len(i_tell)]
-            for ss in range(len(ss_start)):
-                ss_idx = i_tell[ss_start[ss]:ss_end[ss]]
-                i_tell0.append(ss_idx)
-        else:
-            mylogger.info('Only one telluric star detected.')
+        # Mod on 23/04/2018
+        if len(i_tell) != 0:
+            seq_tell = np.array([np.int(str0.replace('.fits','')[-4:]) for
+                                 str0 in tab0['filename'][i_tell]])
+            seq_diff = seq_tell[1:] - seq_tell[0:-1]
+            # +1 to factor first skip for seq_diff
+            seq_break = [ii+1 for ii in range(len(seq_diff)) if seq_diff[ii] != 1]
+            if len(seq_break) > 0:
+                multi_tell = 1
+                i_tell0 = []
+                mylogger.warn('Multiple telluric star detected.')
+                mylogger.warn('Will split into separate files.')
+                ss_start = [0] + seq_break # relative to i_tell
+                ss_end   = seq_break + [len(i_tell)]
+                for ss in range(len(ss_start)):
+                    ss_idx = i_tell[ss_start[ss]:ss_end[ss]]
+                    i_tell0.append(ss_idx)
+            else:
+                mylogger.info('Only one telluric star detected.')
 
         i_sci = [ii for ii in r0 if
                  (obstype[ii] == 'OBJECT' and
