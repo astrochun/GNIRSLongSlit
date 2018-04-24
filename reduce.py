@@ -441,6 +441,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Bug fix - Fix crash with nsextract with full path given
     Modified by Chun Ly, 20 April 2018
      - Pass mylogger to all examine_median.run() calls
+    Modified by Chun Ly, 24 April 2018
+     - Handle no telluric data case
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -578,7 +580,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         # + on 14/09/2017
         files0  = np.loadtxt(flat_list, dtype=type(str)).tolist()
         files0 += np.loadtxt(obj_list, dtype=type(str)).tolist()
-        files0 += np.loadtxt(tell_list, dtype=type(str)).tolist()
+        if exists(tell_list): # Mod on 24/04/2018
+            files0 += np.loadtxt(tell_list, dtype=type(str)).tolist()
         files0 = ['nc'+file0 for file0 in files0]
         remove_bias_level.run(rawdir, files0, mylogger=mylogger)
         examine_median.run(rawdir, 'orig', mylogger=mylogger)
