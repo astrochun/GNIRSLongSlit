@@ -446,6 +446,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Handle multiple telluric datasets for remove_bias_level
      - Handle no telluric data case in nsreduce (skysub)
      - Handle no telluric data case in nsfitcoords, nstransform
+     - Handle no telluric data case in nscombine
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -916,17 +917,20 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         # Mod on 21/01/2018
         for tt in range(len(tell_full_list)):
             _list = tell_full_list[tt]
-            if len(tell_full_list) > 1:
-                tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
+            if exists(_list): # Mod on 24/04/2018
+                if len(tell_full_list) > 1:
+                    tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
+                else:
+                    tell_comb = tell_comb0
+                if not exists(tell_comb):
+                    mylogger.info("Running nscombine on telluric data, "+_list)
+                    iraf.gnirs.nscombine(rawdir+'tfrbnc@'+_list, output=tell_comb,
+                                         fl_cross=yes, tolerance=0.1)
+                else:
+                    mylogger.warn('File exists : '+tell_comb+' !!!')
+                    mylogger.warn('Will not run nscombine on tfrbnc telluric data, '+_list)
             else:
-                tell_comb = tell_comb0
-            if not exists(tell_comb):
-                mylogger.info("Running nscombine on telluric data, "+_list)
-                iraf.gnirs.nscombine(rawdir+'tfrbnc@'+_list, output=tell_comb,
-                                     fl_cross=yes, tolerance=0.1)
-            else:
-                mylogger.warn('File exists : '+tell_comb+' !!!')
-                mylogger.warn('Will not run nscombine on tfrbnc telluric data, '+_list)
+                mylogger.warn('Telluric file does NOT exist : '+_list)
 
         if not exists(obj_comb):
             mylogger.info("Running nscombine on science data")
