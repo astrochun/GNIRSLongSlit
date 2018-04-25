@@ -444,6 +444,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 24 April 2018
      - Handle no telluric data case
      - Handle multiple telluric datasets for remove_bias_level
+     - Handle no telluric data case in nsreduce (skysub)
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -765,17 +766,20 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Mod on 17/01/2018
         for _list in tell_full_list:
-            do_run = iraf_get_subset.check_prefix('rbnc', _list, path=rawdir,
-                                                  mylogger=mylogger) # Mod on 18/12/2017
-            if do_run:
-                mylogger.info("Performing sky subtraction on telluric data, "+_list)
-                iraf.gnirs.nsreduce(rawdir+'bnc@'+_list, outprefix='',
-                                    outimages=rawdir+'rbnc@'+_list,
-                                    fl_nsappwave=no, fl_sky=yes, fl_flat=fl_flat,
-                                    flatimage=flatimage)
+            if exists(_list): # Mod on 24/04/2018
+                do_run = iraf_get_subset.check_prefix('rbnc', _list, path=rawdir,
+                                                      mylogger=mylogger) # Mod on 18/12/2017
+                if do_run:
+                    mylogger.info("Performing sky subtraction on telluric data, "+_list)
+                    iraf.gnirs.nsreduce(rawdir+'bnc@'+_list, outprefix='',
+                                        outimages=rawdir+'rbnc@'+_list,
+                                        fl_nsappwave=no, fl_sky=yes, fl_flat=fl_flat,
+                                        flatimage=flatimage)
+                else:
+                    mylogger.warn('Files exist!!!')
+                    mylogger.warn('Will not run nsreduce on bnc telluric data, '+_list)
             else:
-                mylogger.warn('Files exist!!!')
-                mylogger.warn('Will not run nsreduce on bnc telluric data, '+_list)
+                mylogger.warn('Telluric file does NOT exist : '+_list)
 
         # Step 5b : Sky subtract science data | + on 16/05/2017
         mylogger.info("Performing sky subtraction on science data")
