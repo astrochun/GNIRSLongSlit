@@ -444,9 +444,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 24 April 2018
      - Handle no telluric data case
      - Handle multiple telluric datasets for remove_bias_level
-     - Handle no telluric data case in nsreduce (skysub)
-     - Handle no telluric data case in nsfitcoords, nstransform
-     - Handle no telluric data case in nscombine
+     - Handle no telluric data case (nsreduce - skysub)
+     - Handle no telluric data case (nsfitcoords, nstransform)
+     - Handle no telluric data case (nscombine)
+     - Handle no telluric data case (nsextract)
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -946,19 +947,22 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         iraf.chdir(rawdir)
         for tt in range(len(tell_full_list)):
             _list = tell_full_list[tt]
-            if len(tell_full_list)>1:
-                tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
+            if exists(_list): # Mod on 24/04/2018
+                if len(tell_full_list)>1:
+                    tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
+                else:
+                    tell_comb = tell_comb0
+                outspec = tell_comb.replace('tell','xtell')
+                if not exists(outspec):
+                    mylogger.info("Running nsextract on telluric data, "+_list)
+                    iraf.gnirs.nsextract(os.path.basename(tell_comb),
+                                         outspectra=os.path.basename(outspec),
+                                         database='database/')
+                else:
+                    mylogger.warn('File exists : '+outspec+' !!!')
+                    mylogger.warn('Will not run nsextract on '+_list)
             else:
-                tell_comb = tell_comb0
-            outspec = tell_comb.replace('tell','xtell')
-            if not exists(outspec):
-                mylogger.info("Running nsextract on telluric data, "+_list)
-                iraf.gnirs.nsextract(os.path.basename(tell_comb),
-                                     outspectra=os.path.basename(outspec),
-                                     database='database/')
-            else:
-                mylogger.warn('File exists : '+outspec+' !!!')
-                mylogger.warn('Will not run nsextract on '+_list)
+                mylogger.warn('Telluric file does NOT exist : '+_list)
 
         iraf.chdir(cdir)
 
