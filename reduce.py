@@ -445,6 +445,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Handle no telluric data case
      - Handle multiple telluric datasets for remove_bias_level
      - Handle no telluric data case in nsreduce (skysub)
+     - Handle no telluric data case in nsfitcoords, nstransform
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -830,28 +831,30 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Mod on 17/01/2018
         for _list in tell_full_list:
-            do_run = iraf_get_subset.check_prefix('frbnc', _list, path=rawdir,
-                                                  mylogger=mylogger) # Mod on 18/12/2017
-            if do_run:
-                mylogger.info("Running nsfitcoords on telluric data, "+_list)
-                iraf.gnirs.nsfitcoords('rbnc@'+_list, outprefix='',
-                                       outspectra='frbnc@'+_list,
-                                       lamp=lamp0, database=dbase) # Mod on 25/11/2017
-            else:
-                mylogger.warn('Files exist!!!')
-                mylogger.warn('Will not run nsfitcoords on rbnc telluric data, '+_list)
+            if exists(_list): # Mod on 24/04/2018
+                do_run = iraf_get_subset.check_prefix('frbnc', _list, path=rawdir,
+                                                      mylogger=mylogger) # Mod on 18/12/2017
+                if do_run:
+                    mylogger.info("Running nsfitcoords on telluric data, "+_list)
+                    iraf.gnirs.nsfitcoords('rbnc@'+_list, outprefix='',
+                                           outspectra='frbnc@'+_list,
+                                           lamp=lamp0, database=dbase) # Mod on 25/11/2017
+                else:
+                    mylogger.warn('Files exist!!!')
+                    mylogger.warn('Will not run nsfitcoords on rbnc telluric data, '+_list)
 
-
-            do_run = iraf_get_subset.check_prefix('tfrbnc', _list, path=rawdir,
-                                                  mylogger=mylogger) # Mod on 18/12/2017
-            if do_run:
-                mylogger.info("Running nstransform on telluric data, "+_list)
-                iraf.gnirs.nstransform('frbnc@'+_list, outprefix='',
-                                       outspectra='tfrbnc@'+_list,
-                                       database=dbase) # Mod on 25/11/2017
+                do_run = iraf_get_subset.check_prefix('tfrbnc', _list, path=rawdir,
+                                                      mylogger=mylogger) # Mod on 18/12/2017
+                if do_run:
+                    mylogger.info("Running nstransform on telluric data, "+_list)
+                    iraf.gnirs.nstransform('frbnc@'+_list, outprefix='',
+                                           outspectra='tfrbnc@'+_list,
+                                           database=dbase) # Mod on 25/11/2017
+                else:
+                    mylogger.warn('Files exist!!!')
+                    mylogger.warn('Will not run nstransform on frbnc telluric data, '+_list)
             else:
-                mylogger.warn('Files exist!!!')
-                mylogger.warn('Will not run nstransform on frbnc telluric data, '+_list)
+                mylogger.warn('Telluric file does NOT exist : '+_list)
         #endfor
 
         # Step 6b : Apply wavelength solution to science data | + on 17/05/2017
