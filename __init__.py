@@ -18,6 +18,11 @@ Requirements:
 
 How to use:
 import GNIRSLongSlit as gnirsls
+ - This will import most modules.
+
+For the main reduction module, reduce, it needs to load PyRAF which delays
+the import. Thus, a separate import is needed:
+from GNIRSLongSlit import reduce
 """
 
 # + on 12/03/2017
@@ -33,7 +38,6 @@ import hdr_info
 import create_list
 import create_obs_summary_table
 
-import cleanir
 import cleanir_script
 
 import QA_plot
@@ -47,13 +51,11 @@ import iraf_get_subset
 import file_handling
 import QA_wave_cal
 import remove_bias_level
-import reduce
 
 reload(hdr_info)
 reload(create_list)
 reload(create_obs_summary_table)
 
-reload(cleanir)
 reload(cleanir_script)
 
 reload(QA_plot)
@@ -67,4 +69,3 @@ reload(iraf_get_subset)
 reload(file_handling)
 reload(QA_wave_cal)
 reload(remove_bias_level)
-reload(reduce)
