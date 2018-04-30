@@ -70,6 +70,7 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     Modified by Chun Ly, 30 April 2018
      - Plot aesthetics (axis labels, borders)
      - Write median-remove skysub images
+     - Modify plotting to handle style != 'skysub' (single panel)
     '''
 
     # + on 18/12/2017
@@ -88,7 +89,6 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
 
     if silent == False: clog.info('### Begin run : '+systime())
 
-
     infile = rawdir+'obj.lis'
     if silent == False: clog.info('Reading : '+infile)
     files0 = np.loadtxt(infile, dtype=type(str)).tolist()
@@ -98,14 +98,20 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     if style == 'flat':
         files0 = [file0.replace('.fits','.OH.fits') for file0 in files0]
 
-    fig, ax_arr = plt.subplots(nrows=2)
+    if style == 'skysub':
+        fig, ax_arr = plt.subplots(nrows=2)
+    else:
+        fig, ax_arr = plt.subplots()
 
     for ii in range(len(files0)):
         hdu0   = fits.open(files0[ii]) # Mod on 30/04/2018
         im0    = hdu0['SCI'].data
         label0 = files0[ii].replace(rawdir,'')
         med0   = np.median(im0, axis=0)
-        ax_arr[0].plot(med0, label=label0, linewidth=0.5)
+        if style == 'skysub':
+            ax_arr[0].plot(med0, label=label0, linewidth=0.5)
+        else:
+            ax_arr.plot(med0, label=label0, linewidth=0.5)
 
         if style == 'skysub': # + on 29/04/2018
             c_mean0, c_med0, c_sig0 = sigma_clipped_stats(med0, sigma=2.0,
@@ -131,16 +137,21 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
         #endif
     #endfor
 
-    ax_arr[1].axhline(y=0, color='black', linestyle='--', linewidth=0.5)
+    if style == 'skysub':
+        ax_arr[1].axhline(y=0, color='black', linestyle='--', linewidth=0.5)
 
-    ax_arr[0].legend(fontsize=6, frameon=False)
-    ax_arr[1].legend(fontsize=6, frameon=False)
+        ax_arr[0].legend(fontsize=6, frameon=False)
+        ax_arr[1].legend(fontsize=6, frameon=False)
 
-    ax_arr[0].xaxis.set_ticklabels([])
-    ax_arr[1].set_xlabel('X [pixels]')
+        ax_arr[0].xaxis.set_ticklabels([])
+        ax_arr[1].set_xlabel('X [pixels]')
 
-    ax_arr[0].set_ylabel('Flux')
-    ax_arr[1].set_ylabel('Flux')
+        ax_arr[0].set_ylabel('Flux')
+        ax_arr[1].set_ylabel('Flux')
+    else:
+        ax_arr.legend(fontsize=6, frameon=False)
+        ax_arr.set_xlabel('X [pixels]')
+        ax_arr.set_ylabel('Flux')
 
     plt.subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99, hspace=0.0)
 
