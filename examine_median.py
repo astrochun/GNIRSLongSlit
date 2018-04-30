@@ -66,6 +66,7 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
      - Implement glog logging, allow mylogger keyword input
     Modified by Chun Ly, 29 April 2018
      - Compute median of background level
+     - Remove median from images, plot improved skysubtraction
     '''
 
     # + on 18/12/2017
@@ -94,20 +95,32 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     if style == 'flat':
         files0 = [file0.replace('.fits','.OH.fits') for file0 in files0]
 
-    fig, ax = plt.subplots()
-    
+    fig, ax_arr = plt.subplots(nrows=2)
+
     for ii in range(len(files0)):
         im0    = fits.getdata(files0[ii], extname='SCI')
         label0 = files0[ii].replace(rawdir,'')
         med0   = np.median(im0, axis=0)
-        ax.plot(med0, label=label0, linewidth=0.5)
+        ax_arr[0].plot(med0, label=label0, linewidth=0.5)
 
         if style == 'skysub': # + on 29/04/2018
             c_mean0, c_med0, c_sig0 = sigma_clipped_stats(med0, sigma=2.0,
                                                           iters=10)
-            ax.axhline(y=c_med0, color='black', linestyle='--', linewidth=0.5)
+            ax_arr[0].axhline(y=c_med0, color='black', linestyle='--',
+                              linewidth=0.5)
 
-    ax.legend(fontsize=6, frameon=False)
+            im1  = im0 - c_med0
+            med0 = np.median(im1, axis=0)
+            ax_arr[1].plot(med0, label=label0, linewidth=0.5)
+        #endif
+    #endfor
+
+    ax_arr[1].axhline(y=0, color='black', linestyle='--', linewidth=0.5)
+
+    ax_arr[0].legend(fontsize=6, frameon=False)
+    ax_arr[1].legend(fontsize=6, frameon=False)
+
+    plt.subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99)
 
     out_pdf = rawdir+'median_plot_'+style+'.pdf'
     if silent == False: clog.info('Writing : '+out_pdf)
