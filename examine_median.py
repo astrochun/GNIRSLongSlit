@@ -67,6 +67,8 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     Modified by Chun Ly, 29 April 2018
      - Compute median of background level
      - Remove median from images, plot improved skysubtraction
+    Modified by Chun Ly, 30 April 2018
+     - Plot aesthetics (axis labels, borders)
     '''
 
     # + on 18/12/2017
@@ -120,7 +122,13 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     ax_arr[0].legend(fontsize=6, frameon=False)
     ax_arr[1].legend(fontsize=6, frameon=False)
 
-    plt.subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99)
+    ax_arr[0].xaxis.set_ticklabels([])
+    ax_arr[1].set_xlabel('X [pixels]')
+
+    ax_arr[0].set_ylabel('Flux')
+    ax_arr[1].set_ylabel('Flux')
+
+    plt.subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99, hspace=0.0)
 
     out_pdf = rawdir+'median_plot_'+style+'.pdf'
     if silent == False: clog.info('Writing : '+out_pdf)
