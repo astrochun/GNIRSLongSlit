@@ -448,6 +448,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Handle no telluric data case (nsfitcoords, nstransform)
      - Handle no telluric data case (nscombine)
      - Handle no telluric data case (nsextract)
+    Modified by Chun Ly, 30 April 2018
+     - Bug fix: incorrect array name, flatfile_orig -> flatfile
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -638,7 +640,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             iraf.gnirs.nsflat(rawdir+'rbnc@'+flats_rev, flatfile=flatfile)
         else:
             # Mod on 10/12/2017
-            mylogger.warn('File exists!!! : '+flatfile_orig)
+            mylogger.warn('File exists!!! : '+flatfile)
             mylogger.warn('Will not run nsflat')
 
         # Generate normalized flat plot | + on 11/07/2017
