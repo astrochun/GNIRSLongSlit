@@ -25,6 +25,8 @@ from astropy import log
 
 import glog
 
+from astropy.stats import sigma_clipped_stats # + on 29/04/2018
+
 def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     '''
     Main function to generate median plots for various steps in the data
@@ -62,6 +64,8 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
      - Call check_path()
     Modified by Chun Ly, 18 December 2017
      - Implement glog logging, allow mylogger keyword input
+    Modified by Chun Ly, 29 April 2018
+     - Compute median of background level
     '''
 
     # + on 18/12/2017
@@ -95,7 +99,13 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     for ii in range(len(files0)):
         im0    = fits.getdata(files0[ii], extname='SCI')
         label0 = files0[ii].replace(rawdir,'')
-        ax.plot(np.median(im0, axis=0), label=label0, linewidth=0.5)
+        med0   = np.median(im0, axis=0)
+        ax.plot(med0, label=label0, linewidth=0.5)
+
+        if style == 'skysub': # + on 29/04/2018
+            c_mean0, c_med0, c_sig0 = sigma_clipped_stats(med0, sigma=2.0,
+                                                          iters=10)
+            ax.axhline(y=c_med0, color='black', linestyle='--', linewidth=0.5)
 
     ax.legend(fontsize=6, frameon=False)
 
