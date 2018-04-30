@@ -69,6 +69,7 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
      - Remove median from images, plot improved skysubtraction
     Modified by Chun Ly, 30 April 2018
      - Plot aesthetics (axis labels, borders)
+     - Write median-remove skysub images
     '''
 
     # + on 18/12/2017
@@ -100,7 +101,8 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     fig, ax_arr = plt.subplots(nrows=2)
 
     for ii in range(len(files0)):
-        im0    = fits.getdata(files0[ii], extname='SCI')
+        hdu0   = fits.open(files0[ii]) # Mod on 30/04/2018
+        im0    = hdu0['SCI'].data
         label0 = files0[ii].replace(rawdir,'')
         med0   = np.median(im0, axis=0)
         ax_arr[0].plot(med0, label=label0, linewidth=0.5)
@@ -114,6 +116,18 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
             im1  = im0 - c_med0
             med0 = np.median(im1, axis=0)
             ax_arr[1].plot(med0, label=label0, linewidth=0.5)
+
+            # Save gnirs skysub image with v1 suffix | + on 30/04/2018
+            out_file = files0[ii].replace('.fits','.v1.fits.gz')
+            clog.info('Saving gnirs skysub file : '+out_file)
+            hdu0.writeto(out_file, overwrite=True)
+
+            # Write median-removed skysub image | + on 30/04/2018
+            hdu1 = hdu0
+            hdu1['SCI'].data = im1
+            clog.info('Write median-removed skysub file : '+files0[ii])
+            hdu1.writeto(files0[ii], overwrite=True)
+
         #endif
     #endfor
 
