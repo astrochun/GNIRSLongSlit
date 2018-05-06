@@ -75,6 +75,7 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
      - Modify plotting to handle style != 'skysub' (single panel)
     Modified by Chun Ly, 5 May 2018
      - Write skysub statistics ASCII table
+     - Fix skysub stats ASCII filename
     '''
 
     # + on 18/12/2017
@@ -165,7 +166,7 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
         # + on 05/05/2018
         t_arr0 = [files1, arr_mean, arr_med, arr_sig]
         tab0 = Table(t_arr0, names=('File','sky_mean','sky_med','sky_sig'))
-        sky_stats_outfile = prefix+'sky_stats.tbl'
+        sky_stats_outfile = rawdir+'sky_stats.tbl'
         if silent == False:
             clog.info('Writing : '+sky_stats_outfile)
         asc.write(tab0, sky_stats_outfile, format='fixed_width_two_line')
