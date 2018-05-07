@@ -31,6 +31,9 @@ import dir_check # + on 23/03/2017
 
 import glog # + on 08/01/2018
 
+# + on 07/05/2017
+from check_path import main as check_path
+
 def get_files(path0, mylogger=None, silent=False, verbose=True):
     '''
     Simple function to get names of raw files
@@ -166,7 +169,11 @@ def run(path0, silent=False, verbose=True):
     Modified by Chun Ly, 8 January 2018
      - Import glog and call for stdout and ASCII logging
      - Pass mylogger to get_files()
+    Modified by Chun Ly, 7 May 2018
+     - Bug fix: Call check_path() to add '/' in path0
     '''
+
+    rawdir = check_path(path0) # + on 07/05/2018
 
     # + on 08/01/2018
     logfile  = path0+'symlink.log'
