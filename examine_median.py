@@ -76,6 +76,8 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     Modified by Chun Ly, 5 May 2018
      - Write skysub statistics ASCII table
      - Fix skysub stats ASCII filename
+    Modified by Chun Ly, 8 May 2018
+     - Force legend in upper right corner
     '''
 
     # + on 18/12/2017
@@ -154,8 +156,8 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
     if style == 'skysub':
         ax_arr[1].axhline(y=0, color='black', linestyle='--', linewidth=0.5)
 
-        ax_arr[0].legend(fontsize=6, frameon=False)
-        ax_arr[1].legend(fontsize=6, frameon=False)
+        ax_arr[0].legend(fontsize=6, loc='upper right', frameon=False)
+        ax_arr[1].legend(fontsize=6, loc='upper right', frameon=False)
 
         ax_arr[0].xaxis.set_ticklabels([])
         ax_arr[1].set_xlabel('X [pixels]')
@@ -171,7 +173,7 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
             clog.info('Writing : '+sky_stats_outfile)
         asc.write(tab0, sky_stats_outfile, format='fixed_width_two_line')
     else:
-        ax_arr.legend(fontsize=6, frameon=False)
+        ax_arr.legend(fontsize=6, loc='upper right', frameon=False)
         ax_arr.set_xlabel('X [pixels]')
         ax_arr.set_ylabel('Flux')
 
