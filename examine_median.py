@@ -80,6 +80,7 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
      - Force legend in upper right corner
      - Check if median skysub removal was performed (delete rnbc*.v1.fits.gz
        files to rerun everything)
+     - Minor fix for different style settings
     '''
 
     # + on 18/12/2017
@@ -119,11 +120,14 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
 
     for ii in range(len(files0)):
         # Mod on 08/05/2018
-        out_file = files0[ii].replace('.fits','.v1.fits.gz')
-        if exists(out_file):
-            t_file = out_file.replace(rawdir+prefix,'')
-            clog.info('Skysub median removed. Reading original skysub file : '+t_file)
-            hdu0 = fits.open(out_file) # Mod on 30/04/2018
+        if style == 'skysub':
+            out_file = files0[ii].replace('.fits','.v1.fits.gz')
+            if exists(out_file):
+                t_file = out_file.replace(rawdir+prefix,'')
+                clog.info('Skysub median removed. Reading original skysub file : '+t_file)
+                hdu0 = fits.open(out_file) # Mod on 30/04/2018
+            else:
+                hdu0 = fits.open(files0[ii]) # Mod on 30/04/2018
         else:
             hdu0 = fits.open(files0[ii]) # Mod on 30/04/2018
 
