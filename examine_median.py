@@ -78,6 +78,8 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
      - Fix skysub stats ASCII filename
     Modified by Chun Ly, 8 May 2018
      - Force legend in upper right corner
+     - Check if median skysub removal was performed (delete rnbc*.v1.fits.gz
+       files to rerun everything)
     '''
 
     # + on 18/12/2017
@@ -116,7 +118,15 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
         arr_sig  = np.zeros(len(files0))
 
     for ii in range(len(files0)):
-        hdu0   = fits.open(files0[ii]) # Mod on 30/04/2018
+        # Mod on 08/05/2018
+        out_file = files0[ii].replace('.fits','.v1.fits.gz')
+        if exists(out_file):
+            t_file = out_file.replace(rawdir+prefix,'')
+            clog.info('Skysub median removed. Reading original skysub file : '+t_file)
+            hdu0 = fits.open(out_file) # Mod on 30/04/2018
+        else:
+            hdu0 = fits.open(files0[ii]) # Mod on 30/04/2018
+
         im0    = hdu0['SCI'].data
         label0 = files0[ii].replace(rawdir,'')
         med0   = np.median(im0, axis=0)
@@ -141,7 +151,6 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
             ax_arr[1].plot(med0, label=label0, linewidth=0.5)
 
             # Save gnirs skysub image with v1 suffix | + on 30/04/2018
-            out_file = files0[ii].replace('.fits','.v1.fits.gz')
             clog.info('Saving gnirs skysub file : '+out_file)
             hdu0.writeto(out_file, overwrite=True)
 
