@@ -51,6 +51,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
      - Change output PDF filename
      - Plot averages of statistic measurements
      - Plot expected Poissonian level
+     - Plot aesthetics (legend, limits, x/ylabel)
     '''
 
     logfile  = rawdir+'image_stats.log'
@@ -96,16 +97,18 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
 
             fig, ax_arr = plt.subplots(nrows=2)
 
-            num0 = np.arange(n_files0)
+            num0 = 1+np.arange(n_files0)
             ax_arr[0].scatter(num0, avg_arr, marker='o', s=50,
-                              facecolor='none', edgecolor='k')
+                              facecolor='none', edgecolor='k', label='Mean')
             avg_avg = np.average(avg_arr)
             ax_arr[0].axhline(y=avg_avg, c='k', linestyle='dashed')
 
             ax_arr[0].scatter(num0, med_arr, marker='x', s=25,
-                              color='b')
+                              color='b', label='Median')
             avg_med = np.average(med_arr)
             ax_arr[0].axhline(y=avg_med, c='b', linestyle='dotted')
+
+            ax_arr[0].legend(loc='lower right', fontsize=8)
 
             ax_arr[1].scatter(num0, sig_arr, marker='o', s=50,
                               facecolor='none', edgecolor='k')
@@ -117,6 +120,15 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
             ax_arr[1].axhline(y=sig_poisson, c='b', linestyle='dashed')
             ax_arr[1].text(0, sig_poisson, 'Poisson', color='b', ha='left',
                            va='bottom')
+
+            ax_arr[0].minorticks_on()
+            ax_arr[1].minorticks_on()
+
+            ax_arr[0].set_xticklabels([])
+            ax_arr[0].set_xlim([-0.25,n_files0+1])
+            ax_arr[1].set_xlim([-0.25,n_files0+1])
+            ax_arr[1].set_ylabel(r'$\sigma$')
+            ax_arr[1].set_xlabel('Frame No.')
 
             #fig, ax_arr = plt.subplots(ncols=2)
             #ax_arr[0].hist(avg_arr, bins=5, align='mid', color='b',
