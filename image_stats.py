@@ -48,6 +48,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 8 May 2018
+     - Change output PDF filename
     '''
 
     logfile  = rawdir+'image_stats.log'
@@ -87,7 +88,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
             print avg_arr, med_arr, sig_arr
 
             if out_pdf == '':
-                out_pdf = path+'image_rms_hist.pdf'
+                out_pdf = path+'image_stats.pdf'
             else:
                 out_pdf = path+out_pdf
 
