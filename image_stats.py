@@ -50,6 +50,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
     Created by Chun Ly, 8 May 2018
      - Change output PDF filename
      - Plot averages of statistic measurements
+     - Plot expected Poissonian level
     '''
 
     logfile  = rawdir+'image_stats.log'
@@ -110,7 +111,13 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
                               facecolor='none', edgecolor='k')
             avg_sig = np.average(sig_arr)
             ax_arr[1].axhline(y=avg_sig, c='k', linestyle='dashed')
-            
+
+            # Expected Poissionan level
+            sig_poisson = avg_sig / np.sqrt(n_files0)
+            ax_arr[1].axhline(y=sig_poisson, c='b', linestyle='dashed')
+            ax_arr[1].text(0, sig_poisson, 'Poisson', color='b', ha='left',
+                           va='bottom')
+
             #fig, ax_arr = plt.subplots(ncols=2)
             #ax_arr[0].hist(avg_arr, bins=5, align='mid', color='b',
             #               linestyle='solid', alpha=0.5, edgecolor='b',
