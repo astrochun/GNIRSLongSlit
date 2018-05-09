@@ -49,6 +49,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
     -----
     Created by Chun Ly, 8 May 2018
      - Change output PDF filename
+     - Plot averages of statistic measurements
     '''
 
     logfile  = rawdir+'image_stats.log'
@@ -97,10 +98,18 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
             num0 = np.arange(n_files0)
             ax_arr[0].scatter(num0, avg_arr, marker='o', s=50,
                               facecolor='none', edgecolor='k')
+            avg_avg = np.average(avg_arr)
+            ax_arr[0].axhline(y=avg_avg, c='k', linestyle='dashed')
+
             ax_arr[0].scatter(num0, med_arr, marker='x', s=25,
                               color='b')
+            avg_med = np.average(med_arr)
+            ax_arr[0].axhline(y=avg_med, c='b', linestyle='dotted')
+
             ax_arr[1].scatter(num0, sig_arr, marker='o', s=50,
                               facecolor='none', edgecolor='k')
+            avg_sig = np.average(sig_arr)
+            ax_arr[1].axhline(y=avg_sig, c='k', linestyle='dashed')
             
             #fig, ax_arr = plt.subplots(ncols=2)
             #ax_arr[0].hist(avg_arr, bins=5, align='mid', color='b',
