@@ -52,6 +52,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
      - Plot averages of statistic measurements
      - Plot expected Poissonian level
      - Plot aesthetics (legend, limits, x/ylabel)
+     - Compute and plot rms of stacked image
     '''
 
     logfile  = rawdir+'image_stats.log'
@@ -88,7 +89,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
                 sig_arr[nn] = c_sig
             #endfor
 
-            print avg_arr, med_arr, sig_arr
+            #print avg_arr, med_arr, sig_arr
 
             if out_pdf == '':
                 out_pdf = path+'image_stats.pdf'
@@ -129,6 +130,18 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
             ax_arr[1].set_xlim([-0.25,n_files0+1])
             ax_arr[1].set_ylabel(r'$\sigma$')
             ax_arr[1].set_xlabel('Frame No.')
+
+            # Plot rms of stacked image
+            comb_file = glob.glob(path+'obj_comb.fits')
+            if len(comb_file) != 0:
+                mylogger.info('Reading : '+comb_file[0])
+                comb_data = fits.getdata(comb_file[0])
+
+                c_mean, c_med, c_sig = sigma_clipped_stats(im0, sigma=2.0,
+                                                           iters=10)
+                ax_arr[1].axhline(y=c_sig, c='g', linestyle='dashed')
+                ax_arr[1].text(0, c_sig, 'Stack', color='g', ha='left',
+                               va='bottom')
 
             #fig, ax_arr = plt.subplots(ncols=2)
             #ax_arr[0].hist(avg_arr, bins=5, align='mid', color='b',
