@@ -11,6 +11,7 @@ from chun_codes import systime
 
 from os.path import exists
 from astropy.io import fits
+import astropy.io.ascii as asc
 
 import numpy as np
 
@@ -186,6 +187,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Show FWHM @ Zenith on right y-axis
     Modified by Chun Ly, 19 April 2018
      - Include airmass info in plots
+    Modified by Chun Ly, 14 May 2018
+     - Write ASCII table containing FWHM determination
     '''
 
     # + on 18/12/2017
@@ -218,6 +221,12 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
         files.sort()
 
         n_files = len(files)
+
+        # + on 14/05/2018
+        FWHM_avg_arr   = np.zeros(n_files) # FWHM from averaging stack0_shift
+        FWHM_avg_arr_Z = np.zeros(n_files) # FWHM from averaging stack0_shift at Zenith
+        FWHM_med_arr   = np.zeros(n_files) # FWHM from median along Y
+        FWHM_med_arr_Z = np.zeros(n_files) # FWHM from median along Y at Zenith
 
         # Mod on 06/06/2017
         if skysub == True:
@@ -275,7 +284,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                 axi.minorticks_on()
                 p0 = [0.0, 1.0, 0.0, 2.0]
                 popt, pcov = curve_fit(gauss1d, x0_avg, avg_stack, p0=p0)
-                avg_fwhm0 = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
+                avg_fwhm0  = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
                 avg_fwhm_Z = avg_fwhm0 / airmass**0.6 # + on 18/04/2018
 
                 axi.plot(x0_avg*pscale, gauss1d(x0_avg, *popt), 'r--')
@@ -352,11 +361,25 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                     subplots_adjust(left=0.10, bottom=0.10, top=0.975,
                                     right=0.90, wspace=0.03, hspace=0.05)
                     fig.savefig(pp, format='pdf')
+
+                # + on 14/05/2018
+                FWHM_avg_arr[nn]   = avg_fwhm0
+                FWHM_avg_arr_Z[nn] = avg_fwhm_Z
+                FWHM_med_arr[nn]   = med_fwhm0
+                FWHM_med_arr_Z[nn] = med_fwhm0_Z
             #endfor
             if silent == False: mylogger.info('Writing : '+out_pdf)
             pp.close()
+
+            # + on 14/05/2018
+            fwhm_out_file = out_pdf.replace('.pdf','.tbl')
+            arr0   = [files, FWHM_avg_arr, FWHM_avg_arr_Z, FWHM_med_arr, FWHM_med_arr_Z]
+            names0 = ('files','FWHM_avg','FWHM_avg_Z','FWHM_med','FWHM_med_Z')
+            tab0   = Table(arr0, names=names0)
+            if silent == False: mylogger.info('Writing : '+fwhm_out_file)
+            asc.write(tab0, fwhm_out_file, format='fixed_width_two_line', overwrite=True)
+            out_pdf = out_pdf_default
         #endelse
-        out_pdf = out_pdf_default
     #endfor
 
     if silent == False: mylogger.info('### End main : '+systime())
