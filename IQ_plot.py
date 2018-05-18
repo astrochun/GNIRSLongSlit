@@ -189,6 +189,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Include airmass info in plots
     Modified by Chun Ly, 14 May 2018
      - Write ASCII table containing FWHM determination
+    Modified by Chun Ly, 18 May 2018
+     - Adjust subplots_adjust to avoid labels being cut off
     '''
 
     # + on 18/12/2017
@@ -358,8 +360,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                     ax2.set_xticklabels([])
 
                 if row == 1 or nn == n_files-1:
-                    subplots_adjust(left=0.10, bottom=0.10, top=0.975,
-                                    right=0.90, wspace=0.03, hspace=0.05)
+                    subplots_adjust(left=0.11, bottom=0.10, top=0.975,
+                                    right=0.875, wspace=0.03, hspace=0.05)
                     fig.savefig(pp, format='pdf')
 
                 # + on 14/05/2018
