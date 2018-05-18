@@ -191,6 +191,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Write ASCII table containing FWHM determination
     Modified by Chun Ly, 18 May 2018
      - Adjust subplots_adjust to avoid labels being cut off
+     - Handle case when extra plot window (odd numbers) is available
     '''
 
     # + on 18/12/2017
@@ -304,7 +305,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
 
                 # Axes labeling
                 ax0[row].set_ylabel('FWHM [arcsec]')
-                if row == 1:
+                if row == 1 or nn == n_files-1:
                     ax0[row].set_xlabel('Y [pixel]')
                 else:
                     ax0[row].set_xticklabels([])
