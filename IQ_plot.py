@@ -192,6 +192,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
     Modified by Chun Ly, 18 May 2018
      - Adjust subplots_adjust to avoid labels being cut off
      - Handle case when extra plot window (odd numbers) is available
+     - Handle case with extra plot window (cont'd)
     '''
 
     # + on 18/12/2017
@@ -309,6 +310,10 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                     ax0[row].set_xlabel('Y [pixel]')
                 else:
                     ax0[row].set_xticklabels([])
+
+                if nn == n_files-1:
+                    if row == 0:
+                        ax0[row+1].axis('off')
 
                 # Annotation
                 txt0 = files[nn]+'\nTarget: '+hdr0['OBJECT'] #.split(' ')[0]
