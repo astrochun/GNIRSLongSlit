@@ -193,6 +193,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Adjust subplots_adjust to avoid labels being cut off
      - Handle case when extra plot window (odd numbers) is available
      - Handle case with extra plot window (cont'd)
+    Modified by Chun Ly, 19 May 2018
+     - Include QA (PASS/USABLE/FAIL) info in table
     '''
 
     # + on 18/12/2017
@@ -229,8 +231,10 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
         # + on 14/05/2018
         FWHM_avg_arr   = np.zeros(n_files) # FWHM from averaging stack0_shift
         FWHM_avg_arr_Z = np.zeros(n_files) # FWHM from averaging stack0_shift at Zenith
+        FWHM_avg_QA    = [''] * n_files    # QA check from averaging stack0_shift at Zenith
         FWHM_med_arr   = np.zeros(n_files) # FWHM from median along Y
         FWHM_med_arr_Z = np.zeros(n_files) # FWHM from median along Y at Zenith
+        FWHM_med_QA    = [''] * n_files    # QA check from median along Y at Zenith
 
         # Mod on 06/06/2017
         if skysub == True:
@@ -340,11 +344,23 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                     # Mod on 18/04/2018
                     if med_fwhm0_Z <= FWHM_IQ_J[i_raw]:
                         txt0 += 'PASS'
+                        FWHM_med_QA[nn] = 'PASS' # + on 19/05/2018
                     else:
                         if med_fwhm0_Z <= FWHM_IQ_J[i_raw]*1.25:
                             txt0 += 'USABLE'
+                            FWHM_med_QA[nn] = 'USABLE' # + on 19/05/2018
                         if med_fwhm0_Z > FWHM_IQ_J[i_raw]*1.25:
                             txt0 += 'FAIL'
+                            FWHM_med_QA[nn] = 'FAIL' # + on 19/05/2018
+
+                    # + on 19/05/2018
+                    if avg_fwhm_Z <= FWHM_IQ_J[i_raw]:
+                        FWHM_avg_QA[nn] = 'PASS'
+                    else:
+                        if avg_fwhm_Z <= FWHM_IQ_J[i_raw]*1.25:
+                            FWHM_avg_QA[nn] = 'USABLE'
+                        if avg_fwhm_Z > FWHM_IQ_J[i_raw]*1.25:
+                            FWHM_avg_QA[nn] = 'FAIL'
 
                     ax0[row].annotate(txt0, [0.975,0.05], ha='right',
                                       xycoords='axes fraction', va='bottom')
@@ -381,8 +397,10 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
 
             # + on 14/05/2018
             fwhm_out_file = out_pdf.replace('.pdf','.tbl')
-            arr0   = [files, FWHM_avg_arr, FWHM_avg_arr_Z, FWHM_med_arr, FWHM_med_arr_Z]
-            names0 = ('files','FWHM_avg','FWHM_avg_Z','FWHM_med','FWHM_med_Z')
+            arr0   = [files, FWHM_avg_arr, FWHM_avg_arr_Z, FWHM_med_arr, FWHM_med_arr_Z,
+                      FWHM_avg_QA, FWHM_med_QA] # Mod on 19/05/2018
+            names0 = ('files','FWHM_avg','FWHM_avg_Z','FWHM_med','FWHM_med_Z',
+                      'FWHM_avg_QA','FWHM_med_QA') # Mod on 19/05/2018
             tab0   = Table(arr0, names=names0)
             if silent == False: mylogger.info('Writing : '+fwhm_out_file)
             asc.write(tab0, fwhm_out_file, format='fixed_width_two_line', overwrite=True)
