@@ -53,6 +53,8 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
      - Plot expected Poissonian level
      - Plot aesthetics (legend, limits, x/ylabel)
      - Compute and plot rms of stacked image
+    Created by Chun Ly, 21 May 2018
+     - Bug fix: Mistake in computing RMS for combined 2-D data
     '''
 
     logfile  = rawdir+'image_stats.log'
@@ -135,9 +137,10 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
             comb_file = glob.glob(path+'obj_comb.fits')
             if len(comb_file) != 0:
                 mylogger.info('Reading : '+comb_file[0])
-                comb_data = fits.getdata(comb_file[0])
+                comb_data = fits.getdata(comb_file[0], extname='SCI') # Mod on 21/05/2018
 
-                c_mean, c_med, c_sig = sigma_clipped_stats(im0, sigma=2.0,
+                # Mod on 21/05/2018
+                c_mean, c_med, c_sig = sigma_clipped_stats(comb_data, sigma=2.0,
                                                            iters=10)
                 ax_arr[1].axhline(y=c_sig, c='g', linestyle='dashed')
                 ax_arr[1].text(0, c_sig, 'Stack', color='g', ha='left',
