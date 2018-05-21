@@ -55,6 +55,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
      - Compute and plot rms of stacked image
     Created by Chun Ly, 21 May 2018
      - Bug fix: Mistake in computing RMS for combined 2-D data
+     - Write RMS to mylogger; Label 'Stack' RMS on right side of plot
     '''
 
     logfile  = rawdir+'image_stats.log'
@@ -120,6 +121,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
 
             # Expected Poissionan level
             sig_poisson = avg_sig / np.sqrt(n_files0)
+            mylogger.info('Expected (Poisson) RMS : %.4f' % sig_poisson) # + on 21/05/2018
             ax_arr[1].axhline(y=sig_poisson, c='b', linestyle='dashed')
             ax_arr[1].text(0, sig_poisson, 'Poisson', color='b', ha='left',
                            va='bottom')
@@ -142,9 +144,10 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
                 # Mod on 21/05/2018
                 c_mean, c_med, c_sig = sigma_clipped_stats(comb_data, sigma=2.0,
                                                            iters=10)
+                mylogger.info('Measured RMS in stack : %.4f' % c_sig) # + on 21/05/2018
                 ax_arr[1].axhline(y=c_sig, c='g', linestyle='dashed')
-                ax_arr[1].text(0, c_sig, 'Stack', color='g', ha='left',
-                               va='bottom')
+                ax_arr[1].text(n_files0+1, c_sig, 'Stack', color='g', ha='right',
+                               va='bottom') # Mod on 21/05/2018
 
             #fig, ax_arr = plt.subplots(ncols=2)
             #ax_arr[0].hist(avg_arr, bins=5, align='mid', color='b',
