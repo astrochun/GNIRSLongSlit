@@ -26,7 +26,7 @@ import glog
 
 from astropy.stats import sigma_clipped_stats
 
-def main(rawdir, out_pdf='', silent=False, verbose=True):
+def main(rawdir, out_pdf='', gz=False, silent=False, verbose=True):
 
     '''
     Main function to compute and plot statistics
@@ -35,6 +35,9 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
     ----------
     rawdir : str
       Path to raw files.
+
+    gz : boolean
+      Indicate using gz-compressed files (mostly for debugging). Default: False
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -56,6 +59,7 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
     Created by Chun Ly, 21 May 2018
      - Bug fix: Mistake in computing RMS for combined 2-D data
      - Write RMS to mylogger; Label 'Stack' RMS on right side of plot
+     - Add gz keyword option to use with compressed files
     '''
 
     logfile  = rawdir+'image_stats.log'
@@ -76,6 +80,8 @@ def main(rawdir, out_pdf='', silent=False, verbose=True):
             if silent == False: mylogger.info('Reading : '+file_lis)
             t_files = np.loadtxt(file_lis, dtype=type(str)).tolist()
             files0  = [path+'tfrbnc'+t_file for t_file in t_files]
+            if gz == True: # + on 21/05/2018
+                files0 = [t_file+'.gz' for t_file in files0]
 
             n_files0 = len(files0)
             avg_arr  = np.zeros(n_files0)
