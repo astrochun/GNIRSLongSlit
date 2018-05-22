@@ -81,6 +81,8 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
      - Check if median skysub removal was performed (delete rnbc*.v1.fits.gz
        files to rerun everything)
      - Minor fix for different style settings
+    Modified by Chun Ly, 21 May 2018
+     - Bug fix: compute median from 2-D image, not column median
     '''
 
     # + on 18/12/2017
@@ -140,8 +142,8 @@ def run(rawdir, style, mylogger=None, silent=False, verbose=True):
             ax_arr.plot(med0, label=label0, linewidth=0.5)
 
         if style == 'skysub': # + on 29/04/2018
-            c_mean0, c_med0, c_sig0 = sigma_clipped_stats(med0, sigma=2.0,
-                                                          iters=10)
+            c_mean0, c_med0, c_sig0 = sigma_clipped_stats(im0, sigma=2.0,
+                                                          iters=10) # Mod on 21/05/2018
             ax_arr[0].axhline(y=c_med0, color='black', linestyle='--',
                               linewidth=0.5)
 
