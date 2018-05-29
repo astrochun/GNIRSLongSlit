@@ -56,11 +56,15 @@ def main(rawdir, out_pdf='', gz=False, silent=False, verbose=True):
      - Plot expected Poissonian level
      - Plot aesthetics (legend, limits, x/ylabel)
      - Compute and plot rms of stacked image
-    Created by Chun Ly, 21 May 2018
+    Modified by Chun Ly, 21 May 2018
      - Bug fix: Mistake in computing RMS for combined 2-D data
      - Write RMS to mylogger; Label 'Stack' RMS on right side of plot
      - Add gz keyword option to use with compressed files
+    Modified by Chun Ly, 28 May 2018
+     - Add '/' after rawdir if not provided
     '''
+
+    if rawdir[-1] != '/': rawdir = rawdir+'/'
 
     logfile  = rawdir+'image_stats.log'
     mylogger = glog.log0(logfile)._get_logger()
