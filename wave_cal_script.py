@@ -61,6 +61,8 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
      - Import glog and call for stdout and ASCII logging
     Modified by Chun Ly,  9 January 2018
      - Allow mylogger keyword
+    Modified by Chun Ly, 30 May 2018
+     - Change order for nswavelength fitting
     '''
 
     # Mod on 10/01/2018
@@ -136,7 +138,7 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
     cmd = "iraf.gnirs.nswavelength(lampspec, outprefix='',"+\
           "outspectra=outspec, crval=crval, cdelt=cdelt, crpix=crpix, "+\
           "coordlist=coordlist, database=database, fl_inter='yes',"+\
-          "cradius=20, threshold=50.0, order=2, logfile=logfile)"
+          "cradius=20, threshold=50.0, order=3, logfile=logfile)"
 
     f0.write(cmd+'\n')
     f0.close()
