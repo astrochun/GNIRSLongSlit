@@ -7,6 +7,8 @@ A set of code to provide plots illustrating wavelength calibration solutions
 
 import sys, os
 
+from pyraf import iraf
+
 from chun_codes import systime
 
 from os.path import exists
@@ -445,4 +447,50 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
     if silent == False: mylogger.info('Writing : '+out_pdf)
     pp.close()
     if silent == False: mylogger.info('### End arc_check2 : '+systime())
+#enddef
+
+def cross_check(path, cdir, dbase):
+    '''
+    Check arc/OH calibration against OH/arc dataset
+
+    Parameters
+    ----------
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    skysub : boolean
+      Display skysubtracted or un-skysubtracted images. Default: False
+
+    Returns
+    -------
+
+    Notes
+    -----
+    Created by Chun Ly, 31 May 2018
+    '''
+
+    logfile  = path+'QA_wave_cal.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    iraf.chdir(path)
+    if dbase == 'database/':
+        infile  = 'OH_stack.fits'
+        outfile = 'fOH_stack.arc.fits'
+
+        if not exists(outfile):
+            iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile
+                                   lamp='warc_stack.fits', database=dbase)
+
+    if dbase == 'database_OH/':
+        infile  = 'arc_stack.fits'
+        outfile = 'farc_stack.OH.fits'
+
+        if not exists(outfile):
+            iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile
+                                   lamp='wOH_stack.fits', database=dbase)
+
 #enddef
