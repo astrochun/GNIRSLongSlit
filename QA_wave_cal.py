@@ -218,7 +218,7 @@ def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=Tr
 #enddef
 
 def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
-             verbose=True):
+             verbose=True, cross_check=False):
 
     '''
     Generate plot illustrating expected location of OH skyline to
@@ -235,6 +235,9 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
 
     skysub : boolean
       Display skysubtracted or un-skysubtracted images. Default: False
+
+    cross_check : boolean
+      Check arc-based wavelength calibration against OH skylines. Default: False
 
     Returns
     -------
@@ -253,6 +256,8 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
      - Change prefix: tfrnc to tfrbnc
     Modified by Chun Ly,  9 January 2018
      - Import glog and call for stdout and ASCII logging
+    Modified by Chun Ly, 31 May 2018
+     - Add cross_check keyword; Update input/outputs for cross_check == True
     '''
 
     # + on 09/01/2018
@@ -269,17 +274,20 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
         OH_lines = OH_data[:,0]
         OH_int   = OH_data[:,1]
 
-    # Mod on 02/06/2017
-    if objs == '':
-        obj_list = path + 'obj.lis' if skysub == True else \
-                   path + 'obj.OH.lis'
+    # Mod on 02/06/2017, 31/05/2018
+    if cross_check == False:
+        if objs == '':
+            obj_list = path + 'obj.lis' if skysub == True else \
+                       path + 'obj.OH.lis'
 
-        if silent == False: mylogger.info('Reading : '+obj_list)
-        objs = np.loadtxt(obj_list, dtype=type(str))
+            if silent == False: mylogger.info('Reading : '+obj_list)
+            objs = np.loadtxt(obj_list, dtype=type(str))
 
-    n_obj = len(objs)
+        n_obj = len(objs)
 
-    tfrnc_files = [path+'tfrbnc'+file0 for file0 in objs] # Mod on 16/11/2017
+        tfrnc_files = [path+'tfrbnc'+file0 for file0 in objs] # Mod on 16/11/2017
+    else:
+        tfrnc_files = [path+'tfOH_stack_arc.fits']
 
     # + on 20/05/2017
     chk = [file0 for file0 in tfrnc_files if exists(file0) == True]
@@ -289,12 +297,18 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
         mylogger.warn('Exiting!!!')
         return
 
-    # Mod on 02/06/2017
-    if out_pdf == '':
-        out_pdf = path+'OH_check.pdf' if skysub == True else \
-                  path+'OH_check.raw.pdf'
+    # Mod on 02/06/2017, 31/05/2018
+    if cross_check == False:
+        if out_pdf == '':
+            out_pdf = path+'OH_check.pdf' if skysub == True else \
+                      path+'OH_check.raw.pdf'
+        else:
+            out_pdf = path+out_pdf
     else:
-        out_pdf = path+out_pdf
+        if out_pdf == '':
+            out_pdf = path+'OH_check_arc.pdf'
+        else:
+            out_pdf = path+out_pdf
 
     pp = PdfPages(out_pdf)
 
