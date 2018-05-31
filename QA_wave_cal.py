@@ -492,7 +492,7 @@ def cross_check(path, cdir, dbase):
     mylogger = glog.log0(logfile)._get_logger()
 
     timestamp = systime().replace(':','.')
-    logfile   = rawdir+'gnirs_'+timestamp+'.log'
+    logfile   = path+'gnirs_'+timestamp+'.log'
     iraf.gemini.gnirs.logfile = logfile
 
     iraf.gemini.nsheaders("gnirs")
