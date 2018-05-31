@@ -491,18 +491,16 @@ def cross_check(path, cdir, dbase):
     if dbase == 'database/':
         infile  = 'OH_stack.fits'
         outfile = 'fOH_stack.arc.fits'
-
-        if not exists(outfile):
-            iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile,
-                                   lamp='warc_stack.fits', database=dbase)
+        lamp    = 'warc_stack.fits'
 
     if dbase == 'database_OH/':
         infile  = 'arc_stack.fits'
         outfile = 'farc_stack.OH.fits'
+        lamp    = 'wOH_stack.fits'
 
-        if not exists(outfile):
-            iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile,
-                                   lamp='wOH_stack.fits', database=dbase)
+    if not exists(outfile):
+        iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile,
+                               lamp=lamp, database=dbase)
 
     iraf.chdir(cdir)
 #enddef
