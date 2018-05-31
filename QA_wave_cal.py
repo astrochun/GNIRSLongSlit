@@ -258,6 +258,7 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
      - Import glog and call for stdout and ASCII logging
     Modified by Chun Ly, 31 May 2018
      - Add cross_check keyword; Update input/outputs for cross_check == True
+     - Bug fix: n_obj for cross_check == True
     '''
 
     # + on 09/01/2018
@@ -288,6 +289,7 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
         tfrnc_files = [path+'tfrbnc'+file0 for file0 in objs] # Mod on 16/11/2017
     else:
         tfrnc_files = [path+'tfOH_stack_arc.fits']
+        n_obj = len(tfrnc_files)
 
     # + on 20/05/2017
     chk = [file0 for file0 in tfrnc_files if exists(file0) == True]
