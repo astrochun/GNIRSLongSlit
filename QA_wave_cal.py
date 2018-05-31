@@ -44,7 +44,7 @@ iraf.gemini.gemtools.unlearn()
 iraf.gemini.gnirs.unlearn()
 
 iraf.set(stdimage="imt4096")
-iraf.gemini.nsheaders("gnirs")
+# iraf.gemini.nsheaders("gnirs")
 
 co_dirname = os.path.dirname(__file__)
 
@@ -484,10 +484,21 @@ def cross_check(path, cdir, dbase):
     Created by Chun Ly, 31 May 2018
      - Generate transformed image with iraf.gnirs.nstransform
      - Call mylogger to warn if files exist
+     - Change gnirs logfile
+     - Move call to iraf.gemini.nsheaders to this function
     '''
 
     logfile  = path+'QA_wave_cal.log'
     mylogger = glog.log0(logfile)._get_logger()
+
+    timestamp = systime().replace(':','.')
+    logfile   = rawdir+'gnirs_'+timestamp+'.log'
+    iraf.gemini.gnirs.logfile = logfile
+
+    iraf.gemini.nsheaders("gnirs")
+
+    mylogger.info("Raw data is located in : %s" % path)
+    mylogger.info("GNIRS logfile : "+logfile)
 
     iraf.chdir(path)
     if dbase == 'database/':
