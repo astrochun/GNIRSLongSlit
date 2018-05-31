@@ -35,6 +35,17 @@ import glog # + on 09/01/2018
 from pylab import subplots_adjust
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.5, ec="none")
 
+iraf.gemini(_doprint=0)
+iraf.gemini.gnirs(_doprint=0)
+
+log.info("Unlearning tasks")
+iraf.gemini.unlearn()
+iraf.gemini.gemtools.unlearn()
+iraf.gemini.gnirs.unlearn()
+
+iraf.set(stdimage="imt4096")
+iraf.gemini.nsheaders("gnirs")
+
 co_dirname = os.path.dirname(__file__)
 
 def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=True):
@@ -493,4 +504,5 @@ def cross_check(path, cdir, dbase):
             iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile
                                    lamp='wOH_stack.fits', database=dbase)
 
+    iraf.chdir(cdir)
 #enddef
