@@ -483,6 +483,7 @@ def cross_check(path, cdir, dbase):
     -----
     Created by Chun Ly, 31 May 2018
      - Generate transformed image with iraf.gnirs.nstransform
+     - Call mylogger to warn if files exist
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -502,11 +503,15 @@ def cross_check(path, cdir, dbase):
     if not exists(outfile):
         iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile,
                                lamp=lamp, database=dbase)
+    else:
+        mylogger.warn('File exists! : '+outfile)
 
     t_outfile = 't'+outfile
     if not exists(t_outfile):
         iraf.gnirs.nstransform(outfile, outprefix='', outspectra=t_outfile,
                                database=dbase)
+    else:
+        mylogger.warn('File exists! : '+t_outfile)
 
     iraf.chdir(cdir)
 #enddef
