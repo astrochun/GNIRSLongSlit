@@ -356,7 +356,8 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
     if silent == False: mylogger.info('### End OH_check : '+systime())
 #enddef
 
-def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=True):
+def arc_check2(path, arcs=[''], out_pdf='', stack=False, cross_check=False,
+               silent=False, verbose=True):
 
     '''
     Generate plot illustrating expected location of arc lines to
@@ -373,6 +374,9 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
 
     stack : boolean
       Indicate whether to include stacked arc data. Default: False
+
+    cross_check : boolean
+      Check OH-based wavelength calibration against arc lines. Default: False
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -395,6 +399,8 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
      - Change prefix: tfrnc to tfrbnc
     Modified by Chun Ly,  9 January 2018
      - Import glog and call for stdout and ASCII logging
+    Modified by Chun Ly, 31 May 2018
+     - Add cross_check keyword; Update input/outputs for cross_check == True
     '''
 
     # + on 09/01/2018
@@ -426,6 +432,11 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
         arcs         = arcs0 + arcs
         tfrnc_files  = tfrnc_files0 + tfrnc_files
 
+    # + on 31/05/2018
+    if cross_check == True:
+        arcs         = [path + 'arc_stack_OH.fits']
+        tfrnc_files  = [path + 'tfarc_stack_OH.fits']
+
     chk = [file0 for file0 in tfrnc_files if exists(file0) == True]
     if len(chk) == 0:
         mylogger.warn('Files not found!!!')
@@ -435,7 +446,12 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=T
 
     n_arcs = len(arcs) # Moved lower on 12/11/2017
 
-    out_pdf = path+'arc_check2.pdf' if out_pdf == '' else path+out_pdf
+    # Mod on 31/05/2018
+    if cross_check == False:
+        out_pdf = path+'arc_check2.pdf' if out_pdf == '' else path+out_pdf
+    else:
+        out_pdf = path+'arc_check_OH.pdf' if out_pdf == '' else path+out_pdf
+
     pp = PdfPages(out_pdf)
 
     for nn in xrange(n_arcs):
