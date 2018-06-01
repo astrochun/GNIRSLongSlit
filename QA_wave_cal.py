@@ -504,6 +504,7 @@ def cross_check(path, cdir, dbase):
      - Move call to iraf.gemini.nsheaders to this function
      - iraf.nstransform does not like suffixes. Using underscores
      - Call OH_check
+     - Check for database file before running nsfitcoords and nstransform
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -529,18 +530,23 @@ def cross_check(path, cdir, dbase):
         outfile = 'farc_stack_OH.fits'
         lamp    = 'wOH_stack.fits'
 
-    if not exists(outfile):
-        iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile,
-                               lamp=lamp, database=dbase)
-    else:
-        mylogger.warn('File exists! : '+outfile)
+    db_file = dbase+'id'+lamp.replace('.fits','_SCI_1_')
 
-    t_outfile = 't'+outfile
-    if not exists(t_outfile):
-        iraf.gnirs.nstransform(outfile, outprefix='', outspectra=t_outfile,
-                               database=dbase)
+    if not exists(db_file):
+        mylogger.warn("Wavelength calibration file not found : "+db_file)
     else:
-        mylogger.warn('File exists! : '+t_outfile)
+        if not exists(outfile):
+            iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile,
+                                   lamp=lamp, database=dbase)
+        else:
+            mylogger.warn('File exists! : '+outfile)
+
+        t_outfile = 't'+outfile
+        if not exists(t_outfile):
+            iraf.gnirs.nstransform(outfile, outprefix='', outspectra=t_outfile,
+                                   database=dbase)
+        else:
+            mylogger.warn('File exists! : '+t_outfile)
 
     iraf.chdir(cdir)
 
