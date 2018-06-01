@@ -450,6 +450,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Handle no telluric data case (nsextract)
     Modified by Chun Ly, 30 April 2018
      - Bug fix: incorrect array name, flatfile_orig -> flatfile
+    Modified by Chun Ly, 31 May 2018
+     - Call QA_wave_cal.cross_check for arc calibration against OH skyline
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -761,6 +763,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         OH_stack.wave_cal(rawdir, cdir)  # + on 17/11/2017
         OH_stack.transform(rawdir) # + on 17/11/2017
         OH_stack.plot_spec(rawdir) # + on 22/11/2017
+
+        # Call cross_check | + on 31/05/2018
+        QA_wave_cal.cross_check(rawdir, cdir, 'database/')
     #end wave_cal
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
