@@ -503,6 +503,7 @@ def cross_check(path, cdir, dbase):
      - Change gnirs logfile
      - Move call to iraf.gemini.nsheaders to this function
      - iraf.nstransform does not like suffixes. Using underscores
+     - Call OH_check
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -542,4 +543,7 @@ def cross_check(path, cdir, dbase):
         mylogger.warn('File exists! : '+t_outfile)
 
     iraf.chdir(cdir)
+
+    if dbase == 'database/':
+        OH_check(path, cross_check=False)
 #enddef
