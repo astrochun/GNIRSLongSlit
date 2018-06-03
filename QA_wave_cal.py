@@ -521,6 +521,8 @@ def cross_check(path, cdir, dbase):
      - iraf.nstransform does not like suffixes. Using underscores
      - Call OH_check
      - Check for database file before running nsfitcoords and nstransform
+    Modified by Chun Ly, 3 June 2018
+     - Bug fix: Call OH_check with cross_check=True
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -567,5 +569,5 @@ def cross_check(path, cdir, dbase):
     iraf.chdir(cdir)
 
     if dbase == 'database/':
-        OH_check(path, cross_check=False)
+        OH_check(path, cross_check=True)
 #enddef
