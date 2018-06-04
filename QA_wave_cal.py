@@ -527,7 +527,13 @@ def residual_wave_cal(path, dataset='', cal=''):
     Created by Chun Ly, 4 June 2018
     '''
 
+    logfile  = path+'QA_wave_cal.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin residual_wave_cal : '+systime())
+
     infile = path+'tf'+dataset+'_stack_'+cal+'.fits'
+    if silent == False: mylogger.info('Reading : '+infile)
 
     cal_2D, cal_hdr = fits.getdata(infile, extname='SCI', header=True)
 
@@ -542,6 +548,7 @@ def residual_wave_cal(path, dataset='', cal=''):
     for ii in range(n_bins):
         avg_arr[:,ii] = np.average(cal_2D[:,bins_mid[ii]-5:bins_mid[ii]+5], axis=1)
 
+    if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
 #enddef
 
 def cross_check(path, cdir, dbase):
