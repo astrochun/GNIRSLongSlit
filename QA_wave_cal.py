@@ -492,6 +492,58 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, cross_check=False,
     if silent == False: mylogger.info('### End arc_check2 : '+systime())
 #enddef
 
+def residual_wave_cal(path, dataset='', cal=''):
+    '''
+    Plot residuals of arc/OH lines against OH/arc dataset
+
+    Parameters
+    ----------
+    path : str
+      Full path to where output PDF and FITS file are located. Must end
+      with a '/'
+
+    dataset : str
+      Either: 'arc' or 'OH'
+
+    cal : str
+      Either 'arc' or 'OH
+
+    To use OH calib on OH lines:   dataset='OH',  cal='OH'
+    To use OH calib on arc lines:  dataset='arc', cal='OH'
+    To use arc calib on arc lines: dataset='arc', cal='arc'
+    To use arc calib on OH lines:  dataset='OH',  cal='arc'
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+
+    Returns
+    -------
+
+    Notes
+    -----
+    Created by Chun Ly, 4 June 2018
+    '''
+
+    infile = path+'tf'+dataset+'_stack_'+cal+'.fits'
+
+    cal_2D, cal_hdr = fits.getdata(infile, extname='SCI', header=True)
+
+    lam0 = cal_hdr['CRVAL2']
+    dlam = cal_hdr['CD2_2']
+    wave0 = lam0 + dlam * np.arange(cal_2D.shape[0])
+
+    bins_mid = np.arange(13,cal_2D.shape[1],10)
+    n_bins = len(bins_mid)
+    avg_arr = np.zeros( (cal_2D.shape[0], n_bins) )
+
+    for ii in range(n_bins):
+        avg_arr[:,ii] = np.average(cal_2D[:,bins_mid[ii]-5:bins_mid[ii]+5], axis=1)
+
+#enddef
+
 def cross_check(path, cdir, dbase):
     '''
     Check arc/OH calibration against OH/arc dataset
