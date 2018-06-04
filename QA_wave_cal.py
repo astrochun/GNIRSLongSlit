@@ -535,18 +535,25 @@ def residual_wave_cal(path, dataset='', cal=''):
     infile = path+'tf'+dataset+'_stack_'+cal+'.fits'
     if silent == False: mylogger.info('Reading : '+infile)
 
-    cal_2D, cal_hdr = fits.getdata(infile, extname='SCI', header=True)
+    if not exists(infile):
+        mylogger.warn('File not found : '+infile)
+        mylogger.warn('Exiting!!!')
+        return
+    else:
+        cal_2D, cal_hdr = fits.getdata(infile, extname='SCI', header=True)
 
-    lam0 = cal_hdr['CRVAL2']
-    dlam = cal_hdr['CD2_2']
-    wave0 = lam0 + dlam * np.arange(cal_2D.shape[0])
+        lam0 = cal_hdr['CRVAL2']
+        dlam = cal_hdr['CD2_2']
+        wave0 = lam0 + dlam * np.arange(cal_2D.shape[0])
 
-    bins_mid = np.arange(13,cal_2D.shape[1],10)
-    n_bins = len(bins_mid)
-    avg_arr = np.zeros( (cal_2D.shape[0], n_bins) )
+        bins_mid = np.arange(13,cal_2D.shape[1],10)
+        n_bins = len(bins_mid)
+        avg_arr = np.zeros( (cal_2D.shape[0], n_bins) )
 
-    for ii in range(n_bins):
-        avg_arr[:,ii] = np.average(cal_2D[:,bins_mid[ii]-5:bins_mid[ii]+5], axis=1)
+        for ii in range(n_bins):
+            
+            avg_arr[:,ii] = np.average(cal_2D[:,bins_mid[ii]-5:bins_mid[ii]+5],
+                                       axis=1)
 
     if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
 #enddef
