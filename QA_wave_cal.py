@@ -492,7 +492,7 @@ def arc_check2(path, arcs=[''], out_pdf='', stack=False, cross_check=False,
     if silent == False: mylogger.info('### End arc_check2 : '+systime())
 #enddef
 
-def residual_wave_cal(path, dataset='', cal=''):
+def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
     '''
     Plot residuals of arc/OH lines against OH/arc dataset
 
