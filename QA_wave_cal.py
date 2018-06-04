@@ -542,18 +542,21 @@ def residual_wave_cal(path, dataset='', cal=''):
     else:
         cal_2D, cal_hdr = fits.getdata(infile, extname='SCI', header=True)
 
+        NX = cal_2D.shape[1] # spatial direction
+        NY = cal_2D.shape[0] # dispersion direction
+
         lam0 = cal_hdr['CRVAL2']
         dlam = cal_hdr['CD2_2']
-        wave0 = lam0 + dlam * np.arange(cal_2D.shape[0])
+        wave0 = lam0 + dlam * np.arange(NY)
 
-        bins_mid = np.arange(13,cal_2D.shape[1],10)
+        bins_mid = np.arange(13,NX,10)
         n_bins = len(bins_mid)
-        avg_arr = np.zeros( (cal_2D.shape[0], n_bins) )
+        avg_arr = np.zeros( (NY, n_bins) )
 
         for ii in range(n_bins):
-            
-            avg_arr[:,ii] = np.average(cal_2D[:,bins_mid[ii]-5:bins_mid[ii]+5],
-                                       axis=1)
+            start = np.max([0,bins_mid[ii]-1 - 5])
+            stop  = np.min([NX-1,bins_mid[ii]-1 + 5])
+            avg_arr[:,ii] = np.average(cal_2D[:,start:stop], axis=1)
 
     if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
 #enddef
