@@ -19,6 +19,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
+from scipy.optimize import curve_fit # + on 05/06/2018
+from IQ_plot import gauss1d
+
 from astropy.io import fits
 from astropy.io import ascii as asc # + on 16/06/2017
 from astropy import log
@@ -527,6 +530,9 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
     Created by Chun Ly, 4 June 2018
     Modified by Chun Ly, 5 June 2018
      - Define and read in OH/arc line database
+     - Import curve_fit
+     - Import gauss1d from IQ_plot
+     - Call curve_fit to fit Gaussian profiles to line
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -569,8 +575,27 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         if silent == False: mylogger.info('Reading : '+cal_ref_file)
         cal_line_data = asc.read(cal_ref_file, format='no_header')
         cal_lines     = cal_line_data['col1'].data
+
+        in_spec = np.where((cal_lines >= wave0[0]) &
+                           (cal_lines <= wave0[-1]))[0]
+        cal_line_data = cal_line_data[in_spec]
+        cal_lines     = cal_line_data['col1']
+
         if dataset == 'OH':
             cal_lines_int = cal_line_data['col2'].data
+
+        n_lines = len(cal_lines)
+
+        cen_arr = np.zeros( (n_lines,n_bins) )
+        for ll in range(n_lines):
+            for ii in range(n_bins):
+                z_idx = np.where(np.absolute(wave0 - cal_lines[ll]) <= 10.0)[0]
+                x0, y0 = wave0[z_idx], avg_arr[z_idx,ii]
+                p0 = [0.0, max(y0), cal_lines[ll], 2.0/1e4]
+                popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
+                cen_arr[ll,ii] = popt[2]
+            #endfor
+        #endfor
 
     if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
 #enddef
