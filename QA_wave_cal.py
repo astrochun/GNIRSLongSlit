@@ -525,6 +525,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 4 June 2018
+    Modified by Chun Ly, 5 June 2018
+     - Define and read in OH/arc line database
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -557,6 +559,18 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             start = np.max([0,bins_mid[ii]-1 - 5])
             stop  = np.min([NX-1,bins_mid[ii]-1 + 5])
             avg_arr[:,ii] = np.average(cal_2D[:,start:stop], axis=1)
+
+        if dataset == 'OH':
+            cal_ref_file = co_dirname+'/rousselot2000.dat'
+
+        if dataset == 'arc':
+            cal_ref_file = co_dirname+'/argon.dat'
+
+        if silent == False: mylogger.info('Reading : '+cal_ref_file)
+        cal_line_data = asc.read(cal_ref_file, format='no_header')
+        cal_lines     = cal_line_data['col1'].data
+        if dataset == 'OH':
+            cal_lines_int = cal_line_data['col2'].data
 
     if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
 #enddef
