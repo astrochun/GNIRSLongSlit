@@ -536,6 +536,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
     Modified by Chun Ly, 7 June 2018
      - Plot residuals of wavelength solution
      - Set minimum line peak brightness to fit
+     - Limit plotting to non-zero values for central wavelength
+     - Plot rms for each line
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -603,8 +605,12 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                     popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
                     cen_arr[ll,ii] = popt[2]
             #endfor
-            ax.scatter(cen_arr[ll], cen_arr[ll]-cal_lines[ll], marker='o', s=5,
-                       edgecolor='k', facecolor='none')
+            good   = np.where(cen_arr[ll] != 0)[0]
+            x_test = cen_arr[ll][good]
+            diff = x_test - cal_lines[ll]
+            ax.scatter(x_test, diff, marker='o', s=5, edgecolor='k', facecolor='none')
+            rms, avg = np.std(diff), np.average(diff)
+            ax.errorbar(cal_lines[ll], avg, yerr=rms)
         #endfor
         fig.savefig(pdf_file)
 
