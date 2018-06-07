@@ -542,6 +542,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Plot aesthetics
      - Move mylogger.info() call into else statement
      - Handle dataset == cal cases
+     - Save average and rms for each arc/OH line
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -607,6 +608,9 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         pdf_file = path+'wave_cal_resid_'+dataset+'_'+cal+'.pdf'
         fig, ax = plt.subplots()
 
+        diff_avg = np.zeros(n_lines)
+        diff_rms = np.zeros(n_lines)
+
         for ll in range(n_lines):
             z_idx = np.where(np.absolute(wave0 - cal_lines[ll]) <= 10.0)[0]
             for ii in range(n_bins):
@@ -619,13 +623,15 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             good   = np.where(cen_arr[ll] != 0)[0]
             x_test = cen_arr[ll][good]
             diff = x_test - cal_lines[ll]
-            ax.scatter(x_test, diff, marker='o', s=5, edgecolor='k', facecolor='none')
-            rms, avg = np.std(diff), np.average(diff)
-            ax.scatter(cal_lines[ll], avg, marker='o', s=10, facecolor='blue',
-                       edgecolor='none')
-            ax.errorbar(cal_lines[ll], avg, yerr=rms, ecolor='blue', capsize=0,
-                        elinewidth=2)
+            ax.scatter(x_test, diff, marker='o', s=5, edgecolor='none',
+                       facecolor='black', alpha=0.5)
+            diff_rms[ll], diff_avg[ll] = np.std(diff), np.average(diff)
         #endfor
+        ax.scatter(cal_lines, diff_avg, marker='o', s=40, facecolor='blue',
+                   edgecolor='none', alpha=0.5)
+        ax.errorbar(cal_lines, diff_avg, yerr=diff_rms, ecolor='blue',
+                    capsize=2.0, elinewidth=2, fmt=None, alpha=0.5)
+
         ax.minorticks_on()
         ax.set_xlabel(r'Wavelengths [$\AA$]')
         ax.set_ylabel(r'Difference from reference values [$\AA$]')
