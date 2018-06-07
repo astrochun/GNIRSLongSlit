@@ -544,6 +544,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Handle dataset == cal cases
      - Save average and rms for each arc/OH line
      - Handle dataset == cal cases for output PDF file
+     - Plot aesthetics: Draw vertical lines for location of lines
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -617,6 +618,9 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         diff_rms = np.zeros(n_lines)
 
         for ll in range(n_lines):
+            ax.axvline(cal_lines[ll], color='red', linestyle='dashed',
+                       linewidth=0.25, zorder=1)
+
             z_idx = np.where(np.absolute(wave0 - cal_lines[ll]) <= 10.0)[0]
             for ii in range(n_bins):
                 x0, y0 = wave0[z_idx], avg_arr[z_idx,ii]
@@ -629,13 +633,13 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             x_test = cen_arr[ll][good]
             diff = x_test - cal_lines[ll]
             ax.scatter(x_test, diff, marker='o', s=5, edgecolor='none',
-                       facecolor='black', alpha=0.5)
+                       facecolor='black', alpha=0.5, zorder=2)
             diff_rms[ll], diff_avg[ll] = np.std(diff), np.average(diff)
         #endfor
         ax.scatter(cal_lines, diff_avg, marker='o', s=40, facecolor='blue',
-                   edgecolor='none', alpha=0.5)
+                   edgecolor='none', alpha=0.5, zorder=3)
         ax.errorbar(cal_lines, diff_avg, yerr=diff_rms, ecolor='blue',
-                    capsize=2.0, elinewidth=2, fmt=None, alpha=0.5)
+                    capsize=2.0, elinewidth=2, fmt=None, alpha=0.5, zorder=4)
 
         ax.minorticks_on()
         ax.set_xlabel(r'Wavelengths [$\AA$]')
