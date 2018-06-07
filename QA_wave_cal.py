@@ -545,6 +545,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Save average and rms for each arc/OH line
      - Handle dataset == cal cases for output PDF file
      - Plot aesthetics: Draw vertical lines for location of lines
+     - Handle dataset == cal cases for output FITS file
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -581,9 +582,13 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             stop  = np.min([NX-1,bins_mid[ii]-1 + 5])
             avg_arr[:,ii] = np.average(cal_2D[:,start:stop], axis=1)
 
-        out_fits = path+'wave_cal_resid_'+dataset+'_'+cal+'.fits'
-        fits.writeto(out_fits, avg_arr, overwrite=True)
+        if dataset != cal:
+            out_fits = path+'wave_cal_resid_'+dataset+'_'+cal+'.fits'
+        else:
+            out_fits = path+'wave_cal_resid_'+dataset+'.fits'
+
         if silent == False: mylogger.info('Writing : '+out_fits)
+        fits.writeto(out_fits, avg_arr, overwrite=True)
 
         if dataset == 'OH':
             cal_ref_file = co_dirname+'/rousselot2000.dat'
