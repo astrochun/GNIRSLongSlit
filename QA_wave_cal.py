@@ -541,6 +541,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Write average array to FITS file
      - Plot aesthetics
      - Move mylogger.info() call into else statement
+     - Handle dataset == cal cases
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -548,7 +549,10 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
     if silent == False: mylogger.info('### Begin residual_wave_cal : '+systime())
 
-    infile = path+'tf'+dataset+'_stack_'+cal+'.fits'
+    if dataset != cal:
+        infile = path+'tf'+dataset+'_stack_'+cal+'.fits'
+    else:
+        infile = path+'tf'+dataset+'_stack.fits'
 
     if not exists(infile):
         mylogger.warn('File not found : '+infile)
