@@ -540,6 +540,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Plot rms for each line
      - Write average array to FITS file
      - Plot aesthetics
+     - Move mylogger.info() call into else statement
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -548,13 +549,13 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
     if silent == False: mylogger.info('### Begin residual_wave_cal : '+systime())
 
     infile = path+'tf'+dataset+'_stack_'+cal+'.fits'
-    if silent == False: mylogger.info('Reading : '+infile)
 
     if not exists(infile):
         mylogger.warn('File not found : '+infile)
         mylogger.warn('Exiting!!!')
         return
     else:
+        if silent == False: mylogger.info('Reading : '+infile)
         cal_2D, cal_hdr = fits.getdata(infile, extname='SCI', header=True)
 
         NX = cal_2D.shape[1] # spatial direction
