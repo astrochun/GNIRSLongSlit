@@ -543,6 +543,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Move mylogger.info() call into else statement
      - Handle dataset == cal cases
      - Save average and rms for each arc/OH line
+     - Handle dataset == cal cases for output PDF file
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -605,7 +606,11 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         cen_arr = np.zeros( (n_lines,n_bins) )
 
-        pdf_file = path+'wave_cal_resid_'+dataset+'_'+cal+'.pdf'
+        if dataset != cal:
+            pdf_file = path+'wave_cal_resid_'+dataset+'_'+cal+'.pdf'
+        else:
+            pdf_file = path+'wave_cal_resid_'+dataset+'.pdf'
+
         fig, ax = plt.subplots()
 
         diff_avg = np.zeros(n_lines)
