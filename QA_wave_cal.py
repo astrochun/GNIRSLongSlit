@@ -539,6 +539,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Limit plotting to non-zero values for central wavelength
      - Plot rms for each line
      - Write average array to FITS file
+     - Plot aesthetics
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -615,8 +616,17 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             diff = x_test - cal_lines[ll]
             ax.scatter(x_test, diff, marker='o', s=5, edgecolor='k', facecolor='none')
             rms, avg = np.std(diff), np.average(diff)
-            ax.errorbar(cal_lines[ll], avg, yerr=rms)
+            ax.scatter(cal_lines[ll], avg, marker='o', s=10, facecolor='blue',
+                       edgecolor='none')
+            ax.errorbar(cal_lines[ll], avg, yerr=rms, ecolor='blue', capsize=0,
+                        elinewidth=2)
         #endfor
+        ax.minorticks_on()
+        ax.set_xlabel(r'Wavelengths [$\AA$]')
+        ax.set_ylabel(r'Difference from reference values [$\AA$]')
+        ax.annotate('dataset: %s\ncalib: %s' % (dataset,cal), [0.05,0.95],
+                    xycoords='axes fraction', ha='left', va='top')
+        plt.subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99)
         fig.savefig(pdf_file)
 
     if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
