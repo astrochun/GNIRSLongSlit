@@ -533,6 +533,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Import curve_fit
      - Import gauss1d from IQ_plot
      - Call curve_fit to fit Gaussian profiles to line
+    Modified by Chun Ly, 7 June 2018
+     - Plot residuals of wavelength solution
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -587,15 +589,24 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         n_lines = len(cal_lines)
 
         cen_arr = np.zeros( (n_lines,n_bins) )
+
+        pdf_file = path+'wave_cal_resid_'+dataset+'_'+cal+'.pdf'
+        fig, ax = plt.subplots()
+
         for ll in range(n_lines):
+            z_idx = np.where(np.absolute(wave0 - cal_lines[ll]) <= 10.0)[0]
             for ii in range(n_bins):
-                z_idx = np.where(np.absolute(wave0 - cal_lines[ll]) <= 10.0)[0]
+                # if ll ==0 and ii == 0: print wave0.shape, avg_arr.shape
                 x0, y0 = wave0[z_idx], avg_arr[z_idx,ii]
-                p0 = [0.0, max(y0), cal_lines[ll], 2.0/1e4]
+                p0 = [0.0, max(y0), cal_lines[ll], 1.0]
+                # print ll, ii, p0 #p0[1]
                 popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
                 cen_arr[ll,ii] = popt[2]
             #endfor
+            ax.scatter(cen_arr[ll], cen_arr[ll]-cal_lines[ll], marker='o', s=5,
+                       edgecolor='k', facecolor='none')
         #endfor
+        fig.savefig(pdf_file)
 
     if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
 #enddef
