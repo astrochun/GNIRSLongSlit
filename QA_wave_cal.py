@@ -535,6 +535,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Call curve_fit to fit Gaussian profiles to line
     Modified by Chun Ly, 7 June 2018
      - Plot residuals of wavelength solution
+     - Set minimum line peak brightness to fit
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -596,12 +597,11 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         for ll in range(n_lines):
             z_idx = np.where(np.absolute(wave0 - cal_lines[ll]) <= 10.0)[0]
             for ii in range(n_bins):
-                # if ll ==0 and ii == 0: print wave0.shape, avg_arr.shape
                 x0, y0 = wave0[z_idx], avg_arr[z_idx,ii]
-                p0 = [0.0, max(y0), cal_lines[ll], 1.0]
-                # print ll, ii, p0 #p0[1]
-                popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
-                cen_arr[ll,ii] = popt[2]
+                p0 = [0.0, max(y0), cal_lines[ll], 2.0]
+                if p0[1] > 10:
+                    popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
+                    cen_arr[ll,ii] = popt[2]
             #endfor
             ax.scatter(cen_arr[ll], cen_arr[ll]-cal_lines[ll], marker='o', s=5,
                        edgecolor='k', facecolor='none')
