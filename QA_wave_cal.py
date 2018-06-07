@@ -538,6 +538,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Set minimum line peak brightness to fit
      - Limit plotting to non-zero values for central wavelength
      - Plot rms for each line
+     - Write average array to FITS file
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -570,6 +571,10 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             start = np.max([0,bins_mid[ii]-1 - 5])
             stop  = np.min([NX-1,bins_mid[ii]-1 + 5])
             avg_arr[:,ii] = np.average(cal_2D[:,start:stop], axis=1)
+
+        out_fits = path+'wave_cal_resid_'+dataset+'_'+cal+'.fits'
+        fits.writeto(out_fits, avg_arr, overwrite=True)
+        if silent == False: mylogger.info('Writing : '+out_fits)
 
         if dataset == 'OH':
             cal_ref_file = co_dirname+'/rousselot2000.dat'
