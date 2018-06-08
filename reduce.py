@@ -451,9 +451,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 30 April 2018
      - Bug fix: incorrect array name, flatfile_orig -> flatfile
     Modified by Chun Ly, 31 May 2018
-     - Call QA_wave_cal.cross_check for arc calibration against OH skyline
+     - Call QA_wave_cal.cross_check for arc calibration against OH skylines
     Modified by Chun Ly,  8 June 2018
      - Call QA_wave_cal.residual_wave_cal for both arc/OH with cal = 'arc'
+     - Call QA_wve_call.cross_check for OH calibration against arc lines
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -774,6 +775,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Call cross_check | + on 31/05/2018
         QA_wave_cal.cross_check(rawdir, cdir, 'database/')
+        QA_wave_cal.cross_check(rawdir, cdir, 'database_OH/') # + on 08/06/2018
     #end wave_cal
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
