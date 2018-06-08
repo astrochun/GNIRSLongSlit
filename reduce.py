@@ -452,6 +452,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Bug fix: incorrect array name, flatfile_orig -> flatfile
     Modified by Chun Ly, 31 May 2018
      - Call QA_wave_cal.cross_check for arc calibration against OH skyline
+    Modified by Chun Ly,  8 June 2018
+     - Call QA_wave_cal.residual_wave_cal for both arc/OH with cal = 'arc'
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -756,6 +758,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         # + on 25/05/2017, Mod on 12/11/2017
         QA_wave_cal.arc_check2(rawdir, arcs=arcs, stack=True)
 
+        # Plot arc residuals using arc solution | + on 08/06/2018
+        QA_wave_cal.residual_wave_cal(rawdir, dataset='arc', cal='arc')
+
         # Wavelength calibration with OH skylines
         # + on 13/07/2017
         mylogger.info("Performing non-interactive wavelength calibration on OH data")
@@ -763,6 +768,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         OH_stack.wave_cal(rawdir, cdir)  # + on 17/11/2017
         OH_stack.transform(rawdir) # + on 17/11/2017
         OH_stack.plot_spec(rawdir) # + on 22/11/2017
+
+        # Plot OH residuals using arc solution | + on 08/06/2018
+        QA_wave_cal.residual_wave_cal(rawdir, dataset='OH', cal='arc')
 
         # Call cross_check | + on 31/05/2018
         QA_wave_cal.cross_check(rawdir, cdir, 'database/')
