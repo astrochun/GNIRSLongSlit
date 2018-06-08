@@ -700,6 +700,8 @@ def cross_check(path, cdir, dbase):
     Modified by Chun Ly, 3 June 2018
      - Bug fix: Call OH_check with cross_check=True
      - Call arc_check2 for database_OH case
+    Modified by Chun Ly, 8 June 2018
+     - Exit when db_file not available
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -729,6 +731,8 @@ def cross_check(path, cdir, dbase):
 
     if not exists(db_file):
         mylogger.warn("Wavelength calibration file not found : "+db_file)
+        mylogger.warn("Exiting!!!")
+        return
     else:
         if not exists(outfile):
             iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile,
