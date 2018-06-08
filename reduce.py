@@ -455,6 +455,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly,  8 June 2018
      - Call QA_wave_cal.residual_wave_cal for both arc/OH with cal = 'arc'
      - Call QA_wave_call.cross_check for OH calibration against arc lines
+     - Bug fix: Move residual_wave_cal after cross_check is done
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -770,12 +771,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         OH_stack.transform(rawdir) # + on 17/11/2017
         OH_stack.plot_spec(rawdir) # + on 22/11/2017
 
-        # Plot OH residuals using arc solution | + on 08/06/2018
-        QA_wave_cal.residual_wave_cal(rawdir, dataset='OH', cal='arc')
-
         # Call cross_check | + on 31/05/2018
         QA_wave_cal.cross_check(rawdir, cdir, 'database/')
         QA_wave_cal.cross_check(rawdir, cdir, 'database_OH/') # + on 08/06/2018
+
+        # Plot OH residuals using arc solution | + on 08/06/2018
+        QA_wave_cal.residual_wave_cal(rawdir, dataset='OH', cal='arc')
     #end wave_cal
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
