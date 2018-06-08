@@ -454,7 +454,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call QA_wave_cal.cross_check for arc calibration against OH skylines
     Modified by Chun Ly,  8 June 2018
      - Call QA_wave_cal.residual_wave_cal for both arc/OH with cal = 'arc'
-     - Call QA_wve_call.cross_check for OH calibration against arc lines
+     - Call QA_wave_call.cross_check for OH calibration against arc lines
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
