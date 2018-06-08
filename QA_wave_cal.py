@@ -25,6 +25,7 @@ from IQ_plot import gauss1d
 from astropy.io import fits
 from astropy.io import ascii as asc # + on 16/06/2017
 from astropy import log
+from astropy.table import Table
 
 # + on 19/05/2017
 from astropy.visualization import ZScaleInterval
@@ -546,6 +547,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Handle dataset == cal cases for output PDF file
      - Plot aesthetics: Draw vertical lines for location of lines
      - Handle dataset == cal cases for output FITS file
+     - If statement for lines with fits
+     - Write ASCII with averages and RMS file
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -621,6 +624,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         diff_avg = np.zeros(n_lines)
         diff_rms = np.zeros(n_lines)
+        diff_num = np.zeros(n_lines, dtype=np.int)
 
         for ll in range(n_lines):
             ax.axvline(cal_lines[ll], color='red', linestyle='dashed',
@@ -635,11 +639,13 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                     cen_arr[ll,ii] = popt[2]
             #endfor
             good   = np.where(cen_arr[ll] != 0)[0]
-            x_test = cen_arr[ll][good]
-            diff = x_test - cal_lines[ll]
-            ax.scatter(x_test, diff, marker='o', s=5, edgecolor='none',
-                       facecolor='black', alpha=0.5, zorder=2)
-            diff_rms[ll], diff_avg[ll] = np.std(diff), np.average(diff)
+            if len(good) > 0:
+                x_test = cen_arr[ll][good]
+                diff = x_test - cal_lines[ll]
+                ax.scatter(x_test, diff, marker='o', s=5, edgecolor='none',
+                           facecolor='black', alpha=0.5, zorder=2)
+                diff_rms[ll], diff_avg[ll] = np.std(diff), np.average(diff)
+                diff_num[ll] = len(good)
         #endfor
         ax.scatter(cal_lines, diff_avg, marker='o', s=40, facecolor='blue',
                    edgecolor='none', alpha=0.5, zorder=3)
@@ -653,6 +659,11 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                     xycoords='axes fraction', ha='left', va='top')
         plt.subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99)
         fig.savefig(pdf_file)
+
+        asc_file = pdf_file.replace('.pdf', '.tbl')
+        tab0 = Table([cal_lines, diff_num, diff_avg, diff_rms],
+                     names=('Line','N','Avg','RMS'))
+        tab0.write(asc_file, format='ascii.fixed_width_two_line')
 
     if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
 #enddef
