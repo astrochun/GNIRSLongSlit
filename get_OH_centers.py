@@ -174,16 +174,21 @@ def main(rawdir, silent=False, verbose=True):
                                    p0=p0)
             t_mod = gauss1d(x0, *popt)
             rev_lines.append(popt[2])
+            rev_int.append(popt[1])
         else:
             popt, pcov = curve_fit(gauss_six, x0[zoom], OH_spec_mod[zoom],
                                    p0=p0)
             t_mod = gauss_six(x0, *popt)
 
+            rev_lines += popt[range(len(group_lines),2*len(group_lines))]
+            rev_int   += popt[0:len(group_lines)]
+
         # print '## t_mod : ', np.min(t_mod), np.max(t_mod)
 
         OH_spec_mod_resid -= t_mod
 
-
+        l_tab = Table([rev_lines, rev_int])
+        asc.write(l_tab, rawdir+'rousselot2000_convl.dat', format='no_header')
     if silent == False: log.info('### End main : '+systime())
 #enddef
 
