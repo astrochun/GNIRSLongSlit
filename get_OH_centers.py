@@ -141,6 +141,14 @@ def main(rawdir, silent=False, verbose=True):
     rev_lines = [] #np.zeros(len(lines_set))
     rev_int   = [] #np.zeros(len(lines_set))
 
+    nrows = 3
+    fig, ax = plt.subplots(nrows=nrows)
+
+    dx = (x0[-1]-x0[0])/3.0
+    for aa in range(nrows):
+        ax[aa].plot(x0, OH_spec_mod, color='black')
+        ax[aa].set_xlim([x_min+dx*aa,x_min+dx*(aa+1)])
+
     for ii in range(len(lines_set)):
         x_avg   = np.int(np.average(lines_set[ii]))
         tl_min, tl_max = x0[lines_set[ii][0]], x0[lines_set[ii][1]]
@@ -193,8 +201,18 @@ def main(rawdir, silent=False, verbose=True):
 
         OH_spec_mod_resid -= t_mod
 
-        l_tab = Table([rev_lines, rev_int])
-        asc.write(l_tab, rawdir+'rousselot2000_convl.dat', format='no_header')
+    for aa in range(nrows):
+        ax[aa].plot(x0, OH_spec_mod_resid, linestyle='dashed', color='blue')
+        for t_line in rev_lines:
+            ax[aa].axvline(x=t_line, color='red', linestyle='dotted')
+
+    l_tab = Table([rev_lines, rev_int])
+    out_file = rawdir+'rousselot2000_convl.dat'
+    asc.write(l_tab, out_file, format='no_header')
+
+    out_pdf = out_file.replace('.dat','.pdf')
+    fig.savefig(out_pdf)
+
     if silent == False: mylogger.info('### End main : '+systime())
 #enddef
 
