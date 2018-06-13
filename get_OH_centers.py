@@ -97,6 +97,7 @@ def main(rawdir, silent=False, verbose=True):
      - Plot aesthetics: label plots, change page size, legend
      - Include parameters/assumptions in title
      - Plot aesthetics: Vertical lines for all possible OH skylines
+     - Plot aesthetics: Label OH skylines
     '''
     
     # + on 09/01/2018
@@ -139,6 +140,8 @@ def main(rawdir, silent=False, verbose=True):
         temp = OH_int[idx] * gaussian_R(x0, OH_lines[idx], R_spec)
         OH_spec_mod += temp
 
+    y_max = max(OH_spec_mod) * 1.25
+
     i_lines = np.where(OH_spec_mod >= np.max(OH_spec_mod)*0.01)[0]
 
     lines_set = list(group(i_lines))
@@ -157,6 +160,7 @@ def main(rawdir, silent=False, verbose=True):
                     label="Rousselot (2000)")
         xlim = np.array([x_min+dx*aa,x_min+dx*(aa+1)])
         ax[aa].set_xlim(xlim/1e4)
+        ax[aa].set_ylim([-10,y_max])
 
         # Draw vertical lines for all possible OH skylines
         for val in OH_lines[in_rge]:
@@ -226,7 +230,9 @@ def main(rawdir, silent=False, verbose=True):
         for t_line in rev_lines:
             ax[aa].axvline(x=t_line/1e4, color='red', linestyle='--',
                            linewidth=1.0, zorder=1)
-
+            # Label lines
+            ax[aa].text(t_line/1e4, y_max, '%.2f' % t_line, ha='left', va='top',
+                        rotation=90, fontsize=4)
     l_tab = Table([rev_lines, rev_int])
     out_file = rawdir+'rousselot2000_convl.dat'
     asc.write(l_tab, out_file, format='no_header')
