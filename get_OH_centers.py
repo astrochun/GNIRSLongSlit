@@ -25,6 +25,9 @@ from astropy import log
 import glob
 
 from OH_stack import gaussian, gaussian_R
+from IQ_plot import gauss1d
+
+from scipy.optimize import curve_fit
 
 co_dirname = os.path.dirname(__file__)
 OH_file = co_dirname+'/rousselot2000.dat'
@@ -97,9 +100,29 @@ def main(rawdir, silent=False, verbose=True):
         temp = OH_int[idx] * gaussian_R(x0, OH_lines[idx], R_spec)
         OH_spec_mod += temp
 
-    i_lines = np.where(OH_spec_mod >= np.max(OH_spec_mod)*0.1)[0]
+    i_lines = np.where(OH_spec_mod >= np.max(OH_spec_mod)*0.01)[0]
 
     lines_set = list(group(i_lines))
+
+    OH_spec_mod_resid = OH_spec_mod.copy()
+
+    rev_lines = np.zeros(len(lines_set))
+
+    for ii in range(len(lines_set)):
+        x_avg   = np.int(np.average(lines_set[ii]))
+        lam_cen = x0[x_avg]
+        sig     = lam_cen / R_spec / (2*np.sqrt(2*np.log(2)))
+        p0      = [0.0, OH_spec_mod[x_avg], lam_cen, sig]
+        zoom    = np.arange(lines_set[ii][0],lines_set[ii][1])
+        bounds = ((-0.001, 0.0, lam_cen-0.5, 0.1),
+                  (0.001, 1.25*p0[1], lam_cen+0.5, 1.5*p0[3]))
+        popt, pcov = curve_fit(gauss1d, x0[zoom], OH_spec_mod[zoom], p0=p0,
+                               bounds=bounds)
+
+        t_mod = gauss1d(x0, *popt)
+        OH_spec_mod_resid -= t_mod
+
+        rev_lines[ii] = popt[2]
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
