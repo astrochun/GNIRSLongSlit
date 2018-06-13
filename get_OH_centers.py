@@ -29,6 +29,8 @@ from IQ_plot import gauss1d
 
 from scipy.optimize import curve_fit
 
+import glog
+
 co_dirname = os.path.dirname(__file__)
 OH_file = co_dirname+'/rousselot2000.dat'
 
@@ -90,7 +92,11 @@ def main(rawdir, silent=False, verbose=True):
     Created by Chun Ly, 12 June 2018
     '''
     
-    if silent == False: log.info('### Begin main : '+systime())
+    # + on 09/01/2018
+    logfile  = rawdir+'get_OH_centers.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin main : '+systime())
 
     if exists(OH_file):
         if silent == False: mylogger.info('Reading : '+OH_file)
@@ -180,8 +186,8 @@ def main(rawdir, silent=False, verbose=True):
                                    p0=p0)
             t_mod = gauss_six(x0, *popt)
 
-            rev_lines += popt[range(len(group_lines),2*len(group_lines))]
-            rev_int   += popt[0:len(group_lines)]
+            rev_lines += popt[range(len(group_lines),2*len(group_lines))].tolist()
+            rev_int   += popt[0:len(group_lines)].tolist()
 
         # print '## t_mod : ', np.min(t_mod), np.max(t_mod)
 
@@ -189,6 +195,6 @@ def main(rawdir, silent=False, verbose=True):
 
         l_tab = Table([rev_lines, rev_int])
         asc.write(l_tab, rawdir+'rousselot2000_convl.dat', format='no_header')
-    if silent == False: log.info('### End main : '+systime())
+    if silent == False: mylogger.info('### End main : '+systime())
 #enddef
 
