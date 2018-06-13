@@ -99,6 +99,7 @@ def main(rawdir, silent=False, verbose=True):
      - Plot aesthetics: Vertical lines for all possible OH skylines
      - Plot aesthetics: Label OH skylines
      - Plot aesthetics: Limit vertical lines for OH skylines
+     - Plot aesthetics: group and label OH skylines to avoid overlap
     '''
     
     # + on 09/01/2018
@@ -155,11 +156,14 @@ def main(rawdir, silent=False, verbose=True):
     nrows = 3
     fig, ax = plt.subplots(nrows=nrows)
 
+    xlim_arr = []
     dx = (x0[-1]-x0[0])/3.0
     for aa in range(nrows):
         ax[aa].plot(x0/1e4, OH_spec_mod, color='black', zorder=3,
                     label="Rousselot (2000)")
         xlim = np.array([x_min+dx*aa,x_min+dx*(aa+1)])
+        xlim_arr.append(xlim)
+
         ax[aa].set_xlim(xlim/1e4)
         ax[aa].set_ylim([-10,y_max])
 
@@ -206,8 +210,14 @@ def main(rawdir, silent=False, verbose=True):
             popt, pcov = curve_fit(gauss1d, x0[zoom], OH_spec_mod[zoom],
                                    p0=p0)
             t_mod = gauss1d(x0, *popt)
+
             rev_lines.append(popt[2])
             rev_int.append(popt[1])
+
+            i_ax = [xx for xx in range(nrows) if
+                    (popt[2] >= xlim_arr[xx][0] and popt[2] <= xlim_arr[xx][1])][0]
+            ax[i_ax].annotate('%.2f' % popt[2], [popt[2]/1e4, y_max], ha='center',
+                              va='top', rotation=90, fontsize=4) #, bbox=bbox_props)
         else:
             popt, pcov = curve_fit(gauss_six, x0[zoom], OH_spec_mod[zoom],
                                    p0=p0)
@@ -217,8 +227,18 @@ def main(rawdir, silent=False, verbose=True):
             t_str = popt[0:6]  # Line peak strength
 
             nonzero = np.where(t_loc != 0)[0]
-            rev_lines += t_loc[nonzero].tolist()
+
+            wave0 = t_loc[nonzero].tolist()
+            rev_lines += wave0
             rev_int   += t_str[nonzero].tolist()
+
+            # Label lines
+            str_comb = "".join(['%.2f\n' % val for val in wave0])
+            w_avg = np.average(wave0)
+            i_ax = [xx for xx in range(nrows) if
+                    (w_avg >= xlim_arr[xx][0] and w_avg <= xlim_arr[xx][1])][0]
+            ax[i_ax].annotate(str_comb, [w_avg/1e4, y_max], ha='center', va='top',
+                              rotation=90, fontsize=4) #, bbox=bbox_props)
 
         # print '## t_mod : ', np.min(t_mod), np.max(t_mod)
 
@@ -231,9 +251,7 @@ def main(rawdir, silent=False, verbose=True):
         for t_line in rev_lines:
             ax[aa].axvline(x=t_line/1e4, ymin=0, ymax=0.9, color='red',
                            linestyle='--', linewidth=1.0, zorder=1)
-            # Label lines
-            ax[aa].text(t_line/1e4, y_max, '%.2f' % t_line, ha='left', va='top',
-                        rotation=90, fontsize=4)
+
     l_tab = Table([rev_lines, rev_int])
     out_file = rawdir+'rousselot2000_convl.dat'
     asc.write(l_tab, out_file, format='no_header')
