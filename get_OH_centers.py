@@ -32,6 +32,17 @@ from scipy.optimize import curve_fit
 co_dirname = os.path.dirname(__file__)
 OH_file = co_dirname+'/rousselot2000.dat'
 
+def gauss_six(x, a0, a1, a2, a3, a4, a5, l0, l1, l2, l3, l4, l5,
+              s0, s1, s2, s3, s4, s5):
+    m0 = a0 * np.exp(-(x - l0)**2 / (2 * s0**2))
+    m1 = a1 * np.exp(-(x - l1)**2 / (2 * s1**2))
+    m2 = a2 * np.exp(-(x - l2)**2 / (2 * s2**2))
+    m3 = a3 * np.exp(-(x - l3)**2 / (2 * s3**2))
+    m4 = a4 * np.exp(-(x - l4)**2 / (2 * s4**2))
+    m5 = a5 * np.exp(-(x - l5)**2 / (2 * s5**2))
+
+    return m0 + m1 + m2 + m3 + m4 + m5
+
 def group(L):
     first = last = L[0]
     for n in L[1:]:
