@@ -96,6 +96,7 @@ def main(rawdir, silent=False, verbose=True):
      - Switch to micron units; Do subplots_adjust for white space
      - Plot aesthetics: label plots, change page size, legend
      - Include parameters/assumptions in title
+     - Plot aesthetics: Vertical lines for all possible OH skylines
     '''
     
     # + on 09/01/2018
@@ -156,6 +157,11 @@ def main(rawdir, silent=False, verbose=True):
                     label="Rousselot (2000)")
         xlim = np.array([x_min+dx*aa,x_min+dx*(aa+1)])
         ax[aa].set_xlim(xlim/1e4)
+
+        # Draw vertical lines for all possible OH skylines
+        for val in OH_lines[in_rge]:
+            ax[aa].axvline(x=val/1e4, color='black', linewidth=0.25,
+                           linestyle=':', zorder=2)
 
     for ii in range(len(lines_set)):
         x_avg   = np.int(np.average(lines_set[ii]))
@@ -218,8 +224,8 @@ def main(rawdir, silent=False, verbose=True):
                     zorder=3, label='Residual')
 
         for t_line in rev_lines:
-            ax[aa].axvline(x=t_line/1e4, color='red', linestyle='dotted',
-                           linewidth=1.0, zorder=2)
+            ax[aa].axvline(x=t_line/1e4, color='red', linestyle='--',
+                           linewidth=1.0, zorder=1)
 
     l_tab = Table([rev_lines, rev_int])
     out_file = rawdir+'rousselot2000_convl.dat'
