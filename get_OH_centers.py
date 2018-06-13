@@ -29,6 +29,16 @@ from OH_stack import gaussian, gaussian_R
 co_dirname = os.path.dirname(__file__)
 OH_file = co_dirname+'/rousselot2000.dat'
 
+def group(L):
+    first = last = L[0]
+    for n in L[1:]:
+        if n - 1 == last: # Part of the group, bump the end
+            last = n
+        else: # Not part of the group, yield current group and start a new
+            yield first, last
+            first = last = n
+    yield first, last # Yield the last group
+
 def main(rawdir, silent=False, verbose=True):
 
     '''
@@ -87,6 +97,9 @@ def main(rawdir, silent=False, verbose=True):
         temp = OH_int[idx] * gaussian_R(x0, OH_lines[idx], R_spec)
         OH_spec_mod += temp
 
+    i_lines = np.where(OH_spec_mod >= np.max(OH_spec_mod)*0.1)[0]
+
+    lines_set = list(group(i_lines))
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
