@@ -98,6 +98,7 @@ def main(rawdir, silent=False, verbose=True):
      - Include parameters/assumptions in title
      - Plot aesthetics: Vertical lines for all possible OH skylines
      - Plot aesthetics: Label OH skylines
+     - Plot aesthetics: Limit vertical lines for OH skylines
     '''
     
     # + on 09/01/2018
@@ -164,8 +165,8 @@ def main(rawdir, silent=False, verbose=True):
 
         # Draw vertical lines for all possible OH skylines
         for val in OH_lines[in_rge]:
-            ax[aa].axvline(x=val/1e4, color='black', linewidth=0.25,
-                           linestyle=':', zorder=2)
+            ax[aa].axvline(x=val/1e4, ymin=0, ymax=0.9, color='black',
+                           linewidth=0.25, linestyle=':', zorder=2)
 
     for ii in range(len(lines_set)):
         x_avg   = np.int(np.average(lines_set[ii]))
@@ -228,8 +229,8 @@ def main(rawdir, silent=False, verbose=True):
                     zorder=3, label='Residual')
 
         for t_line in rev_lines:
-            ax[aa].axvline(x=t_line/1e4, color='red', linestyle='--',
-                           linewidth=1.0, zorder=1)
+            ax[aa].axvline(x=t_line/1e4, ymin=0, ymax=0.9, color='red',
+                           linestyle='--', linewidth=1.0, zorder=1)
             # Label lines
             ax[aa].text(t_line/1e4, y_max, '%.2f' % t_line, ha='left', va='top',
                         rotation=90, fontsize=4)
