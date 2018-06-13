@@ -53,6 +53,21 @@ def group(L):
             first = last = n
     yield first, last # Yield the last group
 
+def group_OH_lines(OH_lines, OH_int):
+    str_uniq = np.array(list(set(OH_int)))
+    str_uniq.sort()
+
+    bright = np.where(str_uniq >= 0.05*max(str_uniq))[0]
+
+    best_lines = np.zeros(len(bright))
+    for ii in range(len(bright)):
+        idx = np.where(OH_int == str_uniq[bright[ii]])[0]
+        best_lines[ii] = np.sum(OH_lines[idx]*OH_int[idx])/np.sum(OH_int[idx])
+    #endfor
+    return best_lines, str_uniq[bright]
+#enddef
+
+
 def main(rawdir, silent=False, verbose=True):
 
     '''
