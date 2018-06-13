@@ -106,23 +106,57 @@ def main(rawdir, silent=False, verbose=True):
 
     OH_spec_mod_resid = OH_spec_mod.copy()
 
-    rev_lines = np.zeros(len(lines_set))
+    rev_lines = [] #np.zeros(len(lines_set))
+    rev_int   = [] #np.zeros(len(lines_set))
 
     for ii in range(len(lines_set)):
         x_avg   = np.int(np.average(lines_set[ii]))
-        lam_cen = x0[x_avg]
-        sig     = lam_cen / R_spec / (2*np.sqrt(2*np.log(2)))
-        p0      = [0.0, OH_spec_mod[x_avg], lam_cen, sig]
-        zoom    = np.arange(lines_set[ii][0],lines_set[ii][1])
-        bounds = ((-0.001, 0.0, lam_cen-0.5, 0.1),
-                  (0.001, 1.25*p0[1], lam_cen+0.5, 1.5*p0[3]))
-        popt, pcov = curve_fit(gauss1d, x0[zoom], OH_spec_mod[zoom], p0=p0,
-                               bounds=bounds)
+        tl_min, tl_max = x0[lines_set[ii][0]], x0[lines_set[ii][1]]
+        in_zoom = np.where((OH_lines >= tl_min) & (OH_lines <= tl_max))[0]
 
-        t_mod = gauss1d(x0, *popt)
+        group_lines, group_int = group_OH_lines(OH_lines[in_zoom],
+                                                OH_int[in_zoom])
+
+        # print ii, group_lines
+
+        sig = group_lines / R_spec / (2*np.sqrt(2*np.log(2)))
+        peak0 = OH_spec_mod[np.int_((group_lines-x_min)/(x0[1]-x0[0]))]
+
+        if len(group_lines) == 1:
+            p0 = [0.0, peak0, group_lines[0], sig[0]]
+            plt.axvline(group_lines[0], color='blue')
+        else:
+            t_peak0 = peak0.tolist()
+            t_lines = group_lines.tolist()
+            t_sig   = sig.tolist()
+
+            t_peak0 += np.zeros(6-len(group_lines)).tolist()
+            t_lines += np.zeros(6-len(group_lines)).tolist()
+            t_sig   += np.zeros(6-len(group_lines)).tolist()
+
+            p0 = t_peak0
+            p0 += t_lines
+            p0 += t_sig
+
+
+        zoom    = np.arange(lines_set[ii][0],lines_set[ii][1])
+        # print p0
+        #bounds = ((-0.001, 0.0, lam_cen-0.5, 0.1),
+        #          (0.001, 1.25*p0[1], lam_cen+0.5, 1.5*p0[3]))
+        if len(group_lines) == 1:
+            popt, pcov = curve_fit(gauss1d, x0[zoom], OH_spec_mod[zoom],
+                                   p0=p0)
+            t_mod = gauss1d(x0, *popt)
+            rev_lines.append(popt[2])
+        else:
+            popt, pcov = curve_fit(gauss_six, x0[zoom], OH_spec_mod[zoom],
+                                   p0=p0)
+            t_mod = gauss_six(x0, *popt)
+
+        # print '## t_mod : ', np.min(t_mod), np.max(t_mod)
+
         OH_spec_mod_resid -= t_mod
 
-        rev_lines[ii] = popt[2]
 
     if silent == False: log.info('### End main : '+systime())
 #enddef
