@@ -95,6 +95,7 @@ def main(rawdir, silent=False, verbose=True):
      - Fix rev_lines and rev_int (wrong indexing)
      - Switch to micron units; Do subplots_adjust for white space
      - Plot aesthetics: label plots, change page size, legend
+     - Include parameters/assumptions in title
     '''
     
     # + on 09/01/2018
@@ -215,17 +216,23 @@ def main(rawdir, silent=False, verbose=True):
     for aa in range(nrows):
         ax[aa].plot(x0/1e4, OH_spec_mod_resid, linestyle='dashed', color='blue',
                     zorder=3, label='Residual')
+
         for t_line in rev_lines:
-            ax[aa].axvline(x=t_line/1e4, color='red', linestyle='dotted', zorder=2)
+            ax[aa].axvline(x=t_line/1e4, color='red', linestyle='dotted',
+                           linewidth=1.0, zorder=2)
 
     l_tab = Table([rev_lines, rev_int])
     out_file = rawdir+'rousselot2000_convl.dat'
     asc.write(l_tab, out_file, format='no_header')
 
+    ann_txt  = r'%.2f $\mu$m; %s; ' % (gratwave, o_tab0['filter2'])
+    ann_txt += '%s; %.3f" slit; R = %i' % (o_tab0['grating'], slitwidth, R_spec)
+    ax[0].set_title(ann_txt)
     leg = ax[0].legend(loc='upper right', fancybox=True) #, frameon=False)
     leg.get_frame().set_alpha(0.75)
+
     ax[2].set_xlabel(r'Wavelength [$\mu$m]')
-    plt.subplots_adjust(left=0.08, right=0.95, bottom=0.1, top=0.99)
+    plt.subplots_adjust(left=0.08, right=0.95, bottom=0.065, top=0.95)
 
     fig.set_size_inches(6,8)
     out_pdf = out_file.replace('.dat','.pdf')
