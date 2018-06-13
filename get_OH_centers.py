@@ -90,6 +90,9 @@ def main(rawdir, silent=False, verbose=True):
     Notes
     -----
     Created by Chun Ly, 12 June 2018
+
+    Modified by Chun Ly, 13 June 2018
+     - Fix rev_lines and rev_int (wrong indexing)
     '''
     
     # + on 09/01/2018
@@ -194,8 +197,12 @@ def main(rawdir, silent=False, verbose=True):
                                    p0=p0)
             t_mod = gauss_six(x0, *popt)
 
-            rev_lines += popt[range(len(group_lines),2*len(group_lines))].tolist()
-            rev_int   += popt[0:len(group_lines)].tolist()
+            t_loc = popt[6:12] # Line wavelengths (Ang)
+            t_str = popt[0:6]  # Line peak strength
+
+            nonzero = np.where(t_loc != 0)[0]
+            rev_lines += t_loc[nonzero].tolist()
+            rev_int   += t_str[nonzero].tolist()
 
         # print '## t_mod : ', np.min(t_mod), np.max(t_mod)
 
