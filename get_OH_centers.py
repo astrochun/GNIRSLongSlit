@@ -93,6 +93,7 @@ def main(rawdir, silent=False, verbose=True):
 
     Modified by Chun Ly, 13 June 2018
      - Fix rev_lines and rev_int (wrong indexing)
+     - Switch to micron units; Do subplots_adjust for white space
     '''
     
     # + on 09/01/2018
@@ -149,8 +150,9 @@ def main(rawdir, silent=False, verbose=True):
 
     dx = (x0[-1]-x0[0])/3.0
     for aa in range(nrows):
-        ax[aa].plot(x0, OH_spec_mod, color='black')
-        ax[aa].set_xlim([x_min+dx*aa,x_min+dx*(aa+1)])
+        ax[aa].plot(x0/1e4, OH_spec_mod, color='black', zorder=3)
+        xlim = np.array([x_min+dx*aa,x_min+dx*(aa+1)])
+        ax[aa].set_xlim(xlim/1e4)
 
     for ii in range(len(lines_set)):
         x_avg   = np.int(np.average(lines_set[ii]))
@@ -167,7 +169,7 @@ def main(rawdir, silent=False, verbose=True):
 
         if len(group_lines) == 1:
             p0 = [0.0, peak0, group_lines[0], sig[0]]
-            plt.axvline(group_lines[0], color='blue')
+            #plt.axvline(group_lines[0]/1e4, color='blue')
         else:
             t_peak0 = peak0.tolist()
             t_lines = group_lines.tolist()
@@ -209,14 +211,17 @@ def main(rawdir, silent=False, verbose=True):
         OH_spec_mod_resid -= t_mod
 
     for aa in range(nrows):
-        ax[aa].plot(x0, OH_spec_mod_resid, linestyle='dashed', color='blue')
+        ax[aa].plot(x0/1e4, OH_spec_mod_resid, linestyle='dashed', color='blue',
+                    zorder=3)
         for t_line in rev_lines:
-            ax[aa].axvline(x=t_line, color='red', linestyle='dotted')
+            ax[aa].axvline(x=t_line/1e4, color='red', linestyle='dotted', zorder=2)
 
     l_tab = Table([rev_lines, rev_int])
     out_file = rawdir+'rousselot2000_convl.dat'
     asc.write(l_tab, out_file, format='no_header')
 
+    ax[2].set_xlabel(r'Wavelength [$\mu$m]')
+    plt.subplots_adjust(left=0.08, right=0.95, bottom=0.1, top=0.99)
     out_pdf = out_file.replace('.dat','.pdf')
     fig.savefig(out_pdf)
 
