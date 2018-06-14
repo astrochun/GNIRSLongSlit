@@ -21,7 +21,7 @@ from astropy.io import fits
 import glog # + on 09/01/2018
 
 co_dirname = os.path.dirname(__file__)
-OH_file = co_dirname+'/rousselot2000.dat'
+#OH_file = co_dirname+'/rousselot2000.dat'
 
 def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
 
@@ -63,6 +63,8 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
      - Allow mylogger keyword
     Modified by Chun Ly, 30 May 2018
      - Change order for nswavelength fitting
+    Modified by Chun Ly, 16 June 2018
+     - Change coordlist for OH skylines
     '''
 
     # Mod on 10/01/2018
@@ -122,7 +124,9 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
         coordlist = 'gnirs$data/argon.dat'
         database  = 'database/'
     if line_source == 'OH':
-        coordlist = OH_file
+        coordlist = rawdir+'rousselot2000_convl.dat'
+        if not exists(coordlist):
+            log.warn('File does not exists!!! : '+coordlist)
         database  = 'database_OH/'
 
     # Mod on 08/11/2017
