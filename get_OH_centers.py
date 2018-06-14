@@ -24,7 +24,7 @@ from astropy import log
 
 import glob
 
-from OH_stack import gaussian, gaussian_R
+from fit import gaussian, gaussian_R
 from IQ_plot import gauss1d
 
 from scipy.optimize import curve_fit
