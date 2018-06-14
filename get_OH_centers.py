@@ -106,6 +106,7 @@ def main(rawdir, silent=False, verbose=True):
      - Opaque white background behind lines
      - Plot aesthetics: Draw OH lines to top of subplots
      - Plot aesthetics: Remove legend; adjust white space
+     - WARN if more than six lines
     '''
     
     # + on 09/01/2018
@@ -195,6 +196,8 @@ def main(rawdir, silent=False, verbose=True):
             p0 = [0.0, peak0, group_lines[0], sig[0]]
             #plt.axvline(group_lines[0]/1e4, color='blue')
         else:
+            if len(group_lines) > 6:
+                log.warn('More than 6 lines found, N='+str(len(group_lines))+'!!!')
             t_peak0 = peak0.tolist()
             t_lines = group_lines.tolist()
             t_sig   = sig.tolist()
