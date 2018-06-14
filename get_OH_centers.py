@@ -105,6 +105,7 @@ def main(rawdir, silent=False, verbose=True):
      - Group lines (<5 Ang) before annotation
      - Opaque white background behind lines
      - Plot aesthetics: Draw OH lines to top of subplots
+     - Plot aesthetics: Remove legend; adjust white space
     '''
     
     # + on 09/01/2018
@@ -277,11 +278,11 @@ def main(rawdir, silent=False, verbose=True):
     ann_txt  = r'%.2f $\mu$m; %s; ' % (gratwave, o_tab0['filter2'])
     ann_txt += '%s; %.3f" slit; R = %i' % (o_tab0['grating'], slitwidth, R_spec)
     ax[0].set_title(ann_txt)
-    leg = ax[0].legend(loc='upper right', fancybox=True) #, frameon=False)
-    leg.get_frame().set_alpha(0.75)
+    #leg = ax[0].legend(loc='upper right', fancybox=True) #, frameon=False)
+    #leg.get_frame().set_alpha(0.75)
 
     ax[2].set_xlabel(r'Wavelength [$\mu$m]')
-    plt.subplots_adjust(left=0.08, right=0.95, bottom=0.065, top=0.95)
+    plt.subplots_adjust(left=0.08, right=0.95, bottom=0.06, top=0.96, hspace=0.12)
 
     fig.set_size_inches(6,8)
     out_pdf = out_file.replace('.dat','.pdf')
