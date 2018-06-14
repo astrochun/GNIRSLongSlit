@@ -36,6 +36,7 @@ from check_path import main as check_path
 from pyraf import iraf #from reduce import iraf
 
 import wave_cal_script # + on 20/11/2017
+import get_OH_centers # + on 14/06/2018
 
 import glog # + on 09/01/2018
 
@@ -199,6 +200,8 @@ def wave_cal(rawdir, cdir, silent=False, verbose=False):
      - Bug fix: Pass in cdir
     Modified by Chun Ly, 9 January 2018
      - Import glog and call for stdout and ASCII logging
+    Modified by Chun Ly, 14 June 2018
+     - Import and call get_OH_centers
     '''
 
     # + on 09/01/2018
@@ -212,6 +215,8 @@ def wave_cal(rawdir, cdir, silent=False, verbose=False):
     timestamp = systime().replace(':','.')
     logfile   = rawdir+'gnirs_'+timestamp+'.log'
     iraf.gemini.gnirs.logfile = logfile
+
+    get_OH_centers.main(rawdir)
 
     # + on 16/11/2017
     script_file = 'wave_cal_OH.py'
