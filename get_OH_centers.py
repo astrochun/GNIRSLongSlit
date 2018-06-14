@@ -100,6 +100,7 @@ def main(rawdir, silent=False, verbose=True):
      - Plot aesthetics: Label OH skylines
      - Plot aesthetics: Limit vertical lines for OH skylines
      - Plot aesthetics: group and label OH skylines to avoid overlap
+     - Group lines (<5 Ang) before annotation
     '''
     
     # + on 09/01/2018
@@ -229,16 +230,30 @@ def main(rawdir, silent=False, verbose=True):
             nonzero = np.where(t_loc != 0)[0]
 
             wave0 = t_loc[nonzero].tolist()
+            wave0.sort()
             rev_lines += wave0
             rev_int   += t_str[nonzero].tolist()
 
+            wave0 = np.array(wave0)
             # Label lines
-            str_comb = "".join(['%.2f\n' % val for val in wave0])
-            w_avg = np.average(wave0)
-            i_ax = [xx for xx in range(nrows) if
-                    (w_avg >= xlim_arr[xx][0] and w_avg <= xlim_arr[xx][1])][0]
-            ax[i_ax].annotate(str_comb, [w_avg/1e4, y_max], ha='center', va='top',
-                              rotation=90, fontsize=4) #, bbox=bbox_props)
+            skip = np.zeros(len(wave0))
+            for ww in range(len(wave0)):
+                if skip[ww] == 0:
+                    w_diff = wave0[ww:]-wave0[ww]
+                    t_close = np.where(w_diff <= 5)[0]
+                    close = np.arange(ww,len(wave0))[t_close]
+                    str_comb = "\n".join(['%.2f' % val for
+                                        val in wave0[close]])
+                    print ww, wave0[ww], close
+                    w_cen = np.average(wave0[close])
+                    #0.5*(wave0[0]+wave0[-1]) #np.average(wave0)
+                    i_ax = [xx for xx in range(nrows) if
+                            (w_cen >= xlim_arr[xx][0] and w_cen <= xlim_arr[xx][1])][0]
+                    ax[i_ax].annotate(str_comb, [w_cen/1e4, y_max], ha='center', va='top',
+                                      rotation=90, fontsize=4) #, bbox=bbox_props)
+                    skip[close] = 1
+                #endif
+            #endfor
 
         # print '## t_mod : ', np.min(t_mod), np.max(t_mod)
 
