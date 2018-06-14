@@ -36,16 +36,21 @@ OH_file = co_dirname+'/rousselot2000.dat'
 
 bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.75, ec="none")
 
-def gauss_six(x, a0, a1, a2, a3, a4, a5, l0, l1, l2, l3, l4, l5,
-              s0, s1, s2, s3, s4, s5):
+n_multi = 8
+
+def gauss_multi(x, a0, a1, a2, a3, a4, a5, a6, a7,
+                l0, l1, l2, l3, l4, l5, l6, l7,
+                s0, s1, s2, s3, s4, s5, s6, s7):
     m0 = a0 * np.exp(-(x - l0)**2 / (2 * s0**2))
     m1 = a1 * np.exp(-(x - l1)**2 / (2 * s1**2))
     m2 = a2 * np.exp(-(x - l2)**2 / (2 * s2**2))
     m3 = a3 * np.exp(-(x - l3)**2 / (2 * s3**2))
     m4 = a4 * np.exp(-(x - l4)**2 / (2 * s4**2))
     m5 = a5 * np.exp(-(x - l5)**2 / (2 * s5**2))
+    m6 = a6 * np.exp(-(x - l6)**2 / (2 * s6**2))
+    m7 = a7 * np.exp(-(x - l7)**2 / (2 * s7**2))
 
-    return m0 + m1 + m2 + m3 + m4 + m5
+    return m0 + m1 + m2 + m3 + m4 + m5 + m6 + m7
 
 def group(L):
     first = last = L[0]
@@ -196,15 +201,15 @@ def main(rawdir, silent=False, verbose=True):
             p0 = [0.0, peak0, group_lines[0], sig[0]]
             #plt.axvline(group_lines[0]/1e4, color='blue')
         else:
-            if len(group_lines) > 6:
-                log.warn('More than 6 lines found, N='+str(len(group_lines))+'!!!')
+            if len(group_lines) > n_multi:
+                log.warn('More than 8 lines found, N='+str(len(group_lines))+'!!!')
             t_peak0 = peak0.tolist()
             t_lines = group_lines.tolist()
             t_sig   = sig.tolist()
 
-            t_peak0 += np.zeros(6-len(group_lines)).tolist()
-            t_lines += np.zeros(6-len(group_lines)).tolist()
-            t_sig   += np.zeros(6-len(group_lines)).tolist()
+            t_peak0 += np.zeros(n_multi-len(group_lines)).tolist()
+            t_lines += np.zeros(n_multi-len(group_lines)).tolist()
+            t_sig   += np.zeros(n_multi-len(group_lines)).tolist()
 
             p0 = t_peak0
             p0 += t_lines
@@ -228,12 +233,12 @@ def main(rawdir, silent=False, verbose=True):
             ax[i_ax].annotate('%.2f' % popt[2], [popt[2]/1e4, y_max*0.99], ha='center',
                               va='top', rotation=90, fontsize=4, bbox=bbox_props)
         else:
-            popt, pcov = curve_fit(gauss_six, x0[zoom], OH_spec_mod[zoom],
+            popt, pcov = curve_fit(gauss_multi, x0[zoom], OH_spec_mod[zoom],
                                    p0=p0)
-            t_mod = gauss_six(x0, *popt)
+            t_mod = gauss_multi(x0, *popt)
 
-            t_loc = popt[6:12] # Line wavelengths (Ang)
-            t_str = popt[0:6]  # Line peak strength
+            t_loc = popt[n_multi:2*n_multi] # Line wavelengths (Ang)
+            t_str = popt[0:n_multi]         # Line peak strength
 
             nonzero = np.where(t_loc != 0)[0]
 
@@ -285,7 +290,8 @@ def main(rawdir, silent=False, verbose=True):
     #leg.get_frame().set_alpha(0.75)
 
     ax[2].set_xlabel(r'Wavelength [$\mu$m]')
-    plt.subplots_adjust(left=0.08, right=0.95, bottom=0.06, top=0.96, hspace=0.12)
+    plt.subplots_adjust(left=0.08, right=0.95, bottom=0.06, top=0.96,
+                        hspace=0.12)
 
     fig.set_size_inches(6,8)
     out_pdf = out_file.replace('.dat','.pdf')
