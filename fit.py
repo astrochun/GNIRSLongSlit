@@ -1,3 +1,5 @@
+import numpy as np
+
 def gaussian(x, mu, sig):
     # + on 04/07/2017
     return 1./(np.sqrt(2.*pi)*sig)*np.exp(-np.power((x - mu)/sig, 2.)/2)
