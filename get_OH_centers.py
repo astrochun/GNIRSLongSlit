@@ -34,6 +34,8 @@ import glog
 co_dirname = os.path.dirname(__file__)
 OH_file = co_dirname+'/rousselot2000.dat'
 
+bbox_props = dict(boxstyle="square,pad=0.15", fc="w", alpha=0.75, ec="none")
+
 def gauss_six(x, a0, a1, a2, a3, a4, a5, l0, l1, l2, l3, l4, l5,
               s0, s1, s2, s3, s4, s5):
     m0 = a0 * np.exp(-(x - l0)**2 / (2 * s0**2))
@@ -101,6 +103,7 @@ def main(rawdir, silent=False, verbose=True):
      - Plot aesthetics: Limit vertical lines for OH skylines
      - Plot aesthetics: group and label OH skylines to avoid overlap
      - Group lines (<5 Ang) before annotation
+     - Opaque white background behind lines
     '''
     
     # + on 09/01/2018
@@ -217,8 +220,8 @@ def main(rawdir, silent=False, verbose=True):
 
             i_ax = [xx for xx in range(nrows) if
                     (popt[2] >= xlim_arr[xx][0] and popt[2] <= xlim_arr[xx][1])][0]
-            ax[i_ax].annotate('%.2f' % popt[2], [popt[2]/1e4, y_max], ha='center',
-                              va='top', rotation=90, fontsize=4) #, bbox=bbox_props)
+            ax[i_ax].annotate('%.2f' % popt[2], [popt[2]/1e4, y_max*0.99], ha='center',
+                              va='top', rotation=90, fontsize=4, bbox=bbox_props)
         else:
             popt, pcov = curve_fit(gauss_six, x0[zoom], OH_spec_mod[zoom],
                                    p0=p0)
@@ -244,13 +247,12 @@ def main(rawdir, silent=False, verbose=True):
                     close = np.arange(ww,len(wave0))[t_close]
                     str_comb = "\n".join(['%.2f' % val for
                                         val in wave0[close]])
-                    print ww, wave0[ww], close
                     w_cen = np.average(wave0[close])
                     #0.5*(wave0[0]+wave0[-1]) #np.average(wave0)
                     i_ax = [xx for xx in range(nrows) if
                             (w_cen >= xlim_arr[xx][0] and w_cen <= xlim_arr[xx][1])][0]
-                    ax[i_ax].annotate(str_comb, [w_cen/1e4, y_max], ha='center', va='top',
-                                      rotation=90, fontsize=4) #, bbox=bbox_props)
+                    ax[i_ax].annotate(str_comb, [w_cen/1e4, y_max*0.99], ha='center',
+                                      va='top', rotation=90, fontsize=4, bbox=bbox_props)
                     skip[close] = 1
                 #endif
             #endfor
