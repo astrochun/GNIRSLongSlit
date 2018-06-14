@@ -1,4 +1,5 @@
 import numpy as np
+from math import pi
 
 def gaussian(x, mu, sig):
     # + on 04/07/2017
