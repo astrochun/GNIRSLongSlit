@@ -457,6 +457,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call QA_wave_call.cross_check for OH calibration against arc lines
      - Bug fix: Move residual_wave_cal after cross_check is done
      - Bug fix: OH dataset not ready
+    Modified by Chun Ly, 18 June 2018
+     - Only log calib_line settings if fitcoords is called
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -493,7 +495,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     mylogger.info('do_arcs = %i  wave_cal  = %i' % (do_arcs, wave_cal))
     mylogger.info('skysub  = %i  fitcoords = %i' % (skysub, fitcoords))
     mylogger.info('combine = %i  extract   = %i' % (combine, extract))
-    mylogger.info('calib_line = %s' % (calib_line)) # + on 25/11/2017
+    if fitcoords:
+        mylogger.info('calib_line = %s' % (calib_line)) # + on 25/11/2017
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
