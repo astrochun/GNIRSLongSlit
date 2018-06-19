@@ -266,7 +266,7 @@ def transform(rawdir, silent=False, verbose=False):
     mylogger.info("Running nsfitcoords on OH_stack") # Mod on 09/01/2018
     outfile1 = rawdir + 'fOH_stack.fits'
     if not exists(outfile1):
-        func0, order0 = QA_wave_cal.get_database_model, rawdir, 'OH')
+        func0, order0 = QA_wave_cal.get_database_model(rawdir, 'OH')
         iraf.gnirs.nsfitcoords('wOH_stack.fits', outprefix='',
                                outspectra='fOH_stack.fits',
                                lamp='wOH_stack.fits', database='database_OH/',
