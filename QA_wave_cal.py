@@ -756,3 +756,56 @@ def cross_check(path, cdir, dbase):
     if dbase == 'database_OH/':
         arc_check2(path, cross_check=True)
 #enddef
+
+def get_database_model(path, source, silent=False, verbose=True):
+    '''
+    Determine fitting function and order to pass to nsfitcoords
+
+    Parameters
+    ----------
+    path : str
+      Full path to where output PDF and FITS file are located. Must end
+      with a '/'
+
+    source : str
+      Either 'arc' or 'OH'
+
+    silent : boolean
+      Turns off stdout messages. Default: False
+
+    verbose : boolean
+      Turns on additional stdout messages. Default: True
+    '''
+
+    logfile  = path+'QA_wave_cal.log'
+    mylogger = glog.log0(logfile)._get_logger()
+
+    if silent == False: mylogger.info('### Begin get_database_model : '+systime())
+
+    ref_file = source+'_stack.fits'
+
+    if source == 'arc': dbase = 'database'
+    if source == 'OH':  dbase = 'database_OH'
+
+    d_file  = '%s%s/idw%s' % (path, dbase, ref_file.replace('.fits','_SCI_1_'))
+
+    mylogger.info("Reading : "+d_file)
+
+    f0   = open(d_file, 'r')
+    str0 = f0.readlines()
+
+    ii_beg  = [ii for ii in xrange(len(str0)) if 'begin' in str0[ii]]
+    ii_feat = [ii for ii in xrange(len(str0)) if 'features' in str0[ii]]
+    ii_func = [ii for ii in xrange(len(str0)) if 'function' in str0[ii]]
+    ii_ord  = [ii for ii in xrange(len(str0)) if 'order' in str0[ii]]
+
+    func0  = str0[ii_func[0]].split(' ')[-1].replace('\n','')
+    order0 = np.int(str0[ii_ord[0]].split(' ')[-1].replace('\n',''))
+
+    mylogger.info('Function for '+source+' line fitting : '+func0)
+    mylogger.info('Order of '+source+' line fitting : %i' order0)
+    f0.close()
+
+    if silent == False: mylogger.info('### End get_database_model : '+systime())
+
+#enddef
