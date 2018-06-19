@@ -68,6 +68,7 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
      - Change coordlist for OH skylines
     Modified by Chun Ly, 19 June 2018
      - Force function to legendre
+     - Set fwidth in nswavelength call to depend on slitwidth
     '''
 
     # Mod on 10/01/2018
@@ -123,6 +124,11 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
     line1 = ['crval = %f' % crval, 'crpix = %f' % crpix, 'cdelt = %f' % cdelt]
     f0.writelines("\n".join(line1)+"\n")
 
+    # Get slit length | + on 19/06/2018q
+    slitwidth = np.float(frame_hdr['SLIT'].split('arcsec')[0])
+    pscale = np.sqrt(frame_hdr['CD1_1']**2 + frame_hdr['CD2_1']**2)*3600.0*u.arcsec
+    fwidth = 1.5 * slitwidth/pscale.to(u.arcsec).value
+
     if line_source == 'arc':
         coordlist = 'gnirs$data/argon.dat'
         database  = 'database/'
@@ -145,7 +151,7 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
     cmd = "iraf.gnirs.nswavelength(lampspec, outprefix='',"+\
           "outspectra=outspec, crval=crval, cdelt=cdelt, crpix=crpix, "+\
           "coordlist=coordlist, database=database, fl_inter='yes', "+\
-          "function='legendre', cradius=20, threshold=50.0, "+\
+          "function='legendre', cradius=20, threshold=50.0, fwidth=%.1f, " % fwidth +\
           "order=3, logfile=logfile)"
 
     f0.write(cmd+'\n')
