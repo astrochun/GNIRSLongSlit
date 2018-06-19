@@ -169,6 +169,8 @@ def wave_cal(rawdir, cdir, silent=False, verbose=False):
      - Import glog and call for stdout and ASCII logging
     Modified by Chun Ly, 14 June 2018
      - Import and call get_OH_centers
+    Modified by Chun Ly, 19 June 2018
+     - Pass gnirs logfile to mylogger
     '''
 
     # + on 09/01/2018
@@ -182,6 +184,8 @@ def wave_cal(rawdir, cdir, silent=False, verbose=False):
     timestamp = systime().replace(':','.')
     logfile   = rawdir+'gnirs_'+timestamp+'.log'
     iraf.gemini.gnirs.logfile = logfile
+
+    mylogger.info("GNIRS logfile : "+logfile)
 
     get_OH_centers.main(rawdir)
 
