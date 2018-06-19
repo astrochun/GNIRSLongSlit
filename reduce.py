@@ -743,7 +743,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_run = 0
         if not exists('farc_stack.fits'): do_run = 1
         if do_run:
-            func0, order0 = QA_wave_cal.get_database_model, rawdir, 'arc')
+            func0, order0 = QA_wave_cal.get_database_model(rawdir, 'arc')
             mylogger.info("Running nsfitcoords on arc stacked data")
             iraf.gnirs.nsfitcoords('arc_stack.fits', outprefix='',
                                    outspectra='farc_stack.fits',
