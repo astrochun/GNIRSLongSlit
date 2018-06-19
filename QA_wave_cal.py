@@ -808,4 +808,5 @@ def get_database_model(path, source, silent=False, verbose=True):
 
     if silent == False: mylogger.info('### End get_database_model : '+systime())
 
+    return func0, order0
 #enddef
