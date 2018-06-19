@@ -17,6 +17,7 @@ n_sp_pix = 1022
 yes, no  = 'yes', 'no'
 
 from astropy.io import fits
+import astropy.units as u
 
 import glog # + on 09/01/2018
 
@@ -65,6 +66,8 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
      - Change order for nswavelength fitting
     Modified by Chun Ly, 16 June 2018
      - Change coordlist for OH skylines
+    Modified by Chun Ly, 19 June 2018
+     - Force function to legendre
     '''
 
     # Mod on 10/01/2018
@@ -141,8 +144,9 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
     # Mod on 08/11/2017, 16/11/2017
     cmd = "iraf.gnirs.nswavelength(lampspec, outprefix='',"+\
           "outspectra=outspec, crval=crval, cdelt=cdelt, crpix=crpix, "+\
-          "coordlist=coordlist, database=database, fl_inter='yes',"+\
-          "cradius=20, threshold=50.0, order=3, logfile=logfile)"
+          "coordlist=coordlist, database=database, fl_inter='yes', "+\
+          "function='legendre', cradius=20, threshold=50.0, "+\
+          "order=3, logfile=logfile)"
 
     f0.write(cmd+'\n')
     f0.close()
