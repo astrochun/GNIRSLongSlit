@@ -756,6 +756,9 @@ def cross_check(path, cdir, dbase):
      - Call arc_check2 for database_OH case
     Modified by Chun Ly, 8 June 2018
      - Exit when db_file not available
+    Modified by Chun Ly, 19 June 2018
+     - Call get_database_model
+     - Pass function and order to nsfitcoords
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -789,8 +792,11 @@ def cross_check(path, cdir, dbase):
         return
     else:
         if not exists(outfile):
+            source0 = 'OH' if '_OH' in dbase else 'arc'
+            func0, order0 = get_database_model(path, source0)
             iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile,
-                                   lamp=lamp, database=dbase)
+                                   lamp=lamp, database=dbase,
+                                   function=func0, lyorder=order0)
         else:
             mylogger.warn('File exists! : '+outfile)
 
