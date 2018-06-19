@@ -803,7 +803,7 @@ def get_database_model(path, source, silent=False, verbose=True):
     order0 = np.int(str0[ii_ord[0]].split(' ')[-1].replace('\n',''))
 
     mylogger.info('Function for '+source+' line fitting : '+func0)
-    mylogger.info('Order of '+source+' line fitting : %i' order0)
+    mylogger.info('Order of '+source+' line fitting : %i' % order0)
     f0.close()
 
     if silent == False: mylogger.info('### End get_database_model : '+systime())
