@@ -603,6 +603,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Handle dataset == cal cases for output FITS file
      - If statement for lines with fits
      - Write ASCII with averages and RMS file
+    Modified by Chun Ly, 19 June 2018
+     - Determine and plot average, median, and rms for each column
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -718,6 +720,58 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         tab0 = Table([cal_lines, diff_num, diff_avg, diff_rms],
                      names=('Line','N','Avg','RMS'))
         tab0.write(asc_file, format='ascii.fixed_width_two_line')
+
+        # Determine average, median, and rms for each column | + on 19/06/2018
+        avg0 = np.zeros(n_bins)
+        N0   = np.zeros(n_bins)
+        med0 = np.zeros(n_bins)
+        rms0 = np.zeros(n_bins)
+
+        for nn in range(n_bins):
+            good     = np.where(cen_arr[:,nn] != 0)[0]
+            if len(good) > 0:
+                t_diff   = cen_arr[good,nn] - cal_lines[good]
+                N0[nn]   = len(good)
+                avg0[nn] = np.average(t_diff)
+                med0[nn] = np.median(t_diff)
+                rms0[nn] = np.std(t_diff)
+
+        pdf_file2 = pdf_file.replace('.pdf', '.stat.pdf')
+        fig, ax = plt.subplots(ncols=3)
+        N1, b1, p1 = ax[0].hist(avg0, bins=10, align='mid', color='b',
+                                alpha=0.5, edgecolor='none',
+                                histtype='stepfilled')
+        N2, b2, p2 = ax[1].hist(med0, bins=10, align='mid', color='b',
+                                alpha=0.5, edgecolor='none',
+                                histtype='stepfilled')
+        N3, b3, p3 = ax[2].hist(rms0, bins=10, align='mid', color='b',
+                                alpha=0.5, edgecolor='none',
+                                histtype='stepfilled')
+
+        ax[0].set_ylabel('N')
+        ax[0].set_xlabel(r'Average [$\AA$]')
+        ax[1].set_xlabel(r'Median [$\AA$]')
+        ax[2].set_xlabel(r'$\sigma$ [$\AA$]')
+
+        y_max = np.max([np.max(N1),np.max(N2),np.max(N3)])*1.1
+        for aa in range(3):
+            ax[aa].set_ylim([0,y_max])
+
+        ax[1].set_yticklabels([])
+        ax[2].set_yticklabels([])
+
+        ax[1].tick_params(axis='y', direction='in')
+        ax[2].tick_params(axis='y', direction='in')
+
+        plt.subplots_adjust(left=0.08, right=0.99, bottom=0.12, top=0.96,
+                            wspace=0.03)
+        fig.set_size_inches(8,4)
+        fig.savefig(pdf_file2)
+
+        asc_file2 = pdf_file2.replace('.pdf', '.tbl')
+        tab2 = Table([bins_mid, N0, avg0, med0, rms0],
+                     names=('Column','N','Avg','Med','RMS'))
+        tab2.write(asc_file2, format='ascii.fixed_width_two_line')
 
     if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
 #enddef
