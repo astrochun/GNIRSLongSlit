@@ -29,6 +29,8 @@ from IQ_plot import gauss1d
 from scipy.optimize import curve_fit
 #from Zcalbase_gal.observing.locate_em_lines import gaussian_R
 
+import QA_wave_cal # + on 19/06/2018
+
 # + on 20/09/2017
 from check_path import main as check_path
 
@@ -247,6 +249,9 @@ def transform(rawdir, silent=False, verbose=False):
      - Bug fix: Missing else statement
     Modified by Chun Ly, 9 January 2018
      - Import glog and call for stdout and ASCII logging
+    Modified by Chun Ly, 19 June 2018
+     - Call QA_wave_cal.get_database_model
+     - Pass function and order to nsfitcoords for OH stack
     '''
 
     # + on 09/01/2018
@@ -261,9 +266,11 @@ def transform(rawdir, silent=False, verbose=False):
     mylogger.info("Running nsfitcoords on OH_stack") # Mod on 09/01/2018
     outfile1 = rawdir + 'fOH_stack.fits'
     if not exists(outfile1):
+        func0, order0 = QA_wave_cal.get_database_model, rawdir, 'OH')
         iraf.gnirs.nsfitcoords('wOH_stack.fits', outprefix='',
                                outspectra='fOH_stack.fits',
-                               lamp='wOH_stack.fits', database='database_OH/')
+                               lamp='wOH_stack.fits', database='database_OH/',
+                               function=func0, lyorder=order0)
     else:
         # Mod on 09/01/2018
         mylogger.warn('File exists!!! : '+outfile1)
