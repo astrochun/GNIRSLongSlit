@@ -459,6 +459,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Bug fix: OH dataset not ready
     Modified by Chun Ly, 18 June 2018
      - Only log calib_line settings if fitcoords is called
+    Modified by Chun Ly, 19 June 2018
+     - Call QA_wave_cal.get_database_model
+     - Pass function and order to nsfitcoords for arc stack
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -740,10 +743,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_run = 0
         if not exists('farc_stack.fits'): do_run = 1
         if do_run:
+            func0, order0 = QA_wave_cal.get_database_model, rawdir, 'arc')
             mylogger.info("Running nsfitcoords on arc stacked data")
             iraf.gnirs.nsfitcoords('arc_stack.fits', outprefix='',
                                    outspectra='farc_stack.fits',
-                                   lamp='warc_stack.fits', database='database/')
+                                   lamp='warc_stack.fits', database='database/',
+                                   function=func0, lyorder=order0)
         else:
             mylogger.warn('Files exist!!!')
             mylogger.warn('Will not run nsfitcoords on rnc arc stacked data')
