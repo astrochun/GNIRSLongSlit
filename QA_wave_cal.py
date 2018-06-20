@@ -52,7 +52,7 @@ iraf.set(stdimage="imt4096")
 
 co_dirname = os.path.dirname(__file__)
 
-xorder = 2 # nsfitcoords fitting order along x
+xorder = 3 # nsfitcoords fitting order along x
 
 def get_database_model(path, source, silent=False, verbose=True):
     '''
