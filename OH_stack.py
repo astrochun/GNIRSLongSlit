@@ -252,6 +252,8 @@ def transform(rawdir, silent=False, verbose=False):
     Modified by Chun Ly, 19 June 2018
      - Call QA_wave_cal.get_database_model
      - Pass function and order to nsfitcoords for OH stack
+    Modified by Chun Ly, 20 June 2018
+     - Set nsfitcoords xorder fitting
     '''
 
     # + on 09/01/2018
@@ -270,7 +272,8 @@ def transform(rawdir, silent=False, verbose=False):
         iraf.gnirs.nsfitcoords('wOH_stack.fits', outprefix='',
                                outspectra='fOH_stack.fits',
                                lamp='wOH_stack.fits', database='database_OH/',
-                               function=func0, lyorder=order0)
+                               function=func0, lyorder=order0,
+                               lxorder=QA_wave_cal.xorder)
     else:
         # Mod on 09/01/2018
         mylogger.warn('File exists!!! : '+outfile1)
