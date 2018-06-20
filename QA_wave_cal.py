@@ -610,6 +610,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Plot sigma on second page, Exclude no value cases
      - Add ax.annotation in upper left of second page
      - Call get_database_model, include fitting model
+     - Overwrite ASCII tables in asc.write
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -728,7 +729,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         asc_file = pdf_file.replace('.pdf', '.tbl')
         tab0 = Table([cal_lines, diff_num, diff_avg, diff_rms],
                      names=('Line','N','Avg','RMS'))
-        tab0.write(asc_file, format='ascii.fixed_width_two_line')
+        asc.write(tab0, asc_file, format='fixed_width_two_line', overwrite=True)
 
         # Determine average, median, and rms for each column | + on 19/06/2018
         avg0 = np.zeros(n_bins)
@@ -783,7 +784,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         asc_file2 = pdf_file2.replace('.pdf', '.tbl')
         tab2 = Table([bins_mid, N0, avg0, med0, rms0],
                      names=('Column','N','Avg','Med','RMS'))
-        tab2.write(asc_file2, format='ascii.fixed_width_two_line')
+        tab2.write(asc_file2, format='ascii.fixed_width_two_line',
+                   overwrite=True)
 
         fig, ax = plt.subplots()
         ax.scatter(bins_mid[good], avg0[good], marker='o', color='b',
