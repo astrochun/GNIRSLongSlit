@@ -617,6 +617,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Use FITS file if it exists, otherwise generate
      - Use sigma_clipped_stats to remove outliers in statistics
      - Remove outlier based on offset amount, not using sigma clipping
+     - Tab issue: Move fits.writeto out of for loop
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -659,9 +660,10 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                 stop  = np.min([NX-1,bins_mid[ii]-1 + 5])
                 avg_arr[:,ii] = np.average(cal_2D[:,start:stop], axis=1)
 
-                if silent == False: mylogger.info('Writing : '+out_fits)
-                fits.writeto(out_fits, avg_arr, overwrite=True)
+            if silent == False: mylogger.info('Writing : '+out_fits)
+            fits.writeto(out_fits, avg_arr, overwrite=True)
         else:
+            if silent == False: mylogger.info('Reading : '+out_fits)
             avg_arr = fits.getdata(out_fits)
 
         if dataset == 'OH':
