@@ -462,6 +462,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 19 June 2018
      - Call QA_wave_cal.get_database_model
      - Pass function and order to nsfitcoords for arc stack
+    Modified by Chun Ly, 19 June 2018
+     - Set nsfitcoords xorder fitting
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -748,7 +750,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             iraf.gnirs.nsfitcoords('arc_stack.fits', outprefix='',
                                    outspectra='farc_stack.fits',
                                    lamp='warc_stack.fits', database='database/',
-                                   function=func0, lyorder=order0)
+                                   function=func0, lyorder=order0,
+                                   lxorder=QA_wave_cal.xorder)
         else:
             mylogger.warn('Files exist!!!')
             mylogger.warn('Will not run nsfitcoords on rnc arc stacked data')
