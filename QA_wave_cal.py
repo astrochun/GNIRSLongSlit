@@ -749,8 +749,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         for nn in range(n_bins):
             t_diff   = cen_arr[:,nn] - cal_lines
-            good     = np.where((cen_arr[:,nn] != 0) &
-                                (np.absolute(t_diff) <= 1.5)[0]
+            good = np.where((cen_arr[:,nn] != 0) &
+                            (np.absolute(t_diff) <= 1.5))[0]
             if len(good) > 0:
                 N0[nn]   = len(good)
                 avg0[nn] = np.average(t_diff[good])
