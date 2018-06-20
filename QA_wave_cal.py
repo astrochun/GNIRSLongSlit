@@ -26,6 +26,7 @@ from astropy.io import fits
 from astropy.io import ascii as asc # + on 16/06/2017
 from astropy import log
 from astropy.table import Table
+from astropy.stats import sigma_clipped_stats # + on 20/06/2017
 
 # + on 19/05/2017
 from astropy.visualization import ZScaleInterval
@@ -615,6 +616,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Overwrite ASCII tables in asc.write
     Modified by Chun Ly, 20 June 2018
      - Use FITS file if it exists, otherwise generate
+     - Use sigma_clipped_stats to remove outliers in statistics
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -750,9 +752,10 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             if len(good) > 0:
                 t_diff   = cen_arr[good,nn] - cal_lines[good]
                 N0[nn]   = len(good)
-                avg0[nn] = np.average(t_diff)
-                med0[nn] = np.median(t_diff)
-                rms0[nn] = np.std(t_diff)
+                tmean, tmedian, tstd = sigma_clipped_stats(t_diff, sigma=4, iters=10)
+                avg0[nn] = tmean
+                med0[nn] = tmedian
+                rms0[nn] = tstd
 
         pdf_file2 = pdf_file.replace('.pdf', '.stat.pdf')
         pp = PdfPages(pdf_file2)
