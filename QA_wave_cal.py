@@ -52,6 +52,8 @@ iraf.set(stdimage="imt4096")
 
 co_dirname = os.path.dirname(__file__)
 
+xorder = 2 # nsfitcoords fitting order along x
+
 def get_database_model(path, source, silent=False, verbose=True):
     '''
     Determine fitting function and order to pass to nsfitcoords
@@ -719,8 +721,9 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         ax.set_ylabel(r'Difference from reference values [$\AA$]')
 
         func0, order0 = get_database_model(path, cal)
-        an_txt = 'dataset: %s  calib: %s\nfunc: %s  yorder: %i' % (dataset,cal,
-                                                                   func0,order0)
+        an_txt  = 'dataset: %s  calib: %s\n' % (dataset, cal)
+        an_txt += 'func: %s  yorder: %i  xorder: %i' % (func0, order0, xorder)
+
         ax.annotate(an_txt, [0.05,0.95], xycoords='axes fraction',
                     ha='left', va='top')
         plt.subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99)
