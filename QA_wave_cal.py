@@ -752,7 +752,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             if len(good) > 0:
                 t_diff   = cen_arr[good,nn] - cal_lines[good]
                 N0[nn]   = len(good)
-                tmean, tmedian, tstd = sigma_clipped_stats(t_diff, sigma=3, iters=10)
+                tmean, tmedian, tstd = sigma_clipped_stats(t_diff, sigma=2.5, iters=10)
                 avg0[nn] = tmean
                 med0[nn] = tmedian
                 rms0[nn] = tstd
