@@ -613,6 +613,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Add ax.annotation in upper left of second page
      - Call get_database_model, include fitting model
      - Overwrite ASCII tables in asc.write
+    Modified by Chun Ly, 20 June 2018
+     - Use FITS file if it exists, otherwise generate
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -642,20 +644,23 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         bins_mid = np.arange(13,NX,10)
         n_bins = len(bins_mid)
-        avg_arr = np.zeros( (NY, n_bins) )
-
-        for ii in range(n_bins):
-            start = np.max([0,bins_mid[ii]-1 - 5])
-            stop  = np.min([NX-1,bins_mid[ii]-1 + 5])
-            avg_arr[:,ii] = np.average(cal_2D[:,start:stop], axis=1)
 
         if dataset != cal:
             out_fits = path+'wave_cal_resid_'+dataset+'_'+cal+'.fits'
         else:
             out_fits = path+'wave_cal_resid_'+dataset+'.fits'
 
-        if silent == False: mylogger.info('Writing : '+out_fits)
-        fits.writeto(out_fits, avg_arr, overwrite=True)
+        if not exists(out_fits):
+            avg_arr = np.zeros( (NY, n_bins) )
+            for ii in range(n_bins):
+                start = np.max([0,bins_mid[ii]-1 - 5])
+                stop  = np.min([NX-1,bins_mid[ii]-1 + 5])
+                avg_arr[:,ii] = np.average(cal_2D[:,start:stop], axis=1)
+
+                if silent == False: mylogger.info('Writing : '+out_fits)
+                fits.writeto(out_fits, avg_arr, overwrite=True)
+        else:
+            avg_arr = fits.getdata(out_fits)
 
         if dataset == 'OH':
             cal_ref_file = co_dirname+'/rousselot2000.dat'
