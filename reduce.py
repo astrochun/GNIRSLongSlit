@@ -464,6 +464,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Pass function and order to nsfitcoords for arc stack
     Modified by Chun Ly, 20 June 2018
      - Set nsfitcoords xorder fitting
+     - Set nsfitcoords x- and y-order fitting in fitcoords
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -867,10 +868,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 do_run = iraf_get_subset.check_prefix('frbnc', _list, path=rawdir,
                                                       mylogger=mylogger) # Mod on 18/12/2017
                 if do_run:
+                    func0, order0 = QA_wave_cal.get_database_model(rawdir, calib_line)
                     mylogger.info("Running nsfitcoords on telluric data, "+_list)
                     iraf.gnirs.nsfitcoords('rbnc@'+_list, outprefix='',
                                            outspectra='frbnc@'+_list,
-                                           lamp=lamp0, database=dbase) # Mod on 25/11/2017
+                                           lamp=lamp0, database=dbase,
+                                           function=func0, lyorder=order0,
+                                           lxorder=QA_wave_cal.xorder)
                 else:
                     mylogger.warn('Files exist!!!')
                     mylogger.warn('Will not run nsfitcoords on rbnc telluric data, '+_list)
@@ -895,9 +899,11 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                               mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             mylogger.info("Running nsfitcoords on science data")
+            func0, order0 = QA_wave_cal.get_database_model(rawdir, calib_line)
             iraf.gnirs.nsfitcoords('rbnc@'+obj_list, outprefix='',
                                    outspectra='frbnc@'+obj_list,
-                                   lamp=lamp0, database=dbase) # Mod on 25/11/2017
+                                   lamp=lamp0, database=dbase, function=func0,
+                                   lyorder=order0, lxorder=QA_wave_cal.xorder)
         else:
             mylogger.warn('Files exist!!!')
             mylogger.warn('Will not run nsfitcoords on rbnc science data')
@@ -919,9 +925,11 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                               mylogger=mylogger) # Mod on 18/12/2017
         if do_run:
             mylogger.info("Running nsfitcoords on science OH data")
+            func0, order0 = QA_wave_cal.get_database_model(rawdir, calib_line)
             iraf.gnirs.nsfitcoords('rbnc@'+OH_obj_list, outprefix='',
                                    outspectra='frbnc@'+OH_obj_list,
-                                   lamp=lamp0, database=dbase) # Mod on 25/11/2017
+                                   lamp=lamp0, database=dbase, function=func0,
+                                   lyorder=order0, lxorder=QA_wave_cal.xorder)
         else:
             mylogger.warn('Files exist!!!')
             mylogger.warn('Will not run nsfitcoords on rbnc sci OH data')
