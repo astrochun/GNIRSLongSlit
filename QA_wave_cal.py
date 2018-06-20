@@ -605,6 +605,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Write ASCII with averages and RMS file
     Modified by Chun Ly, 19 June 2018
      - Determine and plot average, median, and rms for each column
+     - Multi-page PDF: Separate plot illustrating difference from model
+       along longslit
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -737,14 +739,16 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                 rms0[nn] = np.std(t_diff)
 
         pdf_file2 = pdf_file.replace('.pdf', '.stat.pdf')
+        pp = PdfPages(pdf_file2)
+
         fig, ax = plt.subplots(ncols=3)
         N1, b1, p1 = ax[0].hist(avg0, bins=10, align='mid', color='b',
                                 alpha=0.5, edgecolor='none',
                                 histtype='stepfilled')
-        N2, b2, p2 = ax[1].hist(med0, bins=10, align='mid', color='b',
+        N2, b2, p2 = ax[1].hist(med0, bins=10, align='mid', color='m',
                                 alpha=0.5, edgecolor='none',
                                 histtype='stepfilled')
-        N3, b3, p3 = ax[2].hist(rms0, bins=10, align='mid', color='b',
+        N3, b3, p3 = ax[2].hist(rms0, bins=10, align='mid', color='k',
                                 alpha=0.5, edgecolor='none',
                                 histtype='stepfilled')
 
@@ -766,12 +770,27 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         plt.subplots_adjust(left=0.08, right=0.99, bottom=0.12, top=0.96,
                             wspace=0.03)
         fig.set_size_inches(8,4)
-        fig.savefig(pdf_file2)
+        fig.savefig(pp, format='pdf')
 
         asc_file2 = pdf_file2.replace('.pdf', '.tbl')
         tab2 = Table([bins_mid, N0, avg0, med0, rms0],
                      names=('Column','N','Avg','Med','RMS'))
         tab2.write(asc_file2, format='ascii.fixed_width_two_line')
+
+        fig, ax = plt.subplots()
+        ax.scatter(bins_mid, avg0, marker='o', color='b', alpha=0.5,
+                   edgecolor='none', label='Average')
+        ax.scatter(bins_mid, med0, marker='o', color='m', alpha=0.5,
+                   edgecolor='none', label='Median')
+        ax.legend(loc='lower right', fancybox=True) #frameon=False)
+        ax.set_ylabel(r'Average / Median [$\AA$]')
+        ax.set_xlabel(r'X (Along longslit) [pixels]')
+        ax.minorticks_on()
+        fig.subplots_adjust(left=0.11, right=0.99, bottom=0.12, top=0.96)
+        fig.set_size_inches(8,4)
+        fig.savefig(pp, format='pdf')
+
+        pp.close()
 
     if silent == False: mylogger.info('### End residual_wave_cal : '+systime())
 #enddef
