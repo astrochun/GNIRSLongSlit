@@ -608,6 +608,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Multi-page PDF: Separate plot illustrating difference from model
        along longslit
      - Plot sigma on second page, Exclude no value cases
+     - Add ax.annotation in upper left of second page
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -787,6 +788,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         ax.scatter(bins_mid[good], rms0[good], marker='o', color='k',
                    alpha=0.5, edgecolor='none', label=r'$\sigma$')
 
+        ax.annotate('dataset: %s\ncalib: %s' % (dataset,cal), [0.05,0.95],
+                    xycoords='axes fraction', ha='left', va='top')
         ax.legend(loc='lower right', fancybox=True) #frameon=False)
 
         ax.set_ylabel(r'Average / Median [$\AA$]')
