@@ -462,7 +462,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 19 June 2018
      - Call QA_wave_cal.get_database_model
      - Pass function and order to nsfitcoords for arc stack
-    Modified by Chun Ly, 19 June 2018
+    Modified by Chun Ly, 20 June 2018
      - Set nsfitcoords xorder fitting
     '''
     
