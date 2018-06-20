@@ -609,6 +609,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
        along longslit
      - Plot sigma on second page, Exclude no value cases
      - Add ax.annotation in upper left of second page
+     - Call get_database_model, include fitting model
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -715,8 +716,12 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         ax.minorticks_on()
         ax.set_xlabel(r'Wavelengths [$\AA$]')
         ax.set_ylabel(r'Difference from reference values [$\AA$]')
-        ax.annotate('dataset: %s\ncalib: %s' % (dataset,cal), [0.05,0.95],
-                    xycoords='axes fraction', ha='left', va='top')
+
+        func0, order0 = get_database_model(path, cal)
+        an_txt = 'dataset: %s  calib: %s\nfunc: %s  yorder: %i' % (dataset,cal,
+                                                                   func0,order0)
+        ax.annotate(an_txt, [0.05,0.95], xycoords='axes fraction',
+                    ha='left', va='top')
         plt.subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99)
         fig.savefig(pdf_file)
 
@@ -788,8 +793,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         ax.scatter(bins_mid[good], rms0[good], marker='o', color='k',
                    alpha=0.5, edgecolor='none', label=r'$\sigma$')
 
-        ax.annotate('dataset: %s\ncalib: %s' % (dataset,cal), [0.05,0.95],
-                    xycoords='axes fraction', ha='left', va='top')
+        ax.annotate(an_txt, [0.05,0.95], xycoords='axes fraction',
+                    ha='left', va='top')
         ax.legend(loc='lower right', fancybox=True) #frameon=False)
 
         ax.set_ylabel(r'Average / Median [$\AA$]')
