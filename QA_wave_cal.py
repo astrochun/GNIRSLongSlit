@@ -852,6 +852,8 @@ def cross_check(path, cdir, dbase):
     Modified by Chun Ly, 19 June 2018
      - Call get_database_model
      - Pass function and order to nsfitcoords
+    Modified by Chun Ly, 20 June 2018
+     - Set nsfitcoords xorder fitting
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -889,7 +891,7 @@ def cross_check(path, cdir, dbase):
             func0, order0 = get_database_model(path, source0)
             iraf.gnirs.nsfitcoords(infile, outprefix='', outspectra=outfile,
                                    lamp=lamp, database=dbase,
-                                   function=func0, lyorder=order0)
+                                   function=func0, lyorder=order0, lxorder=xorder)
         else:
             mylogger.warn('File exists! : '+outfile)
 
