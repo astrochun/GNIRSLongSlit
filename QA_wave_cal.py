@@ -607,6 +607,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Determine and plot average, median, and rms for each column
      - Multi-page PDF: Separate plot illustrating difference from model
        along longslit
+     - Plot sigma on second page, Exclude no value cases
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -742,13 +743,14 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         pp = PdfPages(pdf_file2)
 
         fig, ax = plt.subplots(ncols=3)
-        N1, b1, p1 = ax[0].hist(avg0, bins=10, align='mid', color='b',
+        good = np.where(rms0 != 0)
+        N1, b1, p1 = ax[0].hist(avg0[good], bins=10, align='mid', color='b',
                                 alpha=0.5, edgecolor='none',
                                 histtype='stepfilled')
-        N2, b2, p2 = ax[1].hist(med0, bins=10, align='mid', color='m',
+        N2, b2, p2 = ax[1].hist(med0[good], bins=10, align='mid', color='m',
                                 alpha=0.5, edgecolor='none',
                                 histtype='stepfilled')
-        N3, b3, p3 = ax[2].hist(rms0, bins=10, align='mid', color='k',
+        N3, b3, p3 = ax[2].hist(rms0[good], bins=10, align='mid', color='k',
                                 alpha=0.5, edgecolor='none',
                                 histtype='stepfilled')
 
@@ -778,14 +780,19 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         tab2.write(asc_file2, format='ascii.fixed_width_two_line')
 
         fig, ax = plt.subplots()
-        ax.scatter(bins_mid, avg0, marker='o', color='b', alpha=0.5,
-                   edgecolor='none', label='Average')
-        ax.scatter(bins_mid, med0, marker='o', color='m', alpha=0.5,
-                   edgecolor='none', label='Median')
+        ax.scatter(bins_mid[good], avg0[good], marker='o', color='b',
+                   alpha=0.5, edgecolor='none', label='Average')
+        ax.scatter(bins_mid[good], med0[good], marker='o', color='m',
+                   alpha=0.5, edgecolor='none', label='Median')
+        ax.scatter(bins_mid[good], rms0[good], marker='o', color='k',
+                   alpha=0.5, edgecolor='none', label=r'$\sigma$')
+
         ax.legend(loc='lower right', fancybox=True) #frameon=False)
+
         ax.set_ylabel(r'Average / Median [$\AA$]')
         ax.set_xlabel(r'X (Along longslit) [pixels]')
         ax.minorticks_on()
+
         fig.subplots_adjust(left=0.11, right=0.99, bottom=0.12, top=0.96)
         fig.set_size_inches(8,4)
         fig.savefig(pp, format='pdf')
