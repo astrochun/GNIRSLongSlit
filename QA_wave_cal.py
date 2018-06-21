@@ -628,6 +628,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Handle multi-line fitting (works with dataset='arc')
      - Handle multi-line fitting for dataset='OH'
      - Include lower and upper bounds, Move multi-line fitting later in code
+     - Normalize spectrum to peak, Do not set bounds for curve_fit()
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -742,7 +743,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         u_l_ii = 0
         for ll in range(n_lines):
-            print mylogger.info('ll=%i, u_l_ii=%i' % (ll, u_l_ii))
+            mylogger.info('ll=%i, u_l_ii=%i' % (ll, u_l_ii))
             ax.axvline(cal_lines[ll], color='red', linestyle='dashed',
                        linewidth=0.25, zorder=1)
 
@@ -754,8 +755,9 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
                 for ii in range(n_bins):
                     y0 = avg_arr[z_idx,ii]
+                    y0 /= max(y0)
                     if len(use_lines[u_l_ii]) == 1:
-                        p0 = [0.0, max(y0), cal_lines[ll], 2.0]
+                        p0 = [0.0, 1.0, cal_lines[ll], 2.0]
                         if p0[1] > 10:
                             try:
                                 popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
@@ -768,7 +770,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                             matches = np.array([xx for xx in range(n_lines) if \
                                                 cal_lines[xx] in use_lines[u_l_ii]])
                             ratio0  = cal_lines_int[matches]/max(cal_lines_int[matches])
-                            t_peak0 = (max(y0) * ratio0).tolist()
+                            t_peak0 = ratio0.tolist()
                             t_lines = list(use_lines[u_l_ii])
                             t_sig   = [2.0] * len(t_lines)
 
@@ -789,12 +791,12 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                                         tuple(p0[2*n_multi:]+1)
 
                             try:
-                                popt, pcov = curve_fit(gauss_multi, x0, y0, p0=p0,
-                                                       bounds=(low_bound, up_bound))
+                                popt, pcov = curve_fit(gauss_multi, x0, y0, p0=p0)
+                                #bounds=(low_bound, up_bound))
                                 t_loc = popt[n_multi:2*n_multi]
                                 cen_arr[matches,ii] = t_loc[np.where(t_loc != 0)[0]]
                             except RuntimeError:
-                                print 'fail : ', ll, ii, p0, popt
+                                pass #print 'fail : ', ll, ii, p0, popt
 
                 #endfor
                 u_l_ii += 1
