@@ -627,6 +627,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Define use_lines array for arc case
      - Handle multi-line fitting (works with dataset='arc')
      - Handle multi-line fitting for dataset='OH'
+     - Include lower and upper bounds, Move multi-line fitting later in code
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -741,6 +742,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         u_l_ii = 0
         for ll in range(n_lines):
+            print mylogger.info('ll=%i, u_l_ii=%i' % (ll, u_l_ii))
             ax.axvline(cal_lines[ll], color='red', linestyle='dashed',
                        linewidth=0.25, zorder=1)
 
@@ -748,26 +750,10 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                 w_min = min(use_lines[u_l_ii])-10
                 w_max = max(use_lines[u_l_ii])+10
                 z_idx = np.where((wave0 >= w_min) & (wave0 <= w_max))[0]
-
-                # Set-up initial curve_fit guess for multi lines
-                if len(use_lines[u_l_ii]) > 1:
-                    matches = np.array([xx for xx in range(n_lines) if \
-                                        cal_lines[xx] in use_lines[u_l_ii]])
-                    ratio0  = cal_lines_int[matches]/max(cal_lines_int[matches])
-                    t_peak0 = (max(y0) * ratio0).tolist()
-                    t_lines = use_lines[u_l_ii]
-                    t_sig   = [2.0] * len(t_lines)
-
-                    t_peak0 += np.zeros(n_multi-len(t_lines)).tolist()
-                    t_sig   += np.zeros(n_multi-len(t_lines)).tolist()
-                    t_lines += np.zeros(n_multi-len(t_lines)).tolist()
-
-                    p0 = t_peak0
-                    p0 += t_lines
-                    p0 += t_sig
+                x0 = wave0[z_idx]
 
                 for ii in range(n_bins):
-                    x0, y0 = wave0[z_idx], avg_arr[z_idx,ii]
+                    y0 = avg_arr[z_idx,ii]
                     if len(use_lines[u_l_ii]) == 1:
                         p0 = [0.0, max(y0), cal_lines[ll], 2.0]
                         if p0[1] > 10:
@@ -777,13 +763,42 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                             except RuntimeError:
                                 print ll, ii, p0
                     else:
-                        try:
-                            popt, pcov = curve_fit(gauss_multi, x0, y0, p0=p0)
-                            t_loc = popt[n_multi:2*n_multi]
-                            cen_arr[matches,ii] = t_loc[np.where(t_loc != 0)[0]]
-                        except RuntimeError:
-                            print ll, ii, p0, popt
+                        # Set-up initial curve_fit guess for multi lines
+                        if len(use_lines[u_l_ii]) > 1:
+                            matches = np.array([xx for xx in range(n_lines) if \
+                                                cal_lines[xx] in use_lines[u_l_ii]])
+                            ratio0  = cal_lines_int[matches]/max(cal_lines_int[matches])
+                            t_peak0 = (max(y0) * ratio0).tolist()
+                            t_lines = list(use_lines[u_l_ii])
+                            t_sig   = [2.0] * len(t_lines)
+
+                            t_peak0 += np.zeros(n_multi-len(t_lines)).tolist()
+                            t_sig   += np.zeros(n_multi-len(t_lines)).tolist()
+                            t_lines += np.zeros(n_multi-len(t_lines)).tolist()
+
+                            p0 = t_peak0
+                            p0 += t_lines
+                            p0 += t_sig
+
+                            p0 = np.array(p0)
+                            low_bound = tuple([0] * n_multi) + \
+                                        tuple(p0[n_multi:2*n_multi]-0.5) + \
+                                        tuple([0] * n_multi)
+                            up_bound  = tuple(p0[0:n_multi]*1.25+0.1) + \
+                                        tuple(p0[n_multi:2*n_multi]+0.5) + \
+                                        tuple(p0[2*n_multi:]+1)
+
+                            try:
+                                popt, pcov = curve_fit(gauss_multi, x0, y0, p0=p0,
+                                                       bounds=(low_bound, up_bound))
+                                t_loc = popt[n_multi:2*n_multi]
+                                cen_arr[matches,ii] = t_loc[np.where(t_loc != 0)[0]]
+                            except RuntimeError:
+                                print 'fail : ', ll, ii, p0, popt
+
                 #endfor
+                u_l_ii += 1
+
                 good = np.where(cen_arr[ll] != 0)[0]
                 if len(good) > 0:
                     x_test = cen_arr[ll][good]
@@ -793,7 +808,6 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                     diff_rms[ll], diff_avg[ll] = np.std(diff), np.average(diff)
                     diff_num[ll] = len(good)
 
-                u_l_ii += 1
             #endif
         #endfor
         ax.scatter(cal_lines, diff_avg, marker='o', s=40, facecolor='blue',
