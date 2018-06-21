@@ -21,6 +21,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 from scipy.optimize import curve_fit # + on 05/06/2018
 from IQ_plot import gauss1d
+from get_OH_centers import gauss_multi, n_multi
 
 from astropy.io import fits
 from astropy.io import ascii as asc # + on 16/06/2017
@@ -625,6 +626,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Read in OH npz file for line grouping
      - Define use_lines array for arc case
      - Handle multi-line fitting (works with dataset='arc')
+     - Handle multi-line fitting for dataset='OH'
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -705,6 +707,18 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         if dataset == 'OH':
             cal_lines_int = cal_line_data['col2'].data
 
+            # Remove lines from use_lines if outside coverage | + on 21/06/2018
+            n_in_spec = np.zeros(len(use_lines))
+            for gg in range(len(use_lines)):
+                in_spec = np.where((use_lines[gg] >= wave0[0]) &
+                                   (use_lines[gg] <= wave0[-1]))[0]
+                n_in_spec[gg] = len(in_spec)
+                if len(in_spec) != len(use_lines[gg]) and len(in_spec) > 0:
+                    use_lines[gg] = np.array(use_lines[gg])[in_spec].tolist()
+            ignore = np.where(n_in_spec == 0)[0]
+            if len(ignore) > 0:
+                use_lines = np.delete(use_lines, ignore)
+
         n_lines = len(cal_lines)
 
         if dataset == 'arc':
@@ -733,8 +747,24 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             if not skip[ll]:
                 w_min = min(use_lines[u_l_ii])-10
                 w_max = max(use_lines[u_l_ii])+10
-
                 z_idx = np.where((wave0 >= w_min) & (wave0 <= w_max))[0]
+
+                # Set-up initial curve_fit guess for multi lines
+                if len(use_lines[u_l_ii]) > 1:
+                    matches = np.array([xx for xx in range(n_lines) if \
+                                        cal_lines[xx] in use_lines[u_l_ii]])
+                    ratio0  = cal_lines_int[matches]/max(cal_lines_int[matches])
+                    t_peak0 = (max(y0) * ratio0).tolist()
+                    t_lines = use_lines[u_l_ii]
+                    t_sig   = [2.0] * len(t_lines)
+
+                    t_peak0 += np.zeros(n_multi-len(t_lines)).tolist()
+                    t_sig   += np.zeros(n_multi-len(t_lines)).tolist()
+                    t_lines += np.zeros(n_multi-len(t_lines)).tolist()
+
+                    p0 = t_peak0
+                    p0 += t_lines
+                    p0 += t_sig
 
                 for ii in range(n_bins):
                     x0, y0 = wave0[z_idx], avg_arr[z_idx,ii]
@@ -747,7 +777,12 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                             except RuntimeError:
                                 print ll, ii, p0
                     else:
-                        print "Multi-line fitting"
+                        try:
+                            popt, pcov = curve_fit(gauss_multi, x0, y0, p0=p0)
+                            t_loc = popt[n_multi:2*n_multi]
+                            cen_arr[matches,ii] = t_loc[np.where(t_loc != 0)[0]]
+                        except RuntimeError:
+                            print ll, ii, p0, popt
                 #endfor
                 good = np.where(cen_arr[ll] != 0)[0]
                 if len(good) > 0:
