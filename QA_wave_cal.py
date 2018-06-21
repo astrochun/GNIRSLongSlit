@@ -623,6 +623,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
     Modified by Chun Ly, 21 June 2018
      - Use convolved Rousselot2000 table instead of original
      - Read in OH npz file for line grouping
+     - Define use_lines array for arc case
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -704,6 +705,11 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             cal_lines_int = cal_line_data['col2'].data
 
         n_lines = len(cal_lines)
+
+        if dataset == 'arc':
+            use_lines = []
+            for ll in range(n_lines): use_lines.append([cal_lines[ll]])
+            use_lines = np.array(use_lines)
 
         cen_arr = np.zeros( (n_lines,n_bins) )
 
