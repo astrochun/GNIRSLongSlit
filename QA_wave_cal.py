@@ -618,6 +618,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Use sigma_clipped_stats to remove outliers in statistics
      - Remove outlier based on offset amount, not using sigma clipping
      - Tab issue: Move fits.writeto out of for loop
+     - Compute stats for histogram distributions
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -779,10 +780,25 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         ax[1].set_xlabel(r'Median [$\AA$]')
         ax[2].set_xlabel(r'$\sigma$ [$\AA$]')
 
+        stat_avg = [np.average(avg0[good]), np.average(med0[good]),
+                    np.average(rms0[good])]
+        stat_med = [np.median(avg0[good]), np.median(med0[good]),
+                    np.median(rms0[good])]
+        stat_rms = [np.std(avg0[good]), np.std(med0[good]), np.std(rms0[good])]
+
         y_max = np.max([np.max(N1),np.max(N2),np.max(N3)])*1.1
         for aa in range(3):
             ax[aa].set_ylim([0,y_max])
 
+            ax[aa].axvline(stat_avg[aa], linestyle='solid')
+            ax[aa].axvline(stat_med[aa], linestyle='dashed')
+
+            txt0 = ''
+            str0 = [r'$<x>$', r'$\tilde{x}$', r'$\sigma$']
+            val  = [stat_avg[aa], stat_med[aa], stat_rms[aa]]
+            for ss,vv in zip(str0,val): txt0 += ss+(' = %.3f' % vv) +'\n'
+            ax[aa].annotate(txt0, [0.95,0.95], xycoords='axes fraction',
+                            ha='right', va='top')
         ax[1].set_yticklabels([])
         ax[2].set_yticklabels([])
 
