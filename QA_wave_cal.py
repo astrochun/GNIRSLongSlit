@@ -629,6 +629,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Handle multi-line fitting for dataset='OH'
      - Include lower and upper bounds, Move multi-line fitting later in code
      - Normalize spectrum to peak, Do not set bounds for curve_fit()
+     - Fix typo with np.absolute use
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -743,7 +744,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         u_l_ii = 0
         for ll in range(n_lines):
-            mylogger.info('ll=%i, u_l_ii=%i' % (ll, u_l_ii))
+            #mylogger.info('ll=%i, u_l_ii=%i' % (ll, u_l_ii))
             ax.axvline(cal_lines[ll], color='red', linestyle='dashed',
                        linewidth=0.25, zorder=1)
 
@@ -794,7 +795,14 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                                 popt, pcov = curve_fit(gauss_multi, x0, y0, p0=p0)
                                 #bounds=(low_bound, up_bound))
                                 t_loc = popt[n_multi:2*n_multi]
-                                cen_arr[matches,ii] = t_loc[np.where(t_loc != 0)[0]]
+                                l_diff = t_loc - t_lines
+                                good = np.where((t_loc != 0) &
+                                                (np.absolute(l_diff) <= 5))[0]
+                                #if len(good) != len(matches):
+                                #    print t_loc, l_diff, len(good)
+                                if len(good) > 0:
+                                    cen_arr[matches[good],ii] = t_loc[good]
+
                             except RuntimeError:
                                 pass #print 'fail : ', ll, ii, p0, popt
 
