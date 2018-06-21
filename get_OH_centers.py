@@ -116,6 +116,7 @@ def main(rawdir, silent=False, verbose=True):
      - Fix case if curve_fit solutions are outside of spectral range
     Modified by Chun Ly, 21 June 2018
      - Write npz file containing use lines that are grouped together
+     - mylogger call for writing files
     '''
     
     # + on 09/01/2018
@@ -300,6 +301,7 @@ def main(rawdir, silent=False, verbose=True):
 
     l_tab = Table([rev_lines, rev_int])
     out_file = rawdir+'rousselot2000_convl.dat'
+    mylogger.info('Writing : '+out_file)
     asc.write(l_tab, out_file, format='no_header')
 
     ann_txt  = r'%.2f $\mu$m; %s; ' % (gratwave, o_tab0['filter2'])
@@ -314,6 +316,7 @@ def main(rawdir, silent=False, verbose=True):
 
     fig.set_size_inches(6,8)
     out_pdf = out_file.replace('.dat','.pdf')
+    mylogger.info('Writing : '+out_pdf)
     fig.savefig(out_pdf)
 
     # Write npz file containing final grouping | + on 21/06/2018
