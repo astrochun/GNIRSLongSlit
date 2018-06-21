@@ -114,6 +114,8 @@ def main(rawdir, silent=False, verbose=True):
      - WARN if more than six lines
      - Attempt to constraint fit using bounds but that did not work
      - Fix case if curve_fit solutions are outside of spectral range
+    Modified by Chun Ly, 21 June 2018
+     - Write npz file containing use lines that are grouped together
     '''
     
     # + on 09/01/2018
@@ -169,6 +171,8 @@ def main(rawdir, silent=False, verbose=True):
 
     nrows = 3
     fig, ax = plt.subplots(nrows=nrows)
+
+    use_lines = [] # + on 21/06/2018
 
     xlim_arr = []
     dx = (x0[-1]-x0[0])/3.0
@@ -227,6 +231,8 @@ def main(rawdir, silent=False, verbose=True):
                                    p0=p0)
             t_mod = gauss1d(x0, *popt)
 
+            use_lines.append([popt[2]]) # + on 21/06/2018
+
             rev_lines.append(popt[2])
             rev_int.append(popt[1])
 
@@ -246,6 +252,7 @@ def main(rawdir, silent=False, verbose=True):
             t_str = popt[0:n_multi]         # Line peak strength
 
             nonzero = np.where(t_loc != 0)[0]
+            use_lines.append(t_loc[nonzero].tolist()) # + on 21/06/2018
 
             wave0 = t_loc[nonzero]
             wave0.sort()
@@ -308,6 +315,11 @@ def main(rawdir, silent=False, verbose=True):
     fig.set_size_inches(6,8)
     out_pdf = out_file.replace('.dat','.pdf')
     fig.savefig(out_pdf)
+
+    # Write npz file containing final grouping | + on 21/06/2018
+    savez_file = out_file.replace('.dat','.npz')
+    mylogger.info('Writing : '+savez_file)
+    np.savez_compressed(savez_file, use_lines=use_lines)
 
     if silent == False: mylogger.info('### End main : '+systime())
 #enddef
