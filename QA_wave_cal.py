@@ -622,6 +622,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - try/except for OH skyline failure (RunTimeError)
     Modified by Chun Ly, 21 June 2018
      - Use convolved Rousselot2000 table instead of original
+     - Read in OH npz file for line grouping
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -680,10 +681,24 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         cal_line_data = asc.read(cal_ref_file, format='no_header')
         cal_lines     = cal_line_data['col1'].data
 
+        skip = np.zeros(len(cal_lines))
+
+        if dataset == 'OH':
+            npz_file = path+'rousselot2000_convl.npz'
+            #mylogger.info('Reading : '+npz_file)
+            npz_tab = np.load(npz_file)
+            use_lines = npz_tab['use_lines']
+            for gg in range(len(use_lines)):
+                matches = [xx for xx in range(len(cal_lines)) if
+                           cal_lines[xx] in use_lines[gg]]
+                if len(matches) > 1:
+                    skip[np.array(matches[1:])] = 1
+
         in_spec = np.where((cal_lines >= wave0[0]) &
                            (cal_lines <= wave0[-1]))[0]
         cal_line_data = cal_line_data[in_spec]
-        cal_lines     = cal_line_data['col1']
+        cal_lines     = cal_line_data['col1'].data
+        skip          = skip[in_spec]
 
         if dataset == 'OH':
             cal_lines_int = cal_line_data['col2'].data
