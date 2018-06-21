@@ -117,6 +117,7 @@ def main(rawdir, silent=False, verbose=True):
     Modified by Chun Ly, 21 June 2018
      - Write npz file containing use lines that are grouped together
      - mylogger call for writing files
+     - Switching back to uncompressed npz - Got interpret file pickle error (IOError)
     '''
     
     # + on 09/01/2018
@@ -322,7 +323,7 @@ def main(rawdir, silent=False, verbose=True):
     # Write npz file containing final grouping | + on 21/06/2018
     savez_file = out_file.replace('.dat','.npz')
     mylogger.info('Writing : '+savez_file)
-    np.savez_compressed(savez_file, use_lines=use_lines)
+    np.savez(savez_file, use_lines=use_lines)
 
     if silent == False: mylogger.info('### End main : '+systime())
 #enddef
