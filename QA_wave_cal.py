@@ -620,6 +620,8 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Tab issue: Move fits.writeto out of for loop
      - Compute stats for histogram distributions
      - try/except for OH skyline failure (RunTimeError)
+    Modified by Chun Ly, 21 June 2018
+     - Use convolved Rousselot2000 table instead of original
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -669,7 +671,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             avg_arr = fits.getdata(out_fits)
 
         if dataset == 'OH':
-            cal_ref_file = co_dirname+'/rousselot2000.dat'
+            cal_ref_file = path+'rousselot2000_convl.dat'
 
         if dataset == 'arc':
             cal_ref_file = co_dirname+'/argon.dat'
