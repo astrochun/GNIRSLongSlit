@@ -619,6 +619,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Remove outlier based on offset amount, not using sigma clipping
      - Tab issue: Move fits.writeto out of for loop
      - Compute stats for histogram distributions
+     - try/except for OH skyline failure (RunTimeError)
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -709,8 +710,11 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                 x0, y0 = wave0[z_idx], avg_arr[z_idx,ii]
                 p0 = [0.0, max(y0), cal_lines[ll], 2.0]
                 if p0[1] > 10:
-                    popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
-                    cen_arr[ll,ii] = popt[2]
+                    try:
+                        popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
+                        cen_arr[ll,ii] = popt[2]
+                    except RuntimeError:
+                        print ll, ii, p0
             #endfor
             good   = np.where(cen_arr[ll] != 0)[0]
             if len(good) > 0:
