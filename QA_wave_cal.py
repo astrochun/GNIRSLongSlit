@@ -624,6 +624,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Use convolved Rousselot2000 table instead of original
      - Read in OH npz file for line grouping
      - Define use_lines array for arc case
+     - Handle multi-line fitting (works with dataset='arc')
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -724,29 +725,41 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         diff_rms = np.zeros(n_lines)
         diff_num = np.zeros(n_lines, dtype=np.int)
 
+        u_l_ii = 0
         for ll in range(n_lines):
             ax.axvline(cal_lines[ll], color='red', linestyle='dashed',
                        linewidth=0.25, zorder=1)
 
-            z_idx = np.where(np.absolute(wave0 - cal_lines[ll]) <= 10.0)[0]
-            for ii in range(n_bins):
-                x0, y0 = wave0[z_idx], avg_arr[z_idx,ii]
-                p0 = [0.0, max(y0), cal_lines[ll], 2.0]
-                if p0[1] > 10:
-                    try:
-                        popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
-                        cen_arr[ll,ii] = popt[2]
-                    except RuntimeError:
-                        print ll, ii, p0
-            #endfor
-            good   = np.where(cen_arr[ll] != 0)[0]
-            if len(good) > 0:
-                x_test = cen_arr[ll][good]
-                diff = x_test - cal_lines[ll]
-                ax.scatter(x_test, diff, marker='o', s=5, edgecolor='none',
-                           facecolor='black', alpha=0.5, zorder=2)
-                diff_rms[ll], diff_avg[ll] = np.std(diff), np.average(diff)
-                diff_num[ll] = len(good)
+            if not skip[ll]:
+                w_min = min(use_lines[u_l_ii])-10
+                w_max = max(use_lines[u_l_ii])+10
+
+                z_idx = np.where((wave0 >= w_min) & (wave0 <= w_max))[0]
+
+                for ii in range(n_bins):
+                    x0, y0 = wave0[z_idx], avg_arr[z_idx,ii]
+                    if len(use_lines[u_l_ii]) == 1:
+                        p0 = [0.0, max(y0), cal_lines[ll], 2.0]
+                        if p0[1] > 10:
+                            try:
+                                popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
+                                cen_arr[ll,ii] = popt[2]
+                            except RuntimeError:
+                                print ll, ii, p0
+                    else:
+                        print "Multi-line fitting"
+                #endfor
+                good = np.where(cen_arr[ll] != 0)[0]
+                if len(good) > 0:
+                    x_test = cen_arr[ll][good]
+                    diff = x_test - cal_lines[ll]
+                    ax.scatter(x_test, diff, marker='o', s=5, edgecolor='none',
+                               facecolor='black', alpha=0.5, zorder=2)
+                    diff_rms[ll], diff_avg[ll] = np.std(diff), np.average(diff)
+                    diff_num[ll] = len(good)
+
+                u_l_ii += 1
+            #endif
         #endfor
         ax.scatter(cal_lines, diff_avg, marker='o', s=40, facecolor='blue',
                    edgecolor='none', alpha=0.5, zorder=3)
