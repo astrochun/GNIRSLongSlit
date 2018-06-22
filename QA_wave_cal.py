@@ -79,6 +79,8 @@ def get_database_model(path, source, get_lines=False, silent=False, verbose=True
     Created by Chun Ly, 19 June 2018
     Modified by Chun Ly, 21 May 2017
      - Add get_lines keyword to get arc/OH reference lines
+    Modified by Chun Ly, 22 May 2017
+     - Handle INDEF case
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -113,7 +115,9 @@ def get_database_model(path, source, get_lines=False, silent=False, verbose=True
             temp1 = str0[ii_feat[0]+1+ff].replace('       ','')
             temp1 = temp1.split(' ')
             temp1 = [val for val in temp1 if val != '']
-            l_val0[ff] = np.float(temp1[3])
+            if temp1[3] != 'INDEF': # Mod on 22/06/2018
+                l_val0[ff] = np.float(temp1[3])
+        l_val0 = l_val0.nonzero() # + on 22/06/2018
 
     mylogger.info('Function for '+source+' line fitting : '+func0)
     mylogger.info('Order of '+source+' line fitting : %i' % order0)
