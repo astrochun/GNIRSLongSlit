@@ -465,6 +465,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 20 June 2018
      - Set nsfitcoords xorder fitting
      - Set nsfitcoords x- and y-order fitting in fitcoords
+    Modified by Chun Ly, 22 June 2018
+     - Call residual_wave_cal for cross check: arc calib for OH skylines
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -788,8 +790,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         QA_wave_cal.cross_check(rawdir, cdir, 'database/')
         QA_wave_cal.cross_check(rawdir, cdir, 'database_OH/') # + on 08/06/2018
 
-        # Plot OH residuals using arc solution | + on 08/06/2018
+        # Plot OH/arc residuals using arc/OH solution | Mod on 22/06/2018
         QA_wave_cal.residual_wave_cal(rawdir, dataset='arc', cal='OH')
+        QA_wave_cal.residual_wave_cal(rawdir, dataset='OH', cal='arc')
     #end wave_cal
 
     # Step 5a : Sky subtract telluric data | + on 16/05/2017
