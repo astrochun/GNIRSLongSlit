@@ -651,6 +651,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Fix typo with np.absolute use
      - Implement weighted average calculation for centers to expedite calculation
      - Mark arc/OH lines that are not in database (potentially problematic)
+     - Ignore flag arc/OH lines in stats along X
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -833,7 +834,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         for nn in range(n_bins):
             t_diff   = cen_arr[:,nn] - cal_lines
-            good = np.where((cen_arr[:,nn] != 0) &
+            good = np.where((cen_arr[:,nn] != 0) & (line_flag != 1) &
                             (np.absolute(t_diff) <= 1.5))[0]
             if len(good) > 0:
                 N0[nn]   = len(good)
