@@ -630,6 +630,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Include lower and upper bounds, Move multi-line fitting later in code
      - Normalize spectrum to peak, Do not set bounds for curve_fit()
      - Fix typo with np.absolute use
+     - Implement weighted average calculation for centers to expedite calculation
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -742,82 +743,32 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
         diff_rms = np.zeros(n_lines)
         diff_num = np.zeros(n_lines, dtype=np.int)
 
-        u_l_ii = 0
         for ll in range(n_lines):
             #mylogger.info('ll=%i, u_l_ii=%i' % (ll, u_l_ii))
             ax.axvline(cal_lines[ll], color='red', linestyle='dashed',
                        linewidth=0.25, zorder=1)
 
-            if not skip[ll]:
-                w_min = min(use_lines[u_l_ii])-10
-                w_max = max(use_lines[u_l_ii])+10
-                z_idx = np.where((wave0 >= w_min) & (wave0 <= w_max))[0]
-                x0 = wave0[z_idx]
+            z_idx = np.where(np.absolute(wave0-cal_lines[ll]) <= 10)[0]
+            x0 = wave0[z_idx]
 
-                for ii in range(n_bins):
-                    y0 = avg_arr[z_idx,ii]
-                    y0 /= max(y0)
-                    if len(use_lines[u_l_ii]) == 1:
-                        p0 = [0.0, 1.0, cal_lines[ll], 2.0]
-                        if p0[1] > 10:
-                            try:
-                                popt, pcov = curve_fit(gauss1d, x0, y0, p0=p0)
-                                cen_arr[ll,ii] = popt[2]
-                            except RuntimeError:
-                                print ll, ii, p0
-                    else:
-                        # Set-up initial curve_fit guess for multi lines
-                        if len(use_lines[u_l_ii]) > 1:
-                            matches = np.array([xx for xx in range(n_lines) if \
-                                                cal_lines[xx] in use_lines[u_l_ii]])
-                            ratio0  = cal_lines_int[matches]/max(cal_lines_int[matches])
-                            t_peak0 = ratio0.tolist()
-                            t_lines = list(use_lines[u_l_ii])
-                            t_sig   = [2.0] * len(t_lines)
+            for ii in range(n_bins):
+                y0 = avg_arr[z_idx,ii]
+                y0 /= max(y0)
 
-                            t_peak0 += np.zeros(n_multi-len(t_lines)).tolist()
-                            t_sig   += np.zeros(n_multi-len(t_lines)).tolist()
-                            t_lines += np.zeros(n_multi-len(t_lines)).tolist()
+                x_idx = np.where(np.absolute(x0 - cal_lines[ll]) <= 3)[0]
+                wht_val = np.sum(x0[x_idx]*y0[x_idx])/np.sum(y0[x_idx])
+                if np.absolute(wht_val-cal_lines[ll]) <= 1:
+                    cen_arr[ll,ii] = wht_val
+            #endfor
 
-                            p0 = t_peak0
-                            p0 += t_lines
-                            p0 += t_sig
-
-                            p0 = np.array(p0)
-                            low_bound = tuple([0] * n_multi) + \
-                                        tuple(p0[n_multi:2*n_multi]-0.5) + \
-                                        tuple([0] * n_multi)
-                            up_bound  = tuple(p0[0:n_multi]*1.25+0.1) + \
-                                        tuple(p0[n_multi:2*n_multi]+0.5) + \
-                                        tuple(p0[2*n_multi:]+1)
-
-                            try:
-                                popt, pcov = curve_fit(gauss_multi, x0, y0, p0=p0)
-                                #bounds=(low_bound, up_bound))
-                                t_loc = popt[n_multi:2*n_multi]
-                                l_diff = t_loc - t_lines
-                                good = np.where((t_loc != 0) &
-                                                (np.absolute(l_diff) <= 5))[0]
-                                #if len(good) != len(matches):
-                                #    print t_loc, l_diff, len(good)
-                                if len(good) > 0:
-                                    cen_arr[matches[good],ii] = t_loc[good]
-
-                            except RuntimeError:
-                                pass #print 'fail : ', ll, ii, p0, popt
-
-                #endfor
-                u_l_ii += 1
-
-                good = np.where(cen_arr[ll] != 0)[0]
-                if len(good) > 0:
-                    x_test = cen_arr[ll][good]
-                    diff = x_test - cal_lines[ll]
-                    ax.scatter(x_test, diff, marker='o', s=5, edgecolor='none',
-                               facecolor='black', alpha=0.5, zorder=2)
-                    diff_rms[ll], diff_avg[ll] = np.std(diff), np.average(diff)
-                    diff_num[ll] = len(good)
-
+            good = np.where(cen_arr[ll] != 0)[0]
+            if len(good) > 0:
+                x_test = cen_arr[ll][good]
+                diff = x_test - cal_lines[ll]
+                ax.scatter(x_test, diff, marker='o', s=5, edgecolor='none',
+                           facecolor='black', alpha=0.5, zorder=2)
+                diff_rms[ll], diff_avg[ll] = np.std(diff), np.average(diff)
+                diff_num[ll] = len(good)
             #endif
         #endfor
         ax.scatter(cal_lines, diff_avg, marker='o', s=40, facecolor='blue',
@@ -835,7 +786,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         ax.annotate(an_txt, [0.05,0.95], xycoords='axes fraction',
                     ha='left', va='top')
-        plt.subplots_adjust(left=0.1, right=0.99, bottom=0.1, top=0.99)
+        plt.subplots_adjust(left=0.13, right=0.99, bottom=0.1, top=0.99)
         fig.savefig(pdf_file)
 
         asc_file = pdf_file.replace('.pdf', '.tbl')
