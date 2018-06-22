@@ -650,6 +650,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Normalize spectrum to peak, Do not set bounds for curve_fit()
      - Fix typo with np.absolute use
      - Implement weighted average calculation for centers to expedite calculation
+     - Mark arc/OH lines that are not in database (potentially problematic)
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -744,6 +745,14 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         n_lines = len(cal_lines)
 
+        # Use database for lines to avoid/use in analysis | + on 21/06/2018
+        func0, order0, l_val0 = get_database_model(path, dataset, get_lines=True)
+        line_flag = np.repeat(1,n_lines)
+        for ii in range(n_lines):
+            ii_fit = np.where(np.absolute(l_val0 - cal_lines[ii]) <= 0.1)[0]
+            if len(ii_fit) > 0: line_flag[ii] = 0
+        line_nouse = np.where(line_flag == 1)[0]
+
         if dataset == 'arc':
             use_lines = []
             for ll in range(n_lines): use_lines.append([cal_lines[ll]])
@@ -794,6 +803,9 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
                    edgecolor='none', alpha=0.5, zorder=3)
         ax.errorbar(cal_lines, diff_avg, yerr=diff_rms, ecolor='blue',
                     capsize=2.0, elinewidth=2, fmt=None, alpha=0.5, zorder=4)
+        # Mark with 'X' lines that are not used in wavecal fitting
+        ax.scatter(cal_lines[line_nouse], diff_avg[line_nouse], marker='X', s=100,
+                   facecolor='red', zorder=3)
 
         ax.minorticks_on()
         ax.set_xlabel(r'Wavelengths [$\AA$]')
