@@ -657,6 +657,10 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Implement weighted average calculation for centers to expedite calculation
      - Mark arc/OH lines that are not in database (potentially problematic)
      - Ignore flag arc/OH lines in stats along X
+    Modified by Chun Ly, 21 June 2018
+     - Use default Rousselot table if convolved one not available
+       Note: This is OK with previous version of code that use the default table
+             for wavelength calibration (i.e., line_flag won't be all 1's)
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -707,6 +711,9 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         if dataset == 'OH':
             cal_ref_file = path+'rousselot2000_convl.dat'
+            if not exists(cal_ref_file):
+                cal_ref_file = co_dirname+'/rousselot2000.dat'
+                mylogger.warn('Using default Rousselot2000 table, not convolved one!')
 
         if dataset == 'arc':
             cal_ref_file = co_dirname+'/argon.dat'
