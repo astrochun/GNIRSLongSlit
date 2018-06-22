@@ -254,6 +254,8 @@ def transform(rawdir, silent=False, verbose=False):
      - Pass function and order to nsfitcoords for OH stack
     Modified by Chun Ly, 20 June 2018
      - Set nsfitcoords xorder fitting
+    Modified by Chun Ly, 22 June 2018
+     - Call residual_wave_cal for wavelength solution check
     '''
 
     # + on 09/01/2018
@@ -290,6 +292,9 @@ def transform(rawdir, silent=False, verbose=False):
         mylogger.warn('Will not run nstransform on OH stacked data')
 
     iraf.chdir(cdir)
+
+    # + on 22/06/2018
+    QA_wave_cal.residual_wave_cal(rawdir, dataset='OH', cal='OH')
 #enddef
 
 
@@ -385,5 +390,6 @@ def plot_spec(rawdir, out_pdf='', silent=False, verbose=False):
     fig.set_size_inches(11,8)
 
     fig.savefig(out_pdf)
+
 #enddef
 
