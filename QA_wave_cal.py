@@ -55,7 +55,7 @@ co_dirname = os.path.dirname(__file__)
 
 xorder = 3 # nsfitcoords fitting order along x
 
-def get_database_model(path, source, silent=False, verbose=True):
+def get_database_model(path, source, get_lines=False, silent=False, verbose=True):
     '''
     Determine fitting function and order to pass to nsfitcoords
 
@@ -73,6 +73,12 @@ def get_database_model(path, source, silent=False, verbose=True):
 
     verbose : boolean
       Turns on additional stdout messages. Default: True
+
+    Notes
+    -----
+    Created by Chun Ly, 19 June 2018
+    Modified by Chun Ly, 21 May 2017
+     - Add get_lines keyword to get arc/OH reference lines
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -100,13 +106,26 @@ def get_database_model(path, source, silent=False, verbose=True):
     func0  = str0[ii_func[0]].split(' ')[-1].replace('\n','')
     order0 = np.int(str0[ii_ord[0]].split(' ')[-1].replace('\n',''))
 
+    if get_lines: # + on 21/06/2018
+        n_features = np.int(str0[ii_feat[0]].split('\t')[2].replace('\n',''))
+        l_val0 = np.zeros(n_features)
+        for ff in range(n_features):
+            temp1 = str0[ii_feat[0]+1+ff].replace('       ','')
+            temp1 = temp1.split(' ')
+            temp1 = [val for val in temp1 if val != '']
+            l_val0[ff] = np.float(temp1[3])
+
     mylogger.info('Function for '+source+' line fitting : '+func0)
     mylogger.info('Order of '+source+' line fitting : %i' % order0)
     f0.close()
 
     if silent == False: mylogger.info('### End get_database_model : '+systime())
 
-    return func0, order0
+    # Mod on 21/06/2018
+    if not get_lines:
+        return func0, order0
+    else:
+        return func0, order0, l_val0
 #enddef
 
 def arc_check(path, arcs=[''], out_pdf='', stack=False, silent=False, verbose=True):
