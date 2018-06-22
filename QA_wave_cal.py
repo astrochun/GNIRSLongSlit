@@ -661,6 +661,7 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
      - Use default Rousselot table if convolved one not available
        Note: This is OK with previous version of code that use the default table
              for wavelength calibration (i.e., line_flag won't be all 1's)
+     - Handle old reduction when npz file is unavailable
     '''
 
     logfile  = path+'QA_wave_cal.log'
@@ -726,14 +727,15 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
 
         if dataset == 'OH':
             npz_file = path+'rousselot2000_convl.npz'
-            #mylogger.info('Reading : '+npz_file)
-            npz_tab = np.load(npz_file)
-            use_lines = npz_tab['use_lines']
-            for gg in range(len(use_lines)):
-                matches = [xx for xx in range(len(cal_lines)) if
-                           cal_lines[xx] in use_lines[gg]]
-                if len(matches) > 1:
-                    skip[np.array(matches[1:])] = 1
+            if exists(npz_file):
+                mylogger.info('Reading : '+npz_file)
+                npz_tab = np.load(npz_file)
+                use_lines = npz_tab['use_lines']
+                for gg in range(len(use_lines)):
+                    matches = [xx for xx in range(len(cal_lines)) if
+                               cal_lines[xx] in use_lines[gg]]
+                    if len(matches) > 1:
+                        skip[np.array(matches[1:])] = 1
 
         in_spec = np.where((cal_lines >= wave0[0]) &
                            (cal_lines <= wave0[-1]))[0]
@@ -745,16 +747,17 @@ def residual_wave_cal(path, dataset='', cal='', silent=False, verbose=True):
             cal_lines_int = cal_line_data['col2'].data
 
             # Remove lines from use_lines if outside coverage | + on 21/06/2018
-            n_in_spec = np.zeros(len(use_lines))
-            for gg in range(len(use_lines)):
-                in_spec = np.where((use_lines[gg] >= wave0[0]) &
-                                   (use_lines[gg] <= wave0[-1]))[0]
-                n_in_spec[gg] = len(in_spec)
-                if len(in_spec) != len(use_lines[gg]) and len(in_spec) > 0:
-                    use_lines[gg] = np.array(use_lines[gg])[in_spec].tolist()
-            ignore = np.where(n_in_spec == 0)[0]
-            if len(ignore) > 0:
-                use_lines = np.delete(use_lines, ignore)
+            if exists(npz_file):
+                n_in_spec = np.zeros(len(use_lines))
+                for gg in range(len(use_lines)):
+                    in_spec = np.where((use_lines[gg] >= wave0[0]) &
+                                       (use_lines[gg] <= wave0[-1]))[0]
+                    n_in_spec[gg] = len(in_spec)
+                    if len(in_spec) != len(use_lines[gg]) and len(in_spec) > 0:
+                        use_lines[gg] = np.array(use_lines[gg])[in_spec].tolist()
+                ignore = np.where(n_in_spec == 0)[0]
+                if len(ignore) > 0:
+                    use_lines = np.delete(use_lines, ignore)
 
         n_lines = len(cal_lines)
 
