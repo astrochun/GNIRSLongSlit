@@ -69,6 +69,8 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
     Modified by Chun Ly, 19 June 2018
      - Force function to legendre
      - Set fwidth in nswavelength call to depend on slitwidth
+    Modified by Chun Ly, 21 June 2018
+     - Include ending print statement
     '''
 
     # Mod on 10/01/2018
@@ -155,6 +157,8 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
           "order=3, logfile=logfile)"
 
     f0.write(cmd+'\n')
+
+    f0.write('print("Completed! Return to other terminal and hit RETURN")\n')
     f0.close()
 
     if silent == False: mylogger.info('### End main : '+systime())
