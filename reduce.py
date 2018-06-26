@@ -469,6 +469,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call residual_wave_cal for cross check: arc calib for OH skylines
     Modified by Chun Ly, 25 June 2018
      - Check tell_comb files exist before extraction
+     - Call iraf_get_subset.check_prefix to check for tfrbnc telluric files
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -962,17 +963,23 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         for tt in range(len(tell_full_list)):
             _list = tell_full_list[tt]
             if exists(_list): # Mod on 24/04/2018
-                if len(tell_full_list) > 1:
-                    tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
+                do_run = iraf_get_subset.check_prefix('tfrbnc', _list,
+                                                      path=rawdir, prereq=True)
+                if not do_run:
+                    log.warn('tfrbnc for telluric NOT available!!!')
+                    log.warn('Execute reduce.run with skysub=1')
                 else:
-                    tell_comb = tell_comb0
-                if not exists(tell_comb):
-                    mylogger.info("Running nscombine on telluric data, "+_list)
-                    iraf.gnirs.nscombine(rawdir+'tfrbnc@'+_list, output=tell_comb,
-                                         fl_cross=yes, tolerance=0.1)
-                else:
-                    mylogger.warn('File exists : '+tell_comb+' !!!')
-                    mylogger.warn('Will not run nscombine on tfrbnc telluric data, '+_list)
+                    if len(tell_full_list) > 1:
+                        tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
+                    else:
+                        tell_comb = tell_comb0
+                    if not exists(tell_comb):
+                        mylogger.info("Running nscombine on telluric data, "+_list)
+                        iraf.gnirs.nscombine(rawdir+'tfrbnc@'+_list, output=tell_comb,
+                                             fl_cross=yes, tolerance=0.1)
+                    else:
+                        mylogger.warn('File exists : '+tell_comb+' !!!')
+                        mylogger.warn('Will not run nscombine on tfrbnc telluric data, '+_list)
             else:
                 mylogger.warn('Telluric file does NOT exist : '+_list)
 
