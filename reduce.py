@@ -467,6 +467,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Set nsfitcoords x- and y-order fitting in fitcoords
     Modified by Chun Ly, 22 June 2018
      - Call residual_wave_cal for cross check: arc calib for OH skylines
+    Modified by Chun Ly, 25 June 2018
+     - Check tell_comb files exist before extraction
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -993,15 +995,19 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                     tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
                 else:
                     tell_comb = tell_comb0
-                outspec = tell_comb.replace('tell','xtell')
-                if not exists(outspec):
-                    mylogger.info("Running nsextract on telluric data, "+_list)
-                    iraf.gnirs.nsextract(os.path.basename(tell_comb),
-                                         outspectra=os.path.basename(outspec),
-                                         database='database/')
+                if not exists(tell_comb): # + on 25/06/2018
+                    log.warn('File does NOT exist : '+tell_comb)
+                    log.warn('Execute reduce.run with combine=1 !!!')
                 else:
-                    mylogger.warn('File exists : '+outspec+' !!!')
-                    mylogger.warn('Will not run nsextract on '+_list)
+                    outspec = tell_comb.replace('tell','xtell')
+                    if not exists(outspec):
+                        mylogger.info("Running nsextract on telluric data, "+_list)
+                        iraf.gnirs.nsextract(os.path.basename(tell_comb),
+                                             outspectra=os.path.basename(outspec),
+                                             database='database/')
+                    else:
+                        mylogger.warn('File exists : '+outspec+' !!!')
+                        mylogger.warn('Will not run nsextract on '+_list)
             else:
                 mylogger.warn('Telluric file does NOT exist : '+_list)
 
