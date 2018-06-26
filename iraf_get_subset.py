@@ -77,7 +77,7 @@ def main(path, final_prefix, outfile='', all_lis=[], all_file='',
 #enddef
 
 def check_prefix(final_prefix, input_lis, list_path='', path='',
-                 mylogger=None, silent=False, verbose=True):
+                 mylogger=None, prereq=False, silent=False, verbose=True):
     '''
     Check if specific files from an input list exist with given prefix
 
@@ -98,6 +98,11 @@ def check_prefix(final_prefix, input_lis, list_path='', path='',
     path : str (Optional)
       Full path to individual files if [input_lis] contents do not contain
       full path. Must include '/' at the end
+
+    prereq: boolean
+      Set if you're checking if necessary intermediate/input files are
+      available. If set and files exist, returns do_run = 1.
+      Default: False
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -121,6 +126,8 @@ def check_prefix(final_prefix, input_lis, list_path='', path='',
      - path is now for individual frames from the input_lis
     Modified by Chun Ly, 18 December 2017
      - Implement glog logging, allow mylogger keyword input
+    Modified by Chun Ly, 25 June 2018
+     - Add prereq keyword option to check if intermediate files are available
     '''
 
     # + on 18/12/2017
@@ -142,16 +149,24 @@ def check_prefix(final_prefix, input_lis, list_path='', path='',
 
     do_run = 0
 
-    if len(f_exist) == 0:
-        clog.warn('No files exist') # Mod on 18/12/2017
-        do_run = 1
-    else:
-        # Mod on 18/12/2017
-        if len(f_exist) != len(files):
-            clog.warn('Some files do not exist!')
-            clog.warn(', '.join(f_noexist))
+    # Mod on 25/06/2018
+    if not prereq:
+        if len(f_exist) == 0:
+            clog.info('No files exist, as expected') # Mod on 18/12/2017
+            do_run = 1
         else:
-            clog.info('All files exist!!!')
+            # Mod on 18/12/2017
+            if len(f_exist) != len(files):
+                clog.warn('Some files do not exist!')
+                clog.warn(', '.join(f_noexist))
+            else:
+                clog.info('All files exist!!!')
+    else:
+        if len(f_exist) == 0:
+            clog.warn('Intermediate files unavailable!!')
+        else:
+            clog.info('Intermediate files available')
+            do_run = 1
 
     if silent == False: clog.info('End check_prefix : '+systime())
     return do_run
