@@ -125,6 +125,7 @@ def main(rawdir, silent=False, verbose=True):
      - Bug fix: Add try/except for curve_fit RuntimeError
      - Bug fix: tab fix
      - Bug fix: Add try/except for curve_fit RuntimeError for gauss_multi
+     - Bug fix: list to np.array
     '''
     
     # + on 09/01/2018
@@ -273,7 +274,7 @@ def main(rawdir, silent=False, verbose=True):
                 except RuntimeError:
                     mylogger.warn('Did not converge!')
                     mylogger.warn('Using initial guesses')
-                    popt = list(p0)
+                    popt = np.array(p0)
 
                 t_mod = gauss_multi(x0, *popt)
 
