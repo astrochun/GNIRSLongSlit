@@ -122,6 +122,7 @@ def main(rawdir, silent=False, verbose=True):
      - Bug fix: Crash on call to group_OH_lines. Require in_zoom to not be empty array
     Modified by Chun Ly, 25 June 2018
      - Bug fix: Handle odd fit results (check wavelength within 5 Ang of guess)
+     - Bug fix: Add try/except for curve_fit RuntimeError
     '''
     
     # + on 09/01/2018
@@ -236,8 +237,13 @@ def main(rawdir, silent=False, verbose=True):
                 #          (0.001, 1.25*p0[1], lam_cen+0.5, 1.5*p0[3]))
 
             if len(group_lines) == 1:
-                popt, pcov = curve_fit(gauss1d, x0[zoom], OH_spec_mod[zoom],
-                                       p0=p0)
+                try:
+                    popt, pcov = curve_fit(gauss1d, x0[zoom], OH_spec_mod[zoom],
+                                           p0=p0)
+                except RuntimeError:
+                    mylogger.warn('Did not converge!')
+                    mylogger.warn('Using initial guess : %.3f' % group_lines[0])
+                    popt = list(p0)
 
                 if np.absolute(popt[2]-p0[2]) >= 5:
                     mylogger.warn('Reliable fit not determined!')
