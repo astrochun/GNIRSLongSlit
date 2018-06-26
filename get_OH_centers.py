@@ -123,6 +123,7 @@ def main(rawdir, silent=False, verbose=True):
     Modified by Chun Ly, 25 June 2018
      - Bug fix: Handle odd fit results (check wavelength within 5 Ang of guess)
      - Bug fix: Add try/except for curve_fit RuntimeError
+     - Bug fix: tab fix
     '''
     
     # + on 09/01/2018
@@ -231,10 +232,10 @@ def main(rawdir, silent=False, verbose=True):
 
                 p0 = np.array(p0)
 
-                zoom    = np.arange(lines_set[ii][0],lines_set[ii][1])
-                # print p0
-                #bounds = ((-0.001, 0.0, lam_cen-0.5, 0.1),
-                #          (0.001, 1.25*p0[1], lam_cen+0.5, 1.5*p0[3]))
+            zoom    = np.arange(lines_set[ii][0],lines_set[ii][1])
+            # print p0
+            #bounds = ((-0.001, 0.0, lam_cen-0.5, 0.1),
+            #          (0.001, 1.25*p0[1], lam_cen+0.5, 1.5*p0[3]))
 
             if len(group_lines) == 1:
                 try:
