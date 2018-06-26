@@ -472,6 +472,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call iraf_get_subset.check_prefix to check for tfrbnc telluric files
      - Call iraf_get_subset.check_prefix to check for tfrbnc science files
      - Call iraf_get_subset.check_prefix to check for rbnc telluric files
+     - Call iraf_get_subset.check_prefix to check for frbnc telluric files
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -893,16 +894,21 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                         mylogger.warn('Files exist!!!')
                         mylogger.warn('Will not run nsfitcoords on rbnc telluric data, '+_list)
 
-                do_run = iraf_get_subset.check_prefix('tfrbnc', _list, path=rawdir,
-                                                      mylogger=mylogger) # Mod on 18/12/2017
-                if do_run:
-                    mylogger.info("Running nstransform on telluric data, "+_list)
-                    iraf.gnirs.nstransform('frbnc@'+_list, outprefix='',
-                                           outspectra='tfrbnc@'+_list,
-                                           database=dbase) # Mod on 25/11/2017
+                do_run1 = iraf_get_subset.check_prefix('frbnc', _list,
+                                                       path=rawdir, prereq=True)
+                if not do_run1:
+                    log.warn('frbnc for telluric NOT available!!!')
                 else:
-                    mylogger.warn('Files exist!!!')
-                    mylogger.warn('Will not run nstransform on frbnc telluric data, '+_list)
+                    do_run = iraf_get_subset.check_prefix('tfrbnc', _list, path=rawdir,
+                                                          mylogger=mylogger) # Mod on 18/12/2017
+                    if do_run:
+                        mylogger.info("Running nstransform on telluric data, "+_list)
+                        iraf.gnirs.nstransform('frbnc@'+_list, outprefix='',
+                                               outspectra='tfrbnc@'+_list,
+                                               database=dbase) # Mod on 25/11/2017
+                    else:
+                        mylogger.warn('Files exist!!!')
+                        mylogger.warn('Will not run nstransform on frbnc telluric data, '+_list)
             else:
                 mylogger.warn('Telluric file does NOT exist : '+_list)
         #endfor
