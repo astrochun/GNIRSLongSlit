@@ -473,6 +473,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call iraf_get_subset.check_prefix to check for tfrbnc science files
      - Call iraf_get_subset.check_prefix to check for rbnc telluric files
      - Call iraf_get_subset.check_prefix to check for frbnc telluric files
+     - Call iraf_get_subset.check_prefix to check for rbnc science files
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -915,29 +916,35 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
         # Step 6b : Apply wavelength solution to science data | + on 17/05/2017
         # Science data
-        do_run = iraf_get_subset.check_prefix('frbnc', obj_list, path=rawdir,
-                                              mylogger=mylogger) # Mod on 18/12/2017
-        if do_run:
-            mylogger.info("Running nsfitcoords on science data")
-            func0, order0 = QA_wave_cal.get_database_model(rawdir, calib_line)
-            iraf.gnirs.nsfitcoords('rbnc@'+obj_list, outprefix='',
-                                   outspectra='frbnc@'+obj_list,
-                                   lamp=lamp0, database=dbase, function=func0,
-                                   lyorder=order0, lxorder=QA_wave_cal.xorder)
+        do_run1 = iraf_get_subset.check_prefix('rbnc', obj_list,
+                                               path=rawdir, prereq=True)
+        if not do_run1:
+            log.warn('rbnc for science NOT available!!!')
+            log.warn('Execute reduce.run with skysub=1')
         else:
-            mylogger.warn('Files exist!!!')
-            mylogger.warn('Will not run nsfitcoords on rbnc science data')
+            do_run = iraf_get_subset.check_prefix('frbnc', obj_list, path=rawdir,
+                                              mylogger=mylogger) # Mod on 18/12/2017
+            if do_run:
+                mylogger.info("Running nsfitcoords on science data")
+                func0, order0 = QA_wave_cal.get_database_model(rawdir, calib_line)
+                iraf.gnirs.nsfitcoords('rbnc@'+obj_list, outprefix='',
+                                       outspectra='frbnc@'+obj_list,
+                                       lamp=lamp0, database=dbase, function=func0,
+                                       lyorder=order0, lxorder=QA_wave_cal.xorder)
+            else:
+                mylogger.warn('Files exist!!!')
+                mylogger.warn('Will not run nsfitcoords on rbnc science data')
 
-        do_run = iraf_get_subset.check_prefix('tfrbnc', obj_list, path=rawdir,
-                                              mylogger=mylogger) # Mod on 18/12/2017
-        if do_run:
-            mylogger.info("Running nstransform on science data")
-            iraf.gnirs.nstransform('frbnc@'+obj_list, outprefix='',
-                                   outspectra='tfrbnc@'+obj_list,
-                                   database=dbase) # Mod on 25/11/2017
-        else:
-            mylogger.warn('Files exist!!!')
-            mylogger.warn('Will not run nstransform on frbnc science data')
+            do_run = iraf_get_subset.check_prefix('tfrbnc', obj_list, path=rawdir,
+                                                  mylogger=mylogger) # Mod on 18/12/2017
+            if do_run:
+                mylogger.info("Running nstransform on science data")
+                iraf.gnirs.nstransform('frbnc@'+obj_list, outprefix='',
+                                    outspectra='tfrbnc@'+obj_list,
+                                       database=dbase) # Mod on 25/11/2017
+            else:
+                mylogger.warn('Files exist!!!')
+                mylogger.warn('Will not run nstransform on frbnc science data')
 
         # Apply wavelength solution to unsubtracted science data
         # + on 02/06/2017
