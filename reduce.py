@@ -476,6 +476,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call iraf_get_subset.check_prefix to check for rbnc science files
     Modified by Chun Ly, 26 June 2018
      - Fix mylogger.warn info
+     - Bug fix: typo
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1007,7 +1008,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 mylogger.warn('Telluric file does NOT exist : '+_list)
 
         # Mod on 25/06/2018
-        do_run = iraf_get_subset.check_prefix('tfrbnc', _obj_list,
+        do_run = iraf_get_subset.check_prefix('tfrbnc', obj_list,
                                               path=rawdir, prereq=True)
         if not do_run:
             log.warn('tfrbnc for science NOT available!!!')
