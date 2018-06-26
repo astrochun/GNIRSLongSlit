@@ -118,6 +118,8 @@ def main(rawdir, silent=False, verbose=True):
      - Write npz file containing use lines that are grouped together
      - mylogger call for writing files
      - Switching back to uncompressed npz - Got interpret file pickle error (IOError)
+    Modified by Chun Ly, 25 June 2018
+     - Bug fix: Crash on call to group_OH_lines. Require in_zoom to not be empty array
     '''
     
     # + on 09/01/2018
@@ -197,96 +199,99 @@ def main(rawdir, silent=False, verbose=True):
         tl_min, tl_max = x0[lines_set[ii][0]], x0[lines_set[ii][1]]
         in_zoom = np.where((OH_lines >= tl_min) & (OH_lines <= tl_max))[0]
 
-        group_lines, group_int = group_OH_lines(OH_lines[in_zoom],
-                                                OH_int[in_zoom])
+        if len(in_zoom) > 0:
+            group_lines, group_int = group_OH_lines(OH_lines[in_zoom],
+                                                    OH_int[in_zoom])
 
-        # print ii, group_lines
+            # print ii, group_lines
 
-        sig = group_lines / R_spec / (2*np.sqrt(2*np.log(2)))
-        peak0 = OH_spec_mod[np.int_((group_lines-x_min)/(x0[1]-x0[0]))]
+            sig = group_lines / R_spec / (2*np.sqrt(2*np.log(2)))
+            peak0 = OH_spec_mod[np.int_((group_lines-x_min)/(x0[1]-x0[0]))]
 
-        if len(group_lines) == 1:
-            p0 = [0.0, peak0, group_lines[0], sig[0]]
-            #plt.axvline(group_lines[0]/1e4, color='blue')
-        else:
-            if len(group_lines) > n_multi:
-                log.warn('More than 8 lines found, N='+str(len(group_lines))+'!!!')
-            t_peak0 = peak0.tolist()
-            t_lines = group_lines.tolist()
-            t_sig   = sig.tolist()
+            if len(group_lines) == 1:
+                p0 = [0.0, peak0, group_lines[0], sig[0]]
+                #plt.axvline(group_lines[0]/1e4, color='blue')
+            else:
+                if len(group_lines) > n_multi:
+                    log.warn('More than 8 lines found, N='+str(len(group_lines))+'!!!')
+                t_peak0 = peak0.tolist()
+                t_lines = group_lines.tolist()
+                t_sig   = sig.tolist()
 
-            t_peak0 += np.zeros(n_multi-len(group_lines)).tolist()
-            t_lines += np.zeros(n_multi-len(group_lines)).tolist()
-            t_sig   += np.zeros(n_multi-len(group_lines)).tolist()
+                t_peak0 += np.zeros(n_multi-len(group_lines)).tolist()
+                t_lines += np.zeros(n_multi-len(group_lines)).tolist()
+                t_sig   += np.zeros(n_multi-len(group_lines)).tolist()
 
-            p0 = t_peak0
-            p0 += t_lines
-            p0 += t_sig
+                p0 = t_peak0
+                p0 += t_lines
+                p0 += t_sig
 
-        p0 = np.array(p0)
-        zoom    = np.arange(lines_set[ii][0],lines_set[ii][1])
-        # print p0
-        #bounds = ((-0.001, 0.0, lam_cen-0.5, 0.1),
-        #          (0.001, 1.25*p0[1], lam_cen+0.5, 1.5*p0[3]))
-        if len(group_lines) == 1:
-            popt, pcov = curve_fit(gauss1d, x0[zoom], OH_spec_mod[zoom],
-                                   p0=p0)
-            t_mod = gauss1d(x0, *popt)
+                p0 = np.array(p0)
 
-            use_lines.append([popt[2]]) # + on 21/06/2018
+                zoom    = np.arange(lines_set[ii][0],lines_set[ii][1])
+                # print p0
+                #bounds = ((-0.001, 0.0, lam_cen-0.5, 0.1),
+                #          (0.001, 1.25*p0[1], lam_cen+0.5, 1.5*p0[3]))
 
-            rev_lines.append(popt[2])
-            rev_int.append(popt[1])
+            if len(group_lines) == 1:
+                popt, pcov = curve_fit(gauss1d, x0[zoom], OH_spec_mod[zoom],
+                                       p0=p0)
+                t_mod = gauss1d(x0, *popt)
 
-            i_ax = [xx for xx in range(nrows) if
-                    (popt[2] >= xlim_arr[xx][0] and popt[2] <= xlim_arr[xx][1])][0]
-            ax[i_ax].annotate('%.2f' % popt[2], [popt[2]/1e4, y_max*0.99], ha='center',
-                              va='top', rotation=90, fontsize=4, bbox=bbox_props)
-        else:
-            #low_bound = tuple([0] * n_multi) + tuple(p0[n_multi:2*n_multi]-0.5) + \
-            #            tuple([0] * n_multi)
-            #up_bound  = tuple(p0[0:n_multi]*1.25+0.1) + tuple(p0[n_multi:2*n_multi]+0.5) + \
-            #            tuple(p0[2*n_multi:]+1)
-            popt, pcov = curve_fit(gauss_multi, x0[zoom], OH_spec_mod[zoom], p0=p0)
-            t_mod = gauss_multi(x0, *popt)
+                use_lines.append([popt[2]]) # + on 21/06/2018
 
-            t_loc = popt[n_multi:2*n_multi] # Line wavelengths (Ang)
-            t_str = popt[0:n_multi]         # Line peak strength
+                rev_lines.append(popt[2])
+                rev_int.append(popt[1])
 
-            nonzero = np.where(t_loc != 0)[0]
-            use_lines.append(t_loc[nonzero].tolist()) # + on 21/06/2018
+                i_ax = [xx for xx in range(nrows) if
+                        (popt[2] >= xlim_arr[xx][0] and popt[2] <= xlim_arr[xx][1])][0]
+                ax[i_ax].annotate('%.2f' % popt[2], [popt[2]/1e4, y_max*0.99], ha='center',
+                                  va='top', rotation=90, fontsize=4, bbox=bbox_props)
+            else:
+                #low_bound = tuple([0] * n_multi) + tuple(p0[n_multi:2*n_multi]-0.5) + \
+                    #            tuple([0] * n_multi)
+                #up_bound  = tuple(p0[0:n_multi]*1.25+0.1) + tuple(p0[n_multi:2*n_multi]+0.5) + \
+                    #            tuple(p0[2*n_multi:]+1)
+                popt, pcov = curve_fit(gauss_multi, x0[zoom], OH_spec_mod[zoom], p0=p0)
+                t_mod = gauss_multi(x0, *popt)
 
-            wave0 = t_loc[nonzero]
-            wave0.sort()
+                t_loc = popt[n_multi:2*n_multi] # Line wavelengths (Ang)
+                t_str = popt[0:n_multi]         # Line peak strength
 
-            # Check that lines are within range
-            in_rge = np.where((wave0 >= x_min) & (wave0 <= x_max))[0]
-            wave0 = wave0[in_rge]
-            t_str = t_str[nonzero[in_rge]]
+                nonzero = np.where(t_loc != 0)[0]
+                use_lines.append(t_loc[nonzero].tolist()) # + on 21/06/2018
 
-            rev_lines += wave0.tolist()
-            rev_int   += t_str.tolist()
+                wave0 = t_loc[nonzero]
+                wave0.sort()
 
-            wave0 = np.array(wave0)
-            # Label lines
-            skip = np.zeros(len(wave0))
-            for ww in range(len(wave0)):
-                if skip[ww] == 0:
-                    w_diff = wave0[ww:]-wave0[ww]
-                    t_close = np.where(w_diff <= 5)[0]
-                    close = np.arange(ww,len(wave0))[t_close]
-                    str_comb = "\n".join(['%.2f' % val for
-                                        val in wave0[close]])
-                    w_cen = np.average(wave0[close])
-                    #0.5*(wave0[0]+wave0[-1]) #np.average(wave0)
+                # Check that lines are within range
+                in_rge = np.where((wave0 >= x_min) & (wave0 <= x_max))[0]
+                wave0 = wave0[in_rge]
+                t_str = t_str[nonzero[in_rge]]
 
-                    i_ax = [xx for xx in range(nrows) if
-                            (w_cen >= xlim_arr[xx][0] and w_cen <= xlim_arr[xx][1])][0]
-                    ax[i_ax].annotate(str_comb, [w_cen/1e4, y_max*0.99], ha='center',
-                                      va='top', rotation=90, fontsize=4, bbox=bbox_props)
-                    skip[close] = 1
-                #endif
-            #endfor
+                rev_lines += wave0.tolist()
+                rev_int   += t_str.tolist()
+
+                wave0 = np.array(wave0)
+                # Label lines
+                skip = np.zeros(len(wave0))
+                for ww in range(len(wave0)):
+                    if skip[ww] == 0:
+                        w_diff = wave0[ww:]-wave0[ww]
+                        t_close = np.where(w_diff <= 5)[0]
+                        close = np.arange(ww,len(wave0))[t_close]
+                        str_comb = "\n".join(['%.2f' % val for
+                                              val in wave0[close]])
+                        w_cen = np.average(wave0[close])
+                        #0.5*(wave0[0]+wave0[-1]) #np.average(wave0)
+
+                        i_ax = [xx for xx in range(nrows) if
+                                (w_cen >= xlim_arr[xx][0] and w_cen <= xlim_arr[xx][1])][0]
+                        ax[i_ax].annotate(str_comb, [w_cen/1e4, y_max*0.99], ha='center',
+                                          va='top', rotation=90, fontsize=4, bbox=bbox_props)
+                        skip[close] = 1
+                    #endif
+                #endfor
 
         # print '## t_mod : ', np.min(t_mod), np.max(t_mod)
 
