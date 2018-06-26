@@ -470,6 +470,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 25 June 2018
      - Check tell_comb files exist before extraction
      - Call iraf_get_subset.check_prefix to check for tfrbnc telluric files
+     - Call iraf_get_subset.check_prefix to check for tfrbnc science files
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -983,13 +984,20 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             else:
                 mylogger.warn('Telluric file does NOT exist : '+_list)
 
-        if not exists(obj_comb):
-            mylogger.info("Running nscombine on science data")
-            iraf.gnirs.nscombine(rawdir+'tfrbnc@'+obj_list, output=obj_comb,
-                                 fl_cross=yes, tolerance=0.1)
+        # Mod on 25/06/2018
+        do_run = iraf_get_subset.check_prefix('tfrbnc', _obj_list,
+                                              path=rawdir, prereq=True)
+        if not do_run:
+            log.warn('tfrbnc for science NOT available!!!')
+            log.warn('Execute reduce.run with skysub=1')
         else:
-            mylogger.warn('File exists : '+obj_comb+' !!!')
-            mylogger.warn('Will not run nscombine on tfrbnc science data')
+            if not exists(obj_comb):
+                mylogger.info("Running nscombine on science data")
+                iraf.gnirs.nscombine(rawdir+'tfrbnc@'+obj_list, output=obj_comb,
+                                     fl_cross=yes, tolerance=0.1)
+            else:
+                mylogger.warn('File exists : '+obj_comb+' !!!')
+                mylogger.warn('Will not run nscombine on tfrbnc science data')
 
     # Step 8: Extract 1-D spectra | + on 17/05/2017
     if extract:
