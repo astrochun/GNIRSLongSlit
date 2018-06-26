@@ -120,6 +120,8 @@ def main(rawdir, silent=False, verbose=True):
      - Switching back to uncompressed npz - Got interpret file pickle error (IOError)
     Modified by Chun Ly, 25 June 2018
      - Bug fix: Crash on call to group_OH_lines. Require in_zoom to not be empty array
+    Modified by Chun Ly, 25 June 2018
+     - Bug fix: Handle odd fit results (check wavelength within 5 Ang of guess)
     '''
     
     # + on 09/01/2018
@@ -236,6 +238,12 @@ def main(rawdir, silent=False, verbose=True):
             if len(group_lines) == 1:
                 popt, pcov = curve_fit(gauss1d, x0[zoom], OH_spec_mod[zoom],
                                        p0=p0)
+
+                if np.absolute(popt[2]-p0[2]) >= 5:
+                    mylogger.warn('Reliable fit not determined!')
+                    mylogger.warn('Using initial guess : %.3f' % group_lines[0])
+                    popt = list(p0)
+
                 t_mod = gauss1d(x0, *popt)
 
                 use_lines.append([popt[2]]) # + on 21/06/2018
