@@ -474,6 +474,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Call iraf_get_subset.check_prefix to check for rbnc telluric files
      - Call iraf_get_subset.check_prefix to check for frbnc telluric files
      - Call iraf_get_subset.check_prefix to check for rbnc science files
+    Modified by Chun Ly, 26 June 2018
+     - Fix mylogger.warn info
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -879,7 +881,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                                        path=rawdir, prereq=True)
                 if not do_run1:
                     log.warn('rbnc for telluric NOT available!!!')
-                    log.warn('Execute reduce.run with prepare=1')
+                    log.warn('Execute reduce.run with skysub=1')
                 else:
                     do_run = iraf_get_subset.check_prefix('frbnc', _list, path=rawdir,
                                                           mylogger=mylogger) # Mod on 18/12/2017
@@ -988,7 +990,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                                       path=rawdir, prereq=True)
                 if not do_run:
                     log.warn('tfrbnc for telluric NOT available!!!')
-                    log.warn('Execute reduce.run with skysub=1')
+                    log.warn('Execute reduce.run with fitcoords=1')
                 else:
                     if len(tell_full_list) > 1:
                         tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
@@ -1009,7 +1011,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                                               path=rawdir, prereq=True)
         if not do_run:
             log.warn('tfrbnc for science NOT available!!!')
-            log.warn('Execute reduce.run with skysub=1')
+            log.warn('Execute reduce.run with fitcoords=1')
         else:
             if not exists(obj_comb):
                 mylogger.info("Running nscombine on science data")
