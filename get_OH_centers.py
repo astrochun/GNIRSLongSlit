@@ -124,6 +124,7 @@ def main(rawdir, silent=False, verbose=True):
      - Bug fix: Handle odd fit results (check wavelength within 5 Ang of guess)
      - Bug fix: Add try/except for curve_fit RuntimeError
      - Bug fix: tab fix
+     - Bug fix: Add try/except for curve_fit RuntimeError for gauss_multi
     '''
     
     # + on 09/01/2018
@@ -267,7 +268,13 @@ def main(rawdir, silent=False, verbose=True):
                     #            tuple([0] * n_multi)
                 #up_bound  = tuple(p0[0:n_multi]*1.25+0.1) + tuple(p0[n_multi:2*n_multi]+0.5) + \
                     #            tuple(p0[2*n_multi:]+1)
-                popt, pcov = curve_fit(gauss_multi, x0[zoom], OH_spec_mod[zoom], p0=p0)
+                try:
+                    popt, pcov = curve_fit(gauss_multi, x0[zoom], OH_spec_mod[zoom], p0=p0)
+                except RuntimeError:
+                    mylogger.warn('Did not converge!')
+                    mylogger.warn('Using initial guesses')
+                    popt = list(p0)
+
                 t_mod = gauss_multi(x0, *popt)
 
                 t_loc = popt[n_multi:2*n_multi] # Line wavelengths (Ang)
