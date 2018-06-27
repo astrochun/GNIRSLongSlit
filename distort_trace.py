@@ -55,6 +55,7 @@ def main(rawdir, silent=False, verbose=True):
      - Write multi-page PDF file
      - Remove center value for middle of spectra
      - Plot offsets
+     - Bug fix for curve_fit (use bb_med0); plot aesthetics (legend)
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -83,6 +84,7 @@ def main(rawdir, silent=False, verbose=True):
                 hdr0      = fits.getheader(files[0], extname='SCI')
                 n_bins    = np.int(np.ceil(np.float(hdr0['NAXIS2']))/bin_size)
                 trace_arr = np.zeros((n_files,n_bins))
+                xcen_arr = np.zeros(n_files)
 
                 y0 = bin_size/2.0 + bin_size * np.arange(n_bins)
 
@@ -99,7 +101,7 @@ def main(rawdir, silent=False, verbose=True):
                         x0_max, y0_max = np.argmax(bb_med0), np.max(bb_med0)
                         p0 = [0.0, y0_max, x0_max, 2.0]
                         try:
-                            popt, pcov = curve_fit(gauss1d, x0_bb, med0, p0=p0)
+                            popt, pcov = curve_fit(gauss1d, x0_bb, bb_med0, p0=p0)
                             x_cen = popt[2]
                         except RuntimeError:
                             print 'Runtime error'
@@ -107,8 +109,8 @@ def main(rawdir, silent=False, verbose=True):
                         trace_arr[ff,bb] = x_cen
                     #endfor
                     x_cen_middle = trace_arr[ff,n_bins/2]
-                    print ff, x_cen_middle
-                    trace_arr[ff,:] -= x_cen_middle
+                    xcen_arr[ff] = x_cen_middle
+                    trace_arr[ff] -= x_cen_middle
                 #endfor
             else:
                 mylogger.warn('Files not found !')
@@ -117,8 +119,10 @@ def main(rawdir, silent=False, verbose=True):
         if n_files > 0:
             fig, ax = plt.subplots()
             for ff in range(n_files):
-                ax.scatter(trace_arr[ff,:], y0) #, 'ko')
+                ax.scatter(trace_arr[ff,:], y0, marker='o',
+                           label='%.1f' % xcen_arr[ff])
 
+            ax.legend(loc='lower right')
             fig.set_size_inches(8,8)
             fig.savefig(pp, format='pdf')
     #endfor
