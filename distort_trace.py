@@ -30,6 +30,34 @@ import dir_check
 from IQ_plot import gauss1d
 import glog
 
+def group(x_cen):
+    ctype = [''] * len(x_cen)
+    mtype = [''] * len(x_cen)
+
+    x_cen_s  = np.sort(x_cen)
+    x_cen_si = np.argsort(x_cen)
+
+    ctype0 = ['b','r','g','m','k']
+    mtype0 = ['o','s','x','D']
+
+    cnt0, cnt1 = 0, 0
+    for ii in range(len(x_cen_s)):
+        in_rge = [xx for xx in range(len(x_cen)) if \
+                  (np.absolute(x_cen[xx] - x_cen_s[ii]) <= 1) and
+                  (ctype[xx] == '')]
+        #in_rge = np.where((np.absolute(x_cen - x_cen_s[ii]) <= 1) &
+        #                  (ctype == ''))[0]
+        if len(in_rge) > 0:
+            idx = cnt0 % len(ctype0)
+            for jj in in_rge:
+                ctype[jj] = ctype0[idx]
+                mtype[jj] = mtype0[cnt1]
+            print ii, idx, cnt0, cnt1, x_cen_s[ii], in_rge
+            cnt0 += 1
+            if idx == 4: cnt1 += 1
+
+    return ctype, mtype
+
 def main(rawdir, silent=False, verbose=True):
 
     '''
@@ -119,6 +147,7 @@ def main(rawdir, silent=False, verbose=True):
 
         if n_files > 0:
             fig, ax = plt.subplots()
+
             for ff in range(n_files):
                 ax.scatter(trace_arr[ff,:], y0, marker='o',
                            label='%.1f' % xcen_arr[ff])
