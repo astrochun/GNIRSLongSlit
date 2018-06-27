@@ -52,7 +52,6 @@ def group(x_cen):
             for jj in in_rge:
                 ctype[jj] = ctype0[idx]
                 mtype[jj] = mtype0[cnt1]
-            print ii, idx, cnt0, cnt1, x_cen_s[ii], in_rge
             cnt0 += 1
             if idx == 4: cnt1 += 1
 
@@ -85,6 +84,7 @@ def main(rawdir, silent=False, verbose=True):
      - Plot offsets
      - Bug fix for curve_fit (use bb_med0); plot aesthetics (legend)
      - Plot aesthetics (axes labeling), margin adjustments
+     - Call group() to get matplotlib markers and colors
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -148,8 +148,11 @@ def main(rawdir, silent=False, verbose=True):
         if n_files > 0:
             fig, ax = plt.subplots()
 
+            ctype, mtype = group(xcen_arr)
+
             for ff in range(n_files):
-                ax.scatter(trace_arr[ff,:], y0, marker='o',
+                ax.scatter(trace_arr[ff,:], y0, marker=mtype[ff], alpha=0.5,
+                           edgecolor=ctype[ff], facecolor='none',
                            label='%.1f' % xcen_arr[ff])
 
             ax.legend(loc='lower right')
