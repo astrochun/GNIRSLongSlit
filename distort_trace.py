@@ -56,6 +56,7 @@ def main(rawdir, silent=False, verbose=True):
      - Remove center value for middle of spectra
      - Plot offsets
      - Bug fix for curve_fit (use bb_med0); plot aesthetics (legend)
+     - Plot aesthetics (axes labeling), margin adjustments
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -123,7 +124,13 @@ def main(rawdir, silent=False, verbose=True):
                            label='%.1f' % xcen_arr[ff])
 
             ax.legend(loc='lower right')
+
+            ax.set_ylabel('Y [pixels]', fontsize=14)
+            ax.set_xlabel('X relative to center [pixels]', fontsize=14)
+            ax.minorticks_on()
+
             fig.set_size_inches(8,8)
+            plt.subplots_adjust(left=0.1, right=0.98, bottom=0.07, top=0.98)
             fig.savefig(pp, format='pdf')
     #endfor
 
