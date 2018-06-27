@@ -31,8 +31,9 @@ from IQ_plot import gauss1d
 import glog
 
 def group(x_cen):
-    ctype = [''] * len(x_cen)
-    mtype = [''] * len(x_cen)
+    ctype  = [''] * len(x_cen)
+    mtype  = [''] * len(x_cen)
+    labels = [''] * len(x_cen)
 
     x_cen_s  = np.sort(x_cen)
     x_cen_si = np.argsort(x_cen)
@@ -42,9 +43,9 @@ def group(x_cen):
 
     cnt0, cnt1 = 0, 0
     for ii in range(len(x_cen_s)):
-        in_rge = [xx for xx in range(len(x_cen)) if \
-                  (np.absolute(x_cen[xx] - x_cen_s[ii]) <= 1) and
-                  (ctype[xx] == '')]
+        in_rge = np.array([xx for xx in range(len(x_cen)) if \
+                           (np.absolute(x_cen[xx] - x_cen_s[ii]) <= 1) and
+                           (ctype[xx] == '')])
         #in_rge = np.where((np.absolute(x_cen - x_cen_s[ii]) <= 1) &
         #                  (ctype == ''))[0]
         if len(in_rge) > 0:
@@ -54,8 +55,12 @@ def group(x_cen):
                 mtype[jj] = mtype0[cnt1]
             cnt0 += 1
             if idx == 4: cnt1 += 1
-
-    return ctype, mtype
+            t_val = x_cen[in_rge]
+            if len(in_rge) == 1:
+                labels[in_rge[0]] = '%.2f' % t_val[0]
+            else:
+                labels[in_rge[0]] = '%.2f-%.2f' % (min(t_val), max(t_val))
+    return ctype, mtype, labels
 
 def main(rawdir, silent=False, verbose=True):
 
@@ -148,12 +153,12 @@ def main(rawdir, silent=False, verbose=True):
         if n_files > 0:
             fig, ax = plt.subplots()
 
-            ctype, mtype = group(xcen_arr)
+            ctype, mtype, labels = group(xcen_arr)
 
             for ff in range(n_files):
                 ax.scatter(trace_arr[ff,:], y0, marker=mtype[ff], alpha=0.5,
                            edgecolor=ctype[ff], facecolor='none',
-                           label='%.1f' % xcen_arr[ff])
+                           label=labels[ff])
 
             ax.legend(loc='lower right')
 
