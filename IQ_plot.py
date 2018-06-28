@@ -73,6 +73,8 @@ def compute_fwhm(im0, mylogger=None):
      - Handle RuntimeError with curve_fit
     Modified by Chun Ly, 18 December 2017
      - Implement glog logging, allow mylogger keyword input
+    Modified by Chun Ly, 28 June 2018
+     - Bug fix for RunetimeError exception: set popt
     '''
 
     # + on 18/12/2017
@@ -112,7 +114,9 @@ def compute_fwhm(im0, mylogger=None):
             fwhm0[bb] = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
         except RuntimeError:
             clog.warn('Optimal parameters not found from curve_fit, %i !!' % bb)
-            fwhm0[bb] = np.nan
+            fwhm0[bb] = fwhm0[bb-1]
+            popt = np.array(p0)
+            popt[-1] = fwhm0[bb]
 
         # Later + on 10/03/2017
         x_shift = x - popt[2]
