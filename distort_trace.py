@@ -91,6 +91,7 @@ def main(rawdir, silent=False, verbose=True):
      - Plot aesthetics (axes labeling), margin adjustments
      - Call group() to get matplotlib markers and colors
      - Write npz file using np.savez and np.load when available
+     - Do linear regression fit and save to npz file
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -119,7 +120,9 @@ def main(rawdir, silent=False, verbose=True):
                 hdr0      = fits.getheader(files[0], extname='SCI')
                 n_bins    = np.int(np.ceil(np.float(hdr0['NAXIS2']))/bin_size)
                 trace_arr = np.zeros((n_files,n_bins))
-                xcen_arr = np.zeros(n_files)
+                xcen_arr  = np.zeros(n_files)
+
+                fit_arr   = np.zeros((n_files,2))
 
                 y0 = bin_size/2.0 + bin_size * np.arange(n_bins)
 
@@ -146,11 +149,14 @@ def main(rawdir, silent=False, verbose=True):
                     x_cen_middle = trace_arr[ff,n_bins/2]
                     xcen_arr[ff] = x_cen_middle
                     trace_arr[ff] -= x_cen_middle
+
+                    fit = np.polyfit(y0, trace_arr[ff], 1)
+                    fit_arr[ff] = fit[0]
                 #endfor
 
                 mylogger.info('Writing : '+npz_file)
                 np.savez(npz_file, trace_arr=trace_arr, xcen_arr=xcen_arr,
-                         y0=y0)
+                         fit_arr=fit_arr, y0=y0)
             else:
                 mylogger.warn('Files not found !')
         else:
@@ -159,7 +165,8 @@ def main(rawdir, silent=False, verbose=True):
             trace_arr = npz['trace_arr']
             xcen_arr  = npz['xcen_arr']
             y0        = npz['y0']
-            n_files = len(xcen_arr)
+            fit_arr   = npz['fit_arr']
+            n_files   = len(xcen_arr)
 
         if n_files > 0:
             fig, ax = plt.subplots()
