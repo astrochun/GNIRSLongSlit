@@ -297,8 +297,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                     popt, pcov = curve_fit(gauss1d, x0_avg, avg_stack, p0=p0)
                     fit_good = 1
                 except ValueError:
-                    print len(np.where(np.isnan(x0_avg))[])
-                    print len(np.where(np.isnan(avg_stack))[])
+                    print len(np.where(np.isnan(x0_avg))[0])
+                    print len(np.where(np.isnan(avg_stack))[0])
                     fit_good = 0
 
                 if fit_good:
