@@ -90,6 +90,7 @@ def main(rawdir, silent=False, verbose=True):
      - Bug fix for curve_fit (use bb_med0); plot aesthetics (legend)
      - Plot aesthetics (axes labeling), margin adjustments
      - Call group() to get matplotlib markers and colors
+     - Write npz file using np.savez and np.load when available
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -146,9 +147,19 @@ def main(rawdir, silent=False, verbose=True):
                     xcen_arr[ff] = x_cen_middle
                     trace_arr[ff] -= x_cen_middle
                 #endfor
+
+                mylogger.info('Writing : '+npz_file)
+                np.savez(npz_file, trace_arr=trace_arr, xcen_arr=xcen_arr,
+                         y0=y0)
             else:
                 mylogger.warn('Files not found !')
-        #endif
+        else:
+            mylogger.info('Reading : '+npz_file)
+            npz = np.load(npz_file)
+            trace_arr = npz['trace_arr']
+            xcen_arr  = npz['xcen_arr']
+            y0        = npz['y0']
+            n_files = len(xcen_arr)
 
         if n_files > 0:
             fig, ax = plt.subplots()
@@ -164,6 +175,7 @@ def main(rawdir, silent=False, verbose=True):
 
             ax.set_ylabel('Y [pixels]', fontsize=14)
             ax.set_xlabel('X relative to center [pixels]', fontsize=14)
+            fig.suptitle(path)
             ax.minorticks_on()
 
             fig.set_size_inches(8,8)
