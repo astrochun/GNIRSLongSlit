@@ -195,6 +195,8 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Handle case with extra plot window (cont'd)
     Modified by Chun Ly, 19 May 2018
      - Include QA (PASS/USABLE/FAIL) info in table
+    Modified by Chun Ly, 28 June 2018
+     - Bug troubleshooting with ValueError
     '''
 
     # + on 18/12/2017
@@ -291,16 +293,24 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                 axi.tick_params(labelsize=8)
                 axi.minorticks_on()
                 p0 = [0.0, 1.0, 0.0, 2.0]
-                popt, pcov = curve_fit(gauss1d, x0_avg, avg_stack, p0=p0)
-                avg_fwhm0  = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
-                avg_fwhm_Z = avg_fwhm0 / airmass**0.6 # + on 18/04/2018
+                try:
+                    popt, pcov = curve_fit(gauss1d, x0_avg, avg_stack, p0=p0)
+                    fit_good = 1
+                except ValueError:
+                    print len(np.where(np.isnan(x0_avg))[])
+                    print len(np.where(np.isnan(avg_stack))[])
+                    fit_good = 0
 
-                axi.plot(x0_avg*pscale, gauss1d(x0_avg, *popt), 'r--')
-                axi.annotate('FWHM = %.3f" (%.3f")' % (avg_fwhm0, avg_fwhm_Z),
-                             [0.50,0.025], xycoords='axes fraction', ha='center',
-                             va='bottom', fontsize=8)
-                ax0[row].axhline(y=avg_fwhm0, linewidth=2, color='r',
-                                 linestyle='--', zorder=1)
+                if fit_good:
+                    avg_fwhm0  = popt[3]*2*np.sqrt(2*np.log(2)) * pscale
+                    avg_fwhm_Z = avg_fwhm0 / airmass**0.6 # + on 18/04/2018
+
+                    axi.plot(x0_avg*pscale, gauss1d(x0_avg, *popt), 'r--')
+                    axi.annotate('FWHM = %.3f" (%.3f")' % (avg_fwhm0, avg_fwhm_Z),
+                                 [0.50,0.025], xycoords='axes fraction', ha='center',
+                                 va='bottom', fontsize=8)
+                    ax0[row].axhline(y=avg_fwhm0, linewidth=2, color='r',
+                                     linestyle='--', zorder=1)
 
                 # Median FWHM | Later + on 10/03/2017
                 med_fwhm0 = np.median(fwhm0[good])
