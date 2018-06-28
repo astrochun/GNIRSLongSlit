@@ -197,6 +197,7 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
      - Include QA (PASS/USABLE/FAIL) info in table
     Modified by Chun Ly, 28 June 2018
      - Bug troubleshooting with ValueError
+     - Handle ValueError for avg FWHM
     '''
 
     # + on 18/12/2017
@@ -364,13 +365,14 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                             FWHM_med_QA[nn] = 'FAIL' # + on 19/05/2018
 
                     # + on 19/05/2018
-                    if avg_fwhm_Z <= FWHM_IQ_J[i_raw]:
-                        FWHM_avg_QA[nn] = 'PASS'
-                    else:
-                        if avg_fwhm_Z <= FWHM_IQ_J[i_raw]*1.25:
-                            FWHM_avg_QA[nn] = 'USABLE'
-                        if avg_fwhm_Z > FWHM_IQ_J[i_raw]*1.25:
-                            FWHM_avg_QA[nn] = 'FAIL'
+                    if fit_good:
+                        if avg_fwhm_Z <= FWHM_IQ_J[i_raw]:
+                            FWHM_avg_QA[nn] = 'PASS'
+                        else:
+                            if avg_fwhm_Z <= FWHM_IQ_J[i_raw]*1.25:
+                                FWHM_avg_QA[nn] = 'USABLE'
+                            if avg_fwhm_Z > FWHM_IQ_J[i_raw]*1.25:
+                                FWHM_avg_QA[nn] = 'FAIL'
 
                     ax0[row].annotate(txt0, [0.975,0.05], ha='right',
                                       xycoords='axes fraction', va='bottom')
@@ -397,8 +399,9 @@ def main(path0='', out_pdf='', check_quality=True, skysub=False, silent=False,
                     fig.savefig(pp, format='pdf')
 
                 # + on 14/05/2018
-                FWHM_avg_arr[nn]   = avg_fwhm0
-                FWHM_avg_arr_Z[nn] = avg_fwhm_Z
+                if fit_good:
+                    FWHM_avg_arr[nn]   = avg_fwhm0
+                    FWHM_avg_arr_Z[nn] = avg_fwhm_Z
                 FWHM_med_arr[nn]   = med_fwhm0
                 FWHM_med_arr_Z[nn] = med_fwhm0_Z
             #endfor
