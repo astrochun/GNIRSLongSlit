@@ -139,6 +139,8 @@ def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi, mylogger
      - Fix ValueError with interp1d
     Modified by Chun Ly, 20 April 2018
      - Implement glog logging, allow mylogger keyword input
+    Modified by Chun Ly, 28 June 2018
+     - try/except for RuntimeError for curve_fit
     '''
 
     # + on 20/04/2018
@@ -168,27 +170,34 @@ def gauss2d_fit(im0, hdr0, t_ax, c_slit_x0, c_slit_y0_lo, c_slit_y0_hi, mylogger
         bounds = ((     0, -x_sz0, -y_sz0,    0,    0,       0, 0),
                   (np.inf,  x_sz0,  y_sz0, 10.0, 10.0, 2*np.pi, np.inf))
 
-        popt, pcov = opt.curve_fit(gauss2d, (gx, gy), im0_re, ini_guess,
-                                   bounds=bounds)
+        try:
+            popt, pcov = opt.curve_fit(gauss2d, (gx, gy), im0_re, ini_guess,
+                                       bounds=bounds)
+            fit_good = 1
+        except RuntimeError:
+            mylogger.warn('Solution not found with curve_fit!')
+            fit_good = 0
+            str0 = 'Source unavailable'
 
-        FWHMx = popt[3] * f_s * pscale
-        FWHMy = popt[4] * f_s * pscale
+        if fit_good:
+            FWHMx = popt[3] * f_s * pscale
+            FWHMy = popt[4] * f_s * pscale
 
-        # Determine how off from slit center | + on 06/04/2017
-        # Mod on 03/07/2017 to handle ValueError problem
-        f_lo = interp1d(c_slit_x0, c_slit_y0_lo, bounds_error=False)
-        f_hi = interp1d(c_slit_x0, c_slit_y0_hi, bounds_error=False)
+            # Determine how off from slit center | + on 06/04/2017
+            # Mod on 03/07/2017 to handle ValueError problem
+            f_lo = interp1d(c_slit_x0, c_slit_y0_lo, bounds_error=False)
+            f_hi = interp1d(c_slit_x0, c_slit_y0_hi, bounds_error=False)
 
-        s_lo = f_lo(popt[1])-y_sz0
-        s_hi = f_hi(popt[1])-y_sz0
-        slit_off = (popt[2] - (s_lo+s_hi)/2.0) * pscale
+            s_lo = f_lo(popt[1])-y_sz0
+            s_hi = f_hi(popt[1])-y_sz0
+            slit_off = (popt[2] - (s_lo+s_hi)/2.0) * pscale
 
-        clog.info('## slit_off(arcsec) : %f' % slit_off) # Mod on 20/04/2018
-        str0  = 'Slit offset : %.2f"\n' % slit_off
+            clog.info('## slit_off(arcsec) : %f' % slit_off) # Mod on 20/04/2018
+            str0  = 'Slit offset : %.2f"\n' % slit_off
 
-        str0 += 'Centroid: x=%.2f"  y=%.2f"\n' % (popt[1]*pscale, popt[2]*pscale)
-        str0 += 'FWHM: x=%.2f"  y=%.2f"\n'   % (FWHMx, FWHMy)
-        str0 += r'$\theta$ = %.2f$^{\circ}$' % (popt[5]*180.0/np.pi)
+            str0 += 'Centroid: x=%.2f"  y=%.2f"\n' % (popt[1]*pscale, popt[2]*pscale)
+            str0 += 'FWHM: x=%.2f"  y=%.2f"\n'   % (FWHMx, FWHMy)
+            str0 += r'$\theta$ = %.2f$^{\circ}$' % (popt[5]*180.0/np.pi)
     else:
         str0 = 'FWHM: saturated'
 
