@@ -96,6 +96,8 @@ def main(rawdir, silent=False, verbose=True):
      - Do linear regression fit and save to npz file
     Modified by Chun Ly, 28 June 2018
      - Change linear regression to 2nd order, plot fit
+    Modified by Chun Ly, 29 June 2018
+     - Write PDF file in each datedir
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -110,9 +112,8 @@ def main(rawdir, silent=False, verbose=True):
     dir_list, list_path = dir_check.main(rawdir, mylogger=mylogger,
                                          silent=silent, verbose=verbose)
 
-    out_pdf = rawdir+'distort_trace.pdf'
-    pp = PdfPages(out_pdf)
     for path in list_path:
+        out_pdf = path+'distort_trace.pdf'
         npz_file = path+'distort_trace.npz'
 
         if not exists(npz_file):
@@ -195,10 +196,10 @@ def main(rawdir, silent=False, verbose=True):
 
             fig.set_size_inches(8,8)
             plt.subplots_adjust(left=0.1, right=0.98, bottom=0.07, top=0.98)
-            fig.savefig(pp, format='pdf')
+            mylogger.info('Writing : '+out_pdf)
+            fig.savefig(out_pdf, format='pdf')
     #endfor
 
-    pp.close()
     if silent == False: mylogger.info('### End main ! ')
 #enddef
 
