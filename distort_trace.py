@@ -276,6 +276,16 @@ def create_distort_grid():
             ax[1].scatter(xcen_arr, fit_arr[:,1], marker='o', color='k')
             ax[2].scatter(xcen_arr, fit_arr[:,0], marker='o', color='k')
 
+    ax[0].set_ylabel([-10,0])
+    ax[1].set_ylabel([-0.1,0.1])
+    ax[2].set_ylabel([-0.1,0.1])
+
+    ax[0].set_xticklabels([])
+    ax[1].set_xticklabels([])
+
+    ax[2].set_xlabel('X [pix]')
+    plt.subplots_adjust(left=0.1, right=0.99, top=0.99, bottom=0.1)
+
     out_pdf = path0+'distort_grid.pdf'
     log.info('Writing : '+out_pdf)
     fig.savefig(out_pdf)
