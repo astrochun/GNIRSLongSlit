@@ -92,6 +92,8 @@ def main(rawdir, silent=False, verbose=True):
      - Call group() to get matplotlib markers and colors
      - Write npz file using np.savez and np.load when available
      - Do linear regression fit and save to npz file
+    Modified by Chun Ly, 28 June 2018
+     - Change linear regression to 2nd order, plot fit
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -122,7 +124,7 @@ def main(rawdir, silent=False, verbose=True):
                 trace_arr = np.zeros((n_files,n_bins))
                 xcen_arr  = np.zeros(n_files)
 
-                fit_arr   = np.zeros((n_files,2))
+                fit_arr   = np.zeros((n_files,3))
 
                 y0 = bin_size/2.0 + bin_size * np.arange(n_bins)
 
@@ -150,8 +152,8 @@ def main(rawdir, silent=False, verbose=True):
                     xcen_arr[ff] = x_cen_middle
                     trace_arr[ff] -= x_cen_middle
 
-                    fit = np.polyfit(y0, trace_arr[ff], 1)
-                    fit_arr[ff] = fit[0]
+                    fit = np.polyfit(y0, trace_arr[ff], 2)
+                    fit_arr[ff] = fit
                 #endfor
 
                 mylogger.info('Writing : '+npz_file)
@@ -170,6 +172,7 @@ def main(rawdir, silent=False, verbose=True):
 
         if n_files > 0:
             fig, ax = plt.subplots()
+            xlim = [-10,10]
 
             ctype, mtype, labels = group(xcen_arr)
 
@@ -177,6 +180,9 @@ def main(rawdir, silent=False, verbose=True):
                 ax.scatter(trace_arr[ff,:], y0, marker=mtype[ff], alpha=0.5,
                            edgecolor=ctype[ff], facecolor='none',
                            label=labels[ff])
+
+                pd = np.poly1d(fit_arr[ff])
+                ax.plot(pd(y0), y0, color=ctype[ff], linewidth=0.75, alpha=0.5)
 
             ax.legend(loc='lower right')
 
