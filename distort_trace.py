@@ -98,6 +98,7 @@ def main(rawdir, silent=False, verbose=True):
      - Change linear regression to 2nd order, plot fit
     Modified by Chun Ly, 29 June 2018
      - Write PDF file in each datedir
+     - Minor changes to mylogger calls
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -105,7 +106,7 @@ def main(rawdir, silent=False, verbose=True):
     logfile  = rawdir+'distort_trace.log'
     mylogger = glog.log0(logfile)._get_logger()
 
-    if silent == False: mylogger.info('### Begin main ! ')
+    if silent == False: mylogger.info('### Begin ! ')
 
     bin_size = 25
 
@@ -113,6 +114,7 @@ def main(rawdir, silent=False, verbose=True):
                                          silent=silent, verbose=verbose)
 
     for path in list_path:
+        mylogger.info('Working on : '+path.split('/')[-2])
         out_pdf = path+'distort_trace.pdf'
         npz_file = path+'distort_trace.npz'
 
@@ -200,7 +202,7 @@ def main(rawdir, silent=False, verbose=True):
             fig.savefig(out_pdf, format='pdf')
     #endfor
 
-    if silent == False: mylogger.info('### End main ! ')
+    if silent == False: mylogger.info('### End ! ')
 #enddef
 
 def zcalbase_gal_gemini_all():
