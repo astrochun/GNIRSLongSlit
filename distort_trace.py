@@ -229,6 +229,7 @@ def zcalbase_gal_gemini_all():
     targets0.sort()
 
     for target in targets0:
+        log.info('## Working on : '+target)
         t_path = path0 + target
         main(t_path)
 
