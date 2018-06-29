@@ -272,19 +272,28 @@ def create_distort_grid():
                 npz = np.load(n_file)
                 xcen_arr = npz['xcen_arr']
                 fit_arr  = npz['fit_arr']
-            ax[0].scatter(xcen_arr, fit_arr[:,2], marker='o', color='k')
-            ax[1].scatter(xcen_arr, fit_arr[:,1], marker='o', color='k')
-            ax[2].scatter(xcen_arr, fit_arr[:,0], marker='o', color='k')
+            ax[0].scatter(xcen_arr, fit_arr[:,2], marker='o', edgecolor='k',
+                          facecolor='none')
+            ax[1].scatter(xcen_arr, fit_arr[:,1], marker='o', edgecolor='k',
+                          facecolor='none')
+            ax[2].scatter(xcen_arr, fit_arr[:,0], marker='o', edgecolor='k',
+                          facecolor='none')
+
+    ax[0].annotate(r'x = A y$^2$ + B y + C', xy=(0.02,0.95), xycoords='axes fraction',
+                   ha='left', va='top')
+    ax[0].set_ylabel('C')
+    ax[1].set_ylabel('B')
+    ax[2].set_ylabel('A')
 
     ax[0].set_ylim([-10,0])
-    ax[1].set_ylim([-0.1,0.1])
-    ax[2].set_ylim([-0.1,0.1])
+    ax[1].set_ylim([-0.05,0.05])
+    ax[2].set_ylim([-0.01,0.01])
 
     ax[0].set_xticklabels([])
     ax[1].set_xticklabels([])
 
     ax[2].set_xlabel('X [pix]')
-    plt.subplots_adjust(left=0.1, right=0.99, top=0.99, bottom=0.1)
+    plt.subplots_adjust(left=0.15, right=0.99, top=0.99, bottom=0.1)
 
     out_pdf = path0+'distort_grid.pdf'
     log.info('Writing : '+out_pdf)
