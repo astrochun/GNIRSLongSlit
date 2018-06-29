@@ -234,3 +234,49 @@ def zcalbase_gal_gemini_all():
         main(t_path)
 
 #enddef
+
+def create_distort_grid():
+    '''
+    Create grid (and plot) of distortion for extraction
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Created by Chun Ly, 29 June 2018
+    '''
+
+    path0 = '/Users/cly/data/Observing/Gemini/Data/'
+
+    targets0 = gnirs_2017a + gnirs_2017b
+    targets0.sort()
+
+    fig, ax = plt.subplots(nrows=3)
+
+    for target in targets0:
+        log.info('Working on : '+target)
+
+        t_path = path0 + target
+        npz_files = glob(t_path+'/????/distort_trace.npz')
+
+        if len(npz_files) == 0:
+            log.warn('No files found!!!')
+        else:
+            for n_file in npz_files:
+                npz = np.load(n_file)
+                xcen_arr = npz['xcen_arr']
+                fit_arr  = npz['fit_arr']
+            ax[0].scatter(xcen_arr, fit_arr[:,2], marker='o', color='k')
+            ax[1].scatter(xcen_arr, fit_arr[:,1], marker='o', color='k')
+            ax[2].scatter(xcen_arr, fit_arr[:,0], marker='o', color='k')
+
+    out_pdf = path0+'distort_grid.pdf'
+    log.info('Writing : '+out_pdf)
+    fig.savefig(out_pdf)
+#enddef
