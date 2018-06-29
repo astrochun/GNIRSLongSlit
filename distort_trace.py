@@ -26,6 +26,8 @@ from scipy.optimize import curve_fit
 
 from matplotlib.backends.backend_pdf import PdfPages
 
+from . import gnirs_2017a, gnirs_2017b
+
 import dir_check
 from IQ_plot import gauss1d
 import glog
@@ -200,3 +202,31 @@ def main(rawdir, silent=False, verbose=True):
     if silent == False: mylogger.info('### End main ! ')
 #enddef
 
+def zcalbase_gal_gemini_all():
+    '''
+    Function to run main() to get spectral distortion corrections for
+    ALL GNIRS observations
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Created by Chun Ly, 28 June 2018
+    '''
+
+    path0 = '/Users/cly/data/Observing/Gemini/Data/'
+
+    targets0 = gnirs_2017a + gnirs_2017b
+    targets0.sort()
+
+    for target in targets0:
+        t_path = path0 + target
+        main(t_path)
+
+#enddef
