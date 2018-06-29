@@ -263,7 +263,7 @@ def create_distort_grid():
         log.info('Working on : '+target)
 
         t_path = path0 + target
-        npz_files = glob(t_path+'/????/distort_trace.npz')
+        npz_files = glob(t_path+'/????????/distort_trace.npz')
 
         if len(npz_files) == 0:
             log.warn('No files found!!!')
