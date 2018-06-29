@@ -276,9 +276,9 @@ def create_distort_grid():
             ax[1].scatter(xcen_arr, fit_arr[:,1], marker='o', color='k')
             ax[2].scatter(xcen_arr, fit_arr[:,0], marker='o', color='k')
 
-    ax[0].set_ylabel([-10,0])
-    ax[1].set_ylabel([-0.1,0.1])
-    ax[2].set_ylabel([-0.1,0.1])
+    ax[0].set_ylim([-10,0])
+    ax[1].set_ylim([-0.1,0.1])
+    ax[2].set_ylim([-0.1,0.1])
 
     ax[0].set_xticklabels([])
     ax[1].set_xticklabels([])
