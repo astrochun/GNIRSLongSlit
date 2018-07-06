@@ -238,8 +238,8 @@ def computeStatistics(rawdir, flat_files):
 
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0, skysub=0,
-        fitcoords=0, combine=0, extract=0, calib_line='OH', silent=False,
-        verbose=True):
+        fitcoords=0, combine=0, extract=0, tell_corr=0, calib_line='OH',
+        silent=False, verbose=True):
 
     '''
     Main function to run the IRAF Gemini reduction package on GNIRS data
@@ -477,6 +477,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 26 June 2018
      - Fix mylogger.warn info
      - Bug fix: typo
+    Modified by Chun Ly,  6 July 2018
+     - Add tell_corr keyword input
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -502,11 +504,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         mylogger.warn('fitcoords: nsfitcoords, nstransform on telluric and science data')
         mylogger.warn('combine  : nscombine telluric and science data')
         mylogger.warn('extract  : nsextract telluric data')
+        mylogger.warn('tell_corr : nstelluric on telluric and science data')
         return
     if do_all:
         prepare, do_flat, do_arcs = 1, 1, 1
         wave_cal, skysub = 1, 1
         extract, combine, fitcoords = 1, 1, 1
+        tell_corr = 1
 
     # + on 11/07/2017. Mod on 10/12/2017
     mylogger.info('prepare = %i  do_flat   = %i' % (prepare, do_flat))
@@ -515,6 +519,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     mylogger.info('combine = %i  extract   = %i' % (combine, extract))
     if fitcoords:
         mylogger.info('calib_line = %s' % (calib_line)) # + on 25/11/2017
+    mylogger.info('tell_corr = %i' % (tell_corr))
 
     cdir = os.getcwd()+'/' # + on 06/05/2017
 
