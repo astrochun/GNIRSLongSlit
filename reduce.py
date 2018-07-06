@@ -480,6 +480,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly,  6 July 2018
      - Add tell_corr keyword input
      - Call nstelluric
+     - Define and write input list for telluric corrections
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1067,15 +1068,43 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 tell_comb = tell_comb0
             xtell_comb = tell_comb.replace('tell','xtell')
 
+            if len(tell_full_list) > 1:
+                infiles = glob.glob(rawdir+'xtell_comb?.fits')
+            else:
+                infiles = [xtell_comb]
+
+            if exists(rawdir+'xobj_comb.fits'):
+                infiles += [rawdir+'xobj_comb.fits']
+            else:
+                log.warn('Extracted science data not found!')
+
+            if len(tell_full_list) > 1:
+                tell_infile  = rawdir+'nstelluric'+str(tt)+'.lis'
+            else:
+                tell_infile  = rawdir+'nstelluric.lis'
+            mylogger.info('Writing : '+tell_infile)
+            np.savetxt(tell_infile, infiles, fmt='%s')
+
+            if len(tell_full_list)>1:
+                outfiles = [str0.replace('.fits','.corr'+str(tt)+'.fits') for
+                            str0 in infiles]
+            else:
+                outfiles = [str0.replace('.fits','.corr.fits') for
+                            str0 in infiles]
+
+            tell_outfile = tell_infile.replace('.lis', '.out.lis')
+
+            mylogger.info('Writing : '+tell_outfile)
+            np.savetxt(tell_outfile, outfiles, fmt='%s')
+
             if not exists(xtell_comb): # + on 25/06/2018
                 log.warn('File does NOT exist : '+xtell_comb)
                 log.warn('Execute reduce.run with extract=1 !!!')
             else:
                 mylogger.info("Running nstelluric with : "+xtell_comb)
-                iraf.gnirs.nstelluric(inimages='@nstelluric.lis', cal=xtell_comb,
-                                      outspectra='@nstelluric.out.lis',
-                                      threshold=0.01, fl_inter=yes,
-                                      logfile=logfile)
+                iraf.gnirs.nstelluric(inimages='@'+tell_infile, cal=xtell_comb,
+                                      outspectra='@'+tell_outfile, fl_inter=yes,
+                                      threshold=0.01, logfile=logfile)
 
 
         iraf.chdir(cdir)
