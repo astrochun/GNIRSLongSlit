@@ -479,6 +479,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Bug fix: typo
     Modified by Chun Ly,  6 July 2018
      - Add tell_corr keyword input
+     - Call nstelluric
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1053,6 +1054,29 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                         mylogger.warn('Will not run nsextract on '+_list)
             else:
                 mylogger.warn('Telluric file does NOT exist : '+_list)
+
+        iraf.chdir(cdir)
+
+    # Step 9: Determine and apply telluric correction | + on 06/07/2018
+    if tell_corr:
+        iraf.chdir(rawdir)
+        for tt in range(len(tell_full_list)):
+            if len(tell_full_list)>1:
+                tell_comb = tell_comb0.replace('.fits', str(tt)+'.fits')
+            else:
+                tell_comb = tell_comb0
+            xtell_comb = tell_comb.replace('tell','xtell')
+
+            if not exists(xtell_comb): # + on 25/06/2018
+                log.warn('File does NOT exist : '+xtell_comb)
+                log.warn('Execute reduce.run with extract=1 !!!')
+            else:
+                mylogger.info("Running nstelluric with : "+xtell_comb)
+                iraf.gnirs.nstelluric(inimages='@nstelluric.lis', cal=xtell_comb,
+                                      outspectra='@nstelluric.out.lis',
+                                      threshold=0.01, fl_inter=yes,
+                                      logfile=logfile)
+
 
         iraf.chdir(cdir)
 
