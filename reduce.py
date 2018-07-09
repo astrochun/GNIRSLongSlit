@@ -481,6 +481,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Add tell_corr keyword input
      - Call nstelluric
      - Define and write input list for telluric corrections
+    Modified by Chun Ly,  9 July 2018
+     - Update tot0 to include tell_corr
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -493,7 +495,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
 
     # + on 16/05/2017
     tot0 = sum([do_all, prepare, do_flat, do_arcs, wave_cal, skysub,
-                fitcoords, combine, extract])
+                fitcoords, combine, extract, tell_corr])
     if tot0 == 0:
         # Mod on 10/12/2017
         mylogger.warn('No GNIRS functions are being called!!!')
