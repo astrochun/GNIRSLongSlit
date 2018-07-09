@@ -239,7 +239,7 @@ def computeStatistics(rawdir, flat_files):
 def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         do_all=0, prepare=0, do_flat=0, do_arcs=0, wave_cal=0, skysub=0,
         fitcoords=0, combine=0, extract=0, tell_corr=0, calib_line='OH',
-        silent=False, verbose=True):
+        interact=False, silent=False, verbose=True):
 
     '''
     Main function to run the IRAF Gemini reduction package on GNIRS data
@@ -252,6 +252,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     calib_line : str
       Indication for using OH sky lines or arc lines calibration
       Either 'OH' or 'arc'. Default: 'OH'
+
+    interact : boolean
+      Turn on interactive capability in combine step for cross-correlation
 
     silent : boolean
       Turns off stdout messages. Default: False
@@ -483,6 +486,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Define and write input list for telluric corrections
     Modified by Chun Ly,  9 July 2018
      - Update tot0 to include tell_corr
+     - Add interact keyword for interactive combine step
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1025,8 +1029,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
         else:
             if not exists(obj_comb):
                 mylogger.info("Running nscombine on science data")
+                fl_inter = no
+                if interact:
+                    log.warn('Will perform cross-correlation interactively')
+                    fl_inter = yes
+
                 iraf.gnirs.nscombine(rawdir+'tfrbnc@'+obj_list, output=obj_comb,
-                                     fl_cross=yes, tolerance=0.1)
+                                     fl_cross=yes, tolerance=0.1, fl_inter=fl_inter)
             else:
                 mylogger.warn('File exists : '+obj_comb+' !!!')
                 mylogger.warn('Will not run nscombine on tfrbnc science data')
