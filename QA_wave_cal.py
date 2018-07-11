@@ -344,6 +344,8 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
     Modified by Chun Ly, 31 May 2018
      - Add cross_check keyword; Update input/outputs for cross_check == True
      - Bug fix: n_obj for cross_check == True
+    Modified by Chun Ly, 10 July 2018
+     - Change OH skyline file to use the convolved one
     '''
 
     # + on 09/01/2018
@@ -353,7 +355,7 @@ def OH_check(path, objs='', out_pdf='', skysub=False, silent=False,
     if silent == False: mylogger.info('### Begin OH_check : '+systime())
 
     # + on 20/05/2017
-    OH_file = co_dirname+'/rousselot2000.dat'
+    OH_file = path+'rousselot2000_convl.dat'
     if exists(OH_file):
         if silent == False: mylogger.info('Reading : '+OH_file)
         OH_data  = np.loadtxt(OH_file)
