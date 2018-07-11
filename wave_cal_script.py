@@ -71,6 +71,8 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
      - Set fwidth in nswavelength call to depend on slitwidth
     Modified by Chun Ly, 21 June 2018
      - Include ending print statement
+    Modified by Chun Ly, 10 July 2018
+     - Modify threshold for OH lines from 50 to 25
     '''
 
     # Mod on 10/01/2018
@@ -134,17 +136,20 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
     if line_source == 'arc':
         coordlist = 'gnirs$data/argon.dat'
         database  = 'database/'
+        threshold = 50
     if line_source == 'OH':
         coordlist = rawdir+'rousselot2000_convl.dat'
         if not exists(coordlist):
             log.warn('File does not exists!!! : '+coordlist)
         database  = 'database_OH/'
+        threshold = 25
 
     # Mod on 08/11/2017
     line2 = ["coordlist = '%s'" % coordlist,
              "database  = '%s'" % database,
              "lampspec  = '%s_stack.fits'"  % line_source,
              "outspec   = 'w%s_stack.fits'" % line_source,
+             "threshold = %f" % threshold,
              "logfile   = '%s'" % logfile] # + on 16/11/2017
 
     f0.writelines("\n".join(line2)+"\n")
@@ -153,8 +158,8 @@ def main(rawdir, line_source='', mylogger=None, silent=False, verbose=True):
     cmd = "iraf.gnirs.nswavelength(lampspec, outprefix='',"+\
           "outspectra=outspec, crval=crval, cdelt=cdelt, crpix=crpix, "+\
           "coordlist=coordlist, database=database, fl_inter='yes', "+\
-          "function='legendre', cradius=20, threshold=50.0, fwidth=%.1f, " % fwidth +\
-          "order=3, logfile=logfile)"
+          "function='legendre', cradius=20, threshold=threshold, "+\
+          "fwidth=%.1f, " % fwidth +"order=3, logfile=logfile)"
 
     f0.write(cmd+'\n')
 
