@@ -42,6 +42,7 @@ import iraf_get_subset # + on 26/04/2017
 import QA_wave_cal     # + on 25/05/2017
 import OH_stack        # + on 13/07/2017
 import wave_cal_script # + on 12/11/2017
+import image_stats # + on 11/07/2018
 
 # + on 14/09/2017
 import remove_bias_level
@@ -487,6 +488,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly,  9 July 2018
      - Update tot0 to include tell_corr
      - Add interact keyword for interactive combine step
+    Modified by Chun Ly, 11 July 2018
+     - Call image_stats.main in combine step
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1039,6 +1042,9 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             else:
                 mylogger.warn('File exists : '+obj_comb+' !!!')
                 mylogger.warn('Will not run nscombine on tfrbnc science data')
+
+        # Look at image rms | + on 11/07/2018
+        image_stats.main(rawdir)
 
     # Step 8: Extract 1-D spectra | + on 17/05/2017
     if extract:
