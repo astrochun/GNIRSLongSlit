@@ -24,6 +24,8 @@ from astropy import log
 
 from scipy.optimize import curve_fit
 
+from astropy.stats import sigma_clipped_stats
+
 from matplotlib.backends.backend_pdf import PdfPages
 
 from . import gnirs_2017a, gnirs_2017b
@@ -99,6 +101,8 @@ def main(rawdir, silent=False, verbose=True):
     Modified by Chun Ly, 29 June 2018
      - Write PDF file in each datedir
      - Minor changes to mylogger calls
+    Modified by Chun Ly, 31 July 2018
+     - Use sigma_clipped_stats; Search for multiple peaks
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -136,7 +140,12 @@ def main(rawdir, silent=False, verbose=True):
                 for ff in range(n_files):
                     t_im = fits.getdata(files[ff], extname='SCI')
                     med0 = np.median(t_im, axis=0)
-                    
+
+                    # Find peaks | + on 31/07/2018
+                    t_mean, t_med, t_std = sigma_clipped_stats(med0, sigma=2,
+                                                               iters=20)
+                    idx_det = np.where((med0-t_med)/t_std >= 5)[0]
+
                     x0_max = np.argmax(med0)
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
