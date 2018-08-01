@@ -37,9 +37,17 @@ from IQ_plot import gauss1d
 import glog
 
 def group(x_cen):
-    ctype  = [''] * len(x_cen)
-    mtype  = [''] * len(x_cen)
-    labels = [''] * len(x_cen)
+    ctype  = [''] * x_cen.shape[-1]
+    mtype  = [''] * x_cen.shape[-1]
+    labels = [''] * x_cen.shape[-1]
+    if x_cen.shape[0] > 1:
+        ctype  = [ctype]
+        mtype  = [mtype]
+        labels = [labels]
+        for ii in range(1,x_cen.shape[0]):
+            ctype.append(['']  * x_cen.shape[-1])
+            mtype.append(['']  * x_cen.shape[-1])
+            labels.append([''] * x_cen.shape[-1])
 
     x_cen_s  = np.sort(x_cen)
     x_cen_si = np.argsort(x_cen)
@@ -169,6 +177,7 @@ def main(rawdir, silent=False, verbose=True):
                     list_peak = list(group_index(idx_det))
                     peak_idx  = [xx for xx in range(len(list_peak)) if
                                  list_peak[xx][1]-list_peak[xx][0] >= 5]
+
                     n_peaks = len(peak_idx)
                     mylogger.info('Number of peaks found : '+str(n_peaks))
 
