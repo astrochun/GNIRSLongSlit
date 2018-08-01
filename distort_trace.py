@@ -25,6 +25,8 @@ from astropy import log
 from scipy.optimize import curve_fit
 
 from astropy.stats import sigma_clipped_stats
+from astropy.convolution import convolve, Box1DKernel
+box_kernel = Box1DKernel(5)
 
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -103,6 +105,8 @@ def main(rawdir, silent=False, verbose=True):
      - Minor changes to mylogger calls
     Modified by Chun Ly, 31 July 2018
      - Use sigma_clipped_stats; Search for multiple peaks
+    Modified by Chun Ly,  1 August 2018
+     - Smooth median signal (boxcar); mask for peaks
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -142,11 +146,18 @@ def main(rawdir, silent=False, verbose=True):
                     med0 = np.median(t_im, axis=0)
 
                     # Find peaks | + on 31/07/2018
-                    t_mean, t_med, t_std = sigma_clipped_stats(med0, sigma=2,
-                                                               iters=20)
-                    idx_det = np.where((med0-t_med)/t_std >= 5)[0]
-
                     x0_max = np.argmax(med0)
+                    x0_min = np.argmin(med0)
+
+                    x0 = np.arange(med0.shape[0])
+                    idx_mask = np.where((np.absolute(x0-x0_max) >= 10) &
+                                        (np.absolute(x0-x0_min) >= 10))[0]
+                    sm_med0 = convolve(med0, box_kernel)
+
+                    t_mean, t_med, t_std = sigma_clipped_stats(sm_med0[idx_mask],
+                                                               sigma=2, iters=20)
+                    idx_det = np.where((sm_med0-t_med)/t_std >= 3)[0]
+
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
                         bb_med0 = np.median(t_im[ty1:ty2], axis=0)
