@@ -117,6 +117,7 @@ def main(rawdir, silent=False, verbose=True):
      - Use sigma_clipped_stats; Search for multiple peaks
     Modified by Chun Ly,  1 August 2018
      - Smooth median signal (boxcar); mask for peaks
+     - Call group_index(); Require at leat 5 pixels for peak identification
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -166,6 +167,11 @@ def main(rawdir, silent=False, verbose=True):
                     t_mean, t_med, t_std = sigma_clipped_stats(sm_med0[idx_mask],
                                                                sigma=2, iters=20)
                     idx_det = np.where((sm_med0-t_med)/t_std >= 3)[0]
+
+                    list_peak = list(group_index(idx_det))
+                    peak_idx  = [xx for xx in range(len(list_peak)) if
+                                 list_peak[xx][1]-list_peak[xx][0] >= 5]
+                    n_peaks = len(peak_idx)
 
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
