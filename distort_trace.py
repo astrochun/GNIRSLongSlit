@@ -127,6 +127,7 @@ def main(rawdir, silent=False, verbose=True):
      - Smooth median signal (boxcar); mask for peaks
      - Call group_index(); Require at leat 5 pixels for peak identification
      - Handle multiple peaks
+     - Compute number of peaks only once
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -178,12 +179,13 @@ def main(rawdir, silent=False, verbose=True):
                     peak_idx  = [xx for xx in range(len(list_peak)) if
                                  list_peak[xx][1]-list_peak[xx][0] >= 5]
 
-                    n_peaks = len(peak_idx)
-                    mylogger.info('Number of peaks found : '+str(n_peaks))
+                    if ff == 0:
+                        n_peaks = len(peak_idx)
+                        mylogger.info('Number of peaks found : '+str(n_peaks))
 
-                    trace_arr = np.zeros((n_peaks,n_files,n_bins))
-                    xcen_arr  = np.zeros((n_peaks,n_files))
-                    fit_arr   = np.zeros((n_peaks,n_files,3))
+                        trace_arr = np.zeros((n_peaks,n_files,n_bins))
+                        xcen_arr  = np.zeros((n_peaks,n_files))
+                        fit_arr   = np.zeros((n_peaks,n_files,3))
 
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
