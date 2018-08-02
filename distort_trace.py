@@ -69,6 +69,10 @@ def group(x_cen):
                 labels[in_rge[0]] = '%.2f' % t_val[0]
             else:
                 labels[in_rge[0]] = '%.2f-%.2f' % (min(t_val), max(t_val))
+
+    ctype  = np.array(ctype).reshape(x_cen.shape)
+    mtype  = np.array(mtype).reshape(x_cen.shape)
+    labels = np.array(mtype).reshape(x_cen.shape)
     return ctype, mtype, labels
 
 def group_index(L):
