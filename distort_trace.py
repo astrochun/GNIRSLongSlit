@@ -131,6 +131,7 @@ def main(rawdir, silent=False, verbose=True):
     Modified by Chun Ly,  1 August 2018
      - Use combine stack for peak identification (more sensitive)
      - Get quick peak centers from combine stack
+     - Use peak in med0 if no combine stack or telluric spec
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -202,8 +203,16 @@ def main(rawdir, silent=False, verbose=True):
                 fit_arr   = np.zeros((n_peaks,n_files,3))
 
                 for ff in range(n_files):
-                    t_im = fits.getdata(files[ff], extname='SCI')
+                    t_im, t_hdr = fits.getdata(files[ff], extname='SCI',
+                                               header=True)
                     med0 = np.median(t_im, axis=0)
+
+                    h_obj = t_hdr['OBJECT']
+                    if no_c_file or ('HIP' in h_obj or 'HD' in h_obj):
+                        x0_max = np.argmax(med0)
+                        n_peak = 1
+                    else:
+                        n_peak = n_peaks
 
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
