@@ -132,6 +132,7 @@ def main(rawdir, silent=False, verbose=True):
      - Use combine stack for peak identification (more sensitive)
      - Get quick peak centers from combine stack
      - Use peak in med0 if no combine stack or telluric spec
+     - Handle peak finding for both telluric and science data
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -207,12 +208,15 @@ def main(rawdir, silent=False, verbose=True):
                                                header=True)
                     med0 = np.median(t_im, axis=0)
 
+                    x0_max = np.argmax(med0)
+
                     h_obj = t_hdr['OBJECT']
                     if no_c_file or ('HIP' in h_obj or 'HD' in h_obj):
-                        x0_max = np.argmax(med0)
-                        n_peak = 1
+                        n_peak, use_peak = 1, 1
                     else:
-                        n_peak = n_peaks
+                        n_peak, use_peak = n_peaks, 0
+
+                        x0_diff = list_peak[0][0] - x0_max
 
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
@@ -220,10 +224,16 @@ def main(rawdir, silent=False, verbose=True):
                         if bb == 0:
                             x0_bb = np.arange(len(bb_med0))
 
-                        for pp,idx in zip(range(n_peaks),peak_idx):
-                            p_idx  = np.arange(list_peak[idx][0],list_peak[idx][1])
-                            p_med0 = bb_med0[p_idx]
-                            x0_max, y0_max = np.argmax(p_med0), np.max(p_med0)
+                        for pp in range(n_peak):
+                            if use_peak == 1:
+                                x0_max, y0_max = np.argmax(bb_med0), np.max(bb_med0)
+                            else:
+                                x0_max = np.argmax(bb_med0)
+
+                                p_idx = np.arange(list_peak[pp][0]-x0_diff,
+                                                  list_peak[pp][1]-x0_diff)
+                                p_med0 = bb_med0[p_idx]
+                                x0_max, y0_max = p_idx[0]+np.argmax(p_med0), np.max(p_med0)
                             p0 = [0.0, y0_max, x0_max, 2.0]
                             try:
                                 popt, pcov = curve_fit(gauss1d, x0_bb, bb_med0, p0=p0)
