@@ -37,28 +37,23 @@ from IQ_plot import gauss1d
 import glog
 
 def group(x_cen):
-    ctype  = [''] * x_cen.shape[-1]
-    mtype  = [''] * x_cen.shape[-1]
-    labels = [''] * x_cen.shape[-1]
-    if x_cen.shape[0] > 1:
-        ctype  = [ctype]
-        mtype  = [mtype]
-        labels = [labels]
-        for ii in range(1,x_cen.shape[0]):
-            ctype.append(['']  * x_cen.shape[-1])
-            mtype.append(['']  * x_cen.shape[-1])
-            labels.append([''] * x_cen.shape[-1])
+    t_x_cen = x_cen[np.where(x_cen != 0)] # Exclude those without peaks
 
-    x_cen_s  = np.sort(x_cen)
-    x_cen_si = np.argsort(x_cen)
+    ctype  = [''] * x_cen.size #shape[-1]
+    mtype  = [''] * x_cen.size #shape[-1]
+    labels = [''] * x_cen.size #shape[-1]
+
+    x_cen_s  = np.sort(t_x_cen)
+    x_cen_si = np.argsort(t_x_cen)
 
     ctype0 = ['b','r','g','m','k']
     mtype0 = ['o','s','x','D']
 
+    x_cen_resize = x_cen.reshape(x_cen.size)
     cnt0, cnt1 = 0, 0
     for ii in range(len(x_cen_s)):
-        in_rge = np.array([xx for xx in range(len(x_cen)) if \
-                           (np.absolute(x_cen[xx] - x_cen_s[ii]) <= 1) and
+        in_rge = np.array([xx for xx in range(x_cen.size) if \
+                           (np.absolute(x_cen_resize[xx] - x_cen_s[ii]) <= 1) and
                            (ctype[xx] == '')])
         #in_rge = np.where((np.absolute(x_cen - x_cen_s[ii]) <= 1) &
         #                  (ctype == ''))[0]
@@ -69,7 +64,7 @@ def group(x_cen):
                 mtype[jj] = mtype0[cnt1]
             cnt0 += 1
             if idx == 4: cnt1 += 1
-            t_val = x_cen[in_rge]
+            t_val = x_cen_resize[in_rge]
             if len(in_rge) == 1:
                 labels[in_rge[0]] = '%.2f' % t_val[0]
             else:
