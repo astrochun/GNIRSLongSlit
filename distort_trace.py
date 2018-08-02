@@ -72,7 +72,7 @@ def group(x_cen):
 
     ctype  = np.array(ctype).reshape(x_cen.shape)
     mtype  = np.array(mtype).reshape(x_cen.shape)
-    labels = np.array(mtype).reshape(x_cen.shape)
+    labels = np.array(labels).reshape(x_cen.shape)
     return ctype, mtype, labels
 
 def group_index(L):
@@ -132,6 +132,7 @@ def main(rawdir, silent=False, verbose=True):
      - Get quick peak centers from combine stack
      - Use peak in med0 if no combine stack or telluric spec
      - Handle peak finding for both telluric and science data
+     - Handle multiple peaks in plotting
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -267,6 +268,7 @@ def main(rawdir, silent=False, verbose=True):
             y0        = npz['y0']
             fit_arr   = npz['fit_arr']
             n_files   = len(xcen_arr)
+            n_peaks   = xcen_arr.shape[0]
 
         if n_files > 0:
             fig, ax = plt.subplots()
@@ -274,13 +276,15 @@ def main(rawdir, silent=False, verbose=True):
 
             ctype, mtype, labels = group(xcen_arr)
 
-            for ff in range(n_files):
-                ax.scatter(trace_arr[ff,:], y0, marker=mtype[ff], alpha=0.5,
-                           edgecolor=ctype[ff], facecolor='none',
-                           label=labels[ff])
+            for pp in range(n_peaks):
+                for ff in range(n_files):
+                    if labels[pp,ff] != 0:
+                        ax.scatter(trace_arr[pp,ff,:], y0, marker=mtype[pp,ff],
+                                   alpha=0.5, edgecolor=ctype[pp,ff],
+                                   facecolor='none', label=labels[pp,ff])
 
-                pd = np.poly1d(fit_arr[ff])
-                ax.plot(pd(y0), y0, color=ctype[ff], linewidth=0.75, alpha=0.5)
+                pd = np.poly1d(fit_arr[pp,ff])
+                ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75, alpha=0.5)
 
             ax.legend(loc='lower right')
 
