@@ -128,6 +128,8 @@ def main(rawdir, silent=False, verbose=True):
      - Call group_index(); Require at leat 5 pixels for peak identification
      - Handle multiple peaks
      - Compute number of peaks only once
+    Modified by Chun Ly,  1 August 2018
+     - Use combine stack for peak identification (more sensitive)
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -158,34 +160,43 @@ def main(rawdir, silent=False, verbose=True):
 
                 y0 = bin_size/2.0 + bin_size * np.arange(n_bins)
 
-                for ff in range(n_files):
-                    t_im = fits.getdata(files[ff], extname='SCI')
-                    med0 = np.median(t_im, axis=0)
+                no_c_file = 0
+                c_file = glob(path+'obj_comb.fits')
+                if len(c_file) == 0:
+                    mylogger.warn('Combine frame not found! Using single peak')
+                    no_c_file = 1
+                    n_peaks = 1
+                else:
+                    t_c_im = fits.getdata(c_file[0], extname='SCI')
+                    c_med0 = np.median(t_c_im, axis=0)
 
                     # Find peaks | + on 31/07/2018
-                    x0_max = np.argmax(med0)
-                    x0_min = np.argmin(med0)
+                    x0_max = np.argmax(c_med0)
+                    x0_min = np.argmin(c_med0)
 
-                    x0 = np.arange(med0.shape[0])
+                    x0 = np.arange(c_med0.shape[0])
                     idx_mask = np.where((np.absolute(x0-x0_max) >= 10) &
                                         (np.absolute(x0-x0_min) >= 10))[0]
-                    sm_med0 = convolve(med0, box_kernel)
+                    sm_c_med0 = convolve(c_med0, box_kernel)
 
-                    t_mean, t_med, t_std = sigma_clipped_stats(sm_med0[idx_mask],
+                    t_mean, t_med, t_std = sigma_clipped_stats(sm_c_med0[idx_mask],
                                                                sigma=2, iters=20)
-                    idx_det = np.where((sm_med0-t_med)/t_std >= 3)[0]
+                    idx_det = np.where((sm_c_med0-t_med)/t_std >= 5)[0]
 
                     list_peak = list(group_index(idx_det))
                     peak_idx  = [xx for xx in range(len(list_peak)) if
                                  list_peak[xx][1]-list_peak[xx][0] >= 5]
 
-                    if ff == 0:
-                        n_peaks = len(peak_idx)
-                        mylogger.info('Number of peaks found : '+str(n_peaks))
+                    n_peaks = len(peak_idx)
+                    mylogger.info('Number of peaks found : '+str(n_peaks))
 
-                        trace_arr = np.zeros((n_peaks,n_files,n_bins))
-                        xcen_arr  = np.zeros((n_peaks,n_files))
-                        fit_arr   = np.zeros((n_peaks,n_files,3))
+                trace_arr = np.zeros((n_peaks,n_files,n_bins))
+                xcen_arr  = np.zeros((n_peaks,n_files))
+                fit_arr   = np.zeros((n_peaks,n_files,3))
+
+                for ff in range(n_files):
+                    t_im = fits.getdata(files[ff], extname='SCI')
+                    med0 = np.median(t_im, axis=0)
 
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
