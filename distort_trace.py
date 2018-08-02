@@ -130,6 +130,7 @@ def main(rawdir, silent=False, verbose=True):
      - Compute number of peaks only once
     Modified by Chun Ly,  1 August 2018
      - Use combine stack for peak identification (more sensitive)
+     - Get quick peak centers from combine stack
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -183,12 +184,18 @@ def main(rawdir, silent=False, verbose=True):
                                                                sigma=2, iters=20)
                     idx_det = np.where((sm_c_med0-t_med)/t_std >= 5)[0]
 
-                    list_peak = list(group_index(idx_det))
+                    list_peak = np.array(list(group_index(idx_det)))
                     peak_idx  = [xx for xx in range(len(list_peak)) if
                                  list_peak[xx][1]-list_peak[xx][0] >= 5]
+                    list_peak = list_peak[peak_idx]
 
                     n_peaks = len(peak_idx)
                     mylogger.info('Number of peaks found : '+str(n_peaks))
+
+                    peak_ctr = np.zeros(n_peaks)
+                    for pp in range(n_peaks):
+                        i1, i2 = list_peak[pp][0], list_peak[pp][1]
+                        peak_ctr[pp] = list_peak[pp][0] + np.argmax(c_med0[i1:i2])
 
                 trace_arr = np.zeros((n_peaks,n_files,n_bins))
                 xcen_arr  = np.zeros((n_peaks,n_files))
