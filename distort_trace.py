@@ -127,13 +127,15 @@ def main(rawdir, silent=False, verbose=True):
      - Call group_index(); Require at leat 5 pixels for peak identification
      - Handle multiple peaks
      - Compute number of peaks only once
-    Modified by Chun Ly,  1 August 2018
+    Modified by Chun Ly,  2 August 2018
      - Use combine stack for peak identification (more sensitive)
      - Get quick peak centers from combine stack
      - Use peak in med0 if no combine stack or telluric spec
      - Handle peak finding for both telluric and science data
      - Handle multiple peaks in plotting
      - Restrict fitting to within 10 pixels
+    Modified by Chun Ly,  3 August 2018
+     - Simplify code (x0_bb -> x0)
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -162,6 +164,7 @@ def main(rawdir, silent=False, verbose=True):
                 hdr0      = fits.getheader(files[0], extname='SCI')
                 n_bins    = np.int(np.ceil(np.float(hdr0['NAXIS2']))/bin_size)
 
+                x0 = np.arange(hdr0['NAXIS1'])
                 y0 = bin_size/2.0 + bin_size * np.arange(n_bins)
 
                 no_c_file = 0
@@ -178,7 +181,6 @@ def main(rawdir, silent=False, verbose=True):
                     x0_max = np.argmax(c_med0)
                     x0_min = np.argmin(c_med0)
 
-                    x0 = np.arange(c_med0.shape[0])
                     idx_mask = np.where((np.absolute(x0-x0_max) >= 10) &
                                         (np.absolute(x0-x0_min) >= 10))[0]
                     sm_c_med0 = convolve(c_med0, box_kernel)
@@ -222,8 +224,6 @@ def main(rawdir, silent=False, verbose=True):
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
                         bb_med0 = np.median(t_im[ty1:ty2], axis=0)
-                        if bb == 0:
-                            x0_bb = np.arange(len(bb_med0))
 
                         for pp in range(n_peak):
                             if use_peak == 1:
@@ -237,7 +237,7 @@ def main(rawdir, silent=False, verbose=True):
                                 x0_max, y0_max = p_idx[0]+np.argmax(p_med0), np.max(p_med0)
                             p0 = [0.0, y0_max, x0_max, 2.0]
                             try:
-                                popt, pcov = curve_fit(gauss1d, x0_bb, bb_med0, p0=p0)
+                                popt, pcov = curve_fit(gauss1d, x0, bb_med0, p0=p0)
                                 x_cen = popt[2]
                             except RuntimeError:
                                 print 'Runtime error'
