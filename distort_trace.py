@@ -141,6 +141,7 @@ def main(rawdir, silent=False, verbose=True):
      - Use median for x_cen_middle to deal with outliers
      - Compute median using sigma_clipped_stats, exclude outliers from polyfit
      - Switch flag to flag0 to avoid conflict
+     - Use peak when combine stack has single line
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -222,9 +223,11 @@ def main(rawdir, silent=False, verbose=True):
                     if no_c_file or ('HIP' in h_obj or 'HD' in h_obj):
                         n_peak, use_peak = 1, 1
                     else:
-                        n_peak, use_peak = n_peaks, 0
+                        n_peak = n_peaks
+                        use_peak = 1 if n_peaks == 1 else 0
 
-                        x0_diff = list_peak[0][0] - x0_max
+                        if not use_peak:
+                            x0_diff = list_peak[0][0] - x0_max
 
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
