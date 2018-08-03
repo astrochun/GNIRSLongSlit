@@ -47,7 +47,7 @@ def group(x_cen):
     x_cen_si = np.argsort(t_x_cen)
 
     ctype0 = ['b','r','g','m','k']
-    mtype0 = ['o','s','x','D','p']
+    mtype0 = ['o','s','D','p']
 
     x_cen_resize = x_cen.reshape(x_cen.size)
     cnt0, cnt1 = 0, 0
