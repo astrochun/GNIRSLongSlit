@@ -136,6 +136,7 @@ def main(rawdir, silent=False, verbose=True):
      - Restrict fitting to within 10 pixels
     Modified by Chun Ly,  3 August 2018
      - Simplify code (x0_bb -> x0)
+     - Fix ValueError: Invalid rgba arg ""
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -285,9 +286,9 @@ def main(rawdir, silent=False, verbose=True):
                                    alpha=0.5, edgecolor=ctype[pp,ff],
                                    facecolor='none', label=labels[pp,ff])
 
-                pd = np.poly1d(fit_arr[pp,ff])
-                ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75,
-                        alpha=0.5)
+                        pd = np.poly1d(fit_arr[pp,ff])
+                        ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75,
+                                alpha=0.5)
 
             ax.legend(loc='lower right')
 
