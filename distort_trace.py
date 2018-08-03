@@ -133,6 +133,7 @@ def main(rawdir, silent=False, verbose=True):
      - Use peak in med0 if no combine stack or telluric spec
      - Handle peak finding for both telluric and science data
      - Handle multiple peaks in plotting
+     - Restrict fitting to within 10 pixels
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -250,7 +251,8 @@ def main(rawdir, silent=False, verbose=True):
                         xcen_arr[pp,ff]   = x_cen_middle
                         trace_arr[pp,ff] -= x_cen_middle
 
-                        fit = np.polyfit(y0, trace_arr[pp,ff], 2)
+                        use = np.where(np.absolute(trace_arr[pp,ff]) <= 10)[0]
+                        fit = np.polyfit(y0[use], trace_arr[pp,ff][use], 2)
                         fit_arr[pp,ff] = fit
                     #endfor
                 #endfor
@@ -278,13 +280,14 @@ def main(rawdir, silent=False, verbose=True):
 
             for pp in range(n_peaks):
                 for ff in range(n_files):
-                    if labels[pp,ff] != 0:
+                    if labels[pp,ff] != '':
                         ax.scatter(trace_arr[pp,ff,:], y0, marker=mtype[pp,ff],
                                    alpha=0.5, edgecolor=ctype[pp,ff],
                                    facecolor='none', label=labels[pp,ff])
 
                 pd = np.poly1d(fit_arr[pp,ff])
-                ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75, alpha=0.5)
+                ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75,
+                        alpha=0.5)
 
             ax.legend(loc='lower right')
 
