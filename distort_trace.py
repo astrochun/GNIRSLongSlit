@@ -139,6 +139,7 @@ def main(rawdir, silent=False, verbose=True):
      - Fix ValueError: Invalid rgba arg ""
      - Fix bugs with n_files and use of 'x' datapoints
      - Use median for x_cen_middle to deal with outliers
+     - Compute median using sigma_clipped_stats, exclude outliers from polyfit
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -246,15 +247,25 @@ def main(rawdir, silent=False, verbose=True):
                                 print 'Runtime error'
                                 x_cen = p0[2]
                             trace_arr[pp,ff,bb] = x_cen
+
                         #endfor
                     #endfor
+                #endfor
 
+                flag = np.ones((n_peaks,n_files,n_bins))
+
+                for ff in range(n_files):
                     for pp in range(n_peaks):
-                        x_cen_middle      = np.median(trace_arr[pp,ff]) #,n_bins/2]
+                        t_me, t_md, t_s = sigma_clipped_stats(trace_arr[pp,ff],
+                                                              sigma=3, iters=10)
+                        x_cen_middle      = t_md
                         xcen_arr[pp,ff]   = x_cen_middle
                         trace_arr[pp,ff] -= x_cen_middle
 
-                        use = np.where(np.absolute(trace_arr[pp,ff]) <= 10)[0]
+                        diff = trace_arr[pp,ff] - ((y0-512)*0.019)
+                        use = np.where(np.absolute(diff) <= 5)[0]
+                        if len(use) > 0: flag[pp,ff,use] = 0
+
                         fit = np.polyfit(y0[use], trace_arr[pp,ff][use], 2)
                         fit_arr[pp,ff] = fit
                     #endfor
