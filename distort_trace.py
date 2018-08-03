@@ -138,6 +138,7 @@ def main(rawdir, silent=False, verbose=True):
      - Simplify code (x0_bb -> x0)
      - Fix ValueError: Invalid rgba arg ""
      - Fix bugs with n_files and use of 'x' datapoints
+     - Use median for x_cen_middle to deal with outliers
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -249,7 +250,7 @@ def main(rawdir, silent=False, verbose=True):
                     #endfor
 
                     for pp in range(n_peaks):
-                        x_cen_middle      = trace_arr[pp,ff,n_bins/2]
+                        x_cen_middle      = np.median(trace_arr[pp,ff]) #,n_bins/2]
                         xcen_arr[pp,ff]   = x_cen_middle
                         trace_arr[pp,ff] -= x_cen_middle
 
