@@ -140,6 +140,7 @@ def main(rawdir, silent=False, verbose=True):
      - Fix bugs with n_files and use of 'x' datapoints
      - Use median for x_cen_middle to deal with outliers
      - Compute median using sigma_clipped_stats, exclude outliers from polyfit
+     - Switch flag to flag0 to avoid conflict
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -252,7 +253,7 @@ def main(rawdir, silent=False, verbose=True):
                     #endfor
                 #endfor
 
-                flag = np.ones((n_peaks,n_files,n_bins))
+                flag0 = np.ones((n_peaks,n_files,n_bins))
 
                 for ff in range(n_files):
                     for pp in range(n_peaks):
@@ -264,7 +265,7 @@ def main(rawdir, silent=False, verbose=True):
 
                         diff = trace_arr[pp,ff] - ((y0-512)*0.019)
                         use = np.where(np.absolute(diff) <= 5)[0]
-                        if len(use) > 0: flag[pp,ff,use] = 0
+                        if len(use) > 0: flag0[pp,ff,use] = 0
 
                         fit = np.polyfit(y0[use], trace_arr[pp,ff][use], 2)
                         fit_arr[pp,ff] = fit
@@ -273,7 +274,7 @@ def main(rawdir, silent=False, verbose=True):
 
                 mylogger.info('Writing : '+npz_file)
                 np.savez(npz_file, trace_arr=trace_arr, xcen_arr=xcen_arr,
-                         fit_arr=fit_arr, y0=y0, flag=flag)
+                         fit_arr=fit_arr, y0=y0, flag0=flag0)
             else:
                 mylogger.warn('Files not found !')
         else:
@@ -283,7 +284,7 @@ def main(rawdir, silent=False, verbose=True):
             xcen_arr  = npz['xcen_arr']
             y0        = npz['y0']
             fit_arr   = npz['fit_arr']
-            flag      = npz['flag']
+            flag0     = npz['flag0']
             n_files   = xcen_arr.shape[1]
             n_peaks   = xcen_arr.shape[0]
 
@@ -300,8 +301,8 @@ def main(rawdir, silent=False, verbose=True):
                         ax.scatter(trace_arr[pp,ff,:], y0, marker=mtype[pp,ff],
                                    alpha=0.5, edgecolor=ctype[pp,ff],
                                    facecolor=fc, label=labels[pp,ff])
-                        #ax.scatter(trace_arr[pp,ff,flag[pp,ff] == 1],
-                        #           y0[flag[pp,ff]==1], marker='x', color='r')
+                        #ax.scatter(trace_arr[pp,ff,flag0[pp,ff] == 1],
+                        #           y0[flag0[pp,ff]==1], marker='x', color='r')
 
                         pd = np.poly1d(fit_arr[pp,ff])
                         ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75,
