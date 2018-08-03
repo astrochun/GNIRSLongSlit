@@ -137,6 +137,7 @@ def main(rawdir, silent=False, verbose=True):
     Modified by Chun Ly,  3 August 2018
      - Simplify code (x0_bb -> x0)
      - Fix ValueError: Invalid rgba arg ""
+     - Fix bugs with n_files and use of 'x' datapoints
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -270,7 +271,7 @@ def main(rawdir, silent=False, verbose=True):
             xcen_arr  = npz['xcen_arr']
             y0        = npz['y0']
             fit_arr   = npz['fit_arr']
-            n_files   = len(xcen_arr)
+            n_files   = xcen_arr.shape[1]
             n_peaks   = xcen_arr.shape[0]
 
         if n_files > 0:
@@ -282,9 +283,10 @@ def main(rawdir, silent=False, verbose=True):
             for pp in range(n_peaks):
                 for ff in range(n_files):
                     if labels[pp,ff] != '':
+                        fc = ctype[pp,ff] if mtype[pp,ff] == 'x' else 'none'
                         ax.scatter(trace_arr[pp,ff,:], y0, marker=mtype[pp,ff],
                                    alpha=0.5, edgecolor=ctype[pp,ff],
-                                   facecolor='none', label=labels[pp,ff])
+                                   facecolor=fc, label=labels[pp,ff])
 
                         pd = np.poly1d(fit_arr[pp,ff])
                         ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75,
@@ -294,6 +296,7 @@ def main(rawdir, silent=False, verbose=True):
 
             ax.set_ylabel('Y [pixels]', fontsize=14)
             ax.set_xlabel('X relative to center [pixels]', fontsize=14)
+            #ax.set_xlim([-100,100])
             fig.suptitle(path)
             ax.minorticks_on()
 
