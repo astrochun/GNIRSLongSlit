@@ -53,7 +53,7 @@ def group(x_cen):
     cnt0, cnt1 = 0, 0
     for ii in range(len(x_cen_s)):
         in_rge = np.array([xx for xx in range(x_cen.size) if \
-                           (np.absolute(x_cen_resize[xx] - x_cen_s[ii]) <= 1) and
+                           (np.absolute(x_cen_resize[xx] - x_cen_s[ii]) <= 3) and
                            (ctype[xx] == '')])
         #in_rge = np.where((np.absolute(x_cen - x_cen_s[ii]) <= 1) &
         #                  (ctype == ''))[0]
@@ -298,6 +298,7 @@ def main(rawdir, silent=False, verbose=True):
             ax.set_ylabel('Y [pixels]', fontsize=14)
             ax.set_xlabel('X relative to center [pixels]', fontsize=14)
             #ax.set_xlim([-100,100])
+            ax.set_ylim([-10,1050])
             fig.suptitle(path)
             ax.minorticks_on()
 
