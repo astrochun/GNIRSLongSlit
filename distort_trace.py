@@ -142,6 +142,7 @@ def main(rawdir, silent=False, verbose=True):
      - Compute median using sigma_clipped_stats, exclude outliers from polyfit
      - Switch flag to flag0 to avoid conflict
      - Use peak when combine stack has single line
+     - Switch from curve_fit to weighted centering
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -245,15 +246,16 @@ def main(rawdir, silent=False, verbose=True):
                                 x0_max = p_idx[0]+np.argmax(p_med0)
                                 y0_max = np.max(p_med0)
 
-                            p0 = [0.0, y0_max, x0_max, 2.0]
-                            try:
-                                popt, pcov = curve_fit(gauss1d, x0, bb_med0, p0=p0)
-                                x_cen = popt[2]
-                            except RuntimeError:
-                                print 'Runtime error'
-                                x_cen = p0[2]
-                            trace_arr[pp,ff,bb] = x_cen
 
+                            x_cen = np.sum(p_med0 * p_idx)/np.sum(p_med0)
+                            #p0 = [0.0, y0_max, x0_max, 2.0]
+                            #try:
+                            #    popt, pcov = curve_fit(gauss1d, x0, bb_med0, p0=p0)
+                            #    x_cen = popt[2]
+                            #except RuntimeError:
+                            #    print 'Runtime error'
+                            #    x_cen = p0[2]
+                            trace_arr[pp,ff,bb] = x_cen
                         #endfor
                     #endfor
                 #endfor
@@ -317,7 +319,7 @@ def main(rawdir, silent=False, verbose=True):
 
             ax.set_ylabel('Y [pixels]', fontsize=14)
             ax.set_xlabel('X relative to center [pixels]', fontsize=14)
-            #ax.set_xlim([-100,100])
+            ax.set_xlim([-100,100])
             ax.set_ylim([-10,1050])
             fig.suptitle(path)
             ax.minorticks_on()
