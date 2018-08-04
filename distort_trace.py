@@ -143,6 +143,7 @@ def main(rawdir, silent=False, verbose=True):
      - Switch flag to flag0 to avoid conflict
      - Use peak when combine stack has single line
      - Switch from curve_fit to weighted centering
+     - Define p_idx for single peak
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -237,15 +238,15 @@ def main(rawdir, silent=False, verbose=True):
                         for pp in range(n_peak):
                             if use_peak == 1:
                                 x0_max, y0_max = np.argmax(bb_med0), np.max(bb_med0)
+
+                                p_idx = np.arange(x0_max-10,x0_max+10)
                             else:
                                 x0_max = np.argmax(bb_med0)
 
                                 p_idx = np.arange(list_peak[pp][0]-x0_diff,
                                                   list_peak[pp][1]-x0_diff)
-                                p_med0 = bb_med0[p_idx]
-                                x0_max = p_idx[0]+np.argmax(p_med0)
-                                y0_max = np.max(p_med0)
 
+                            p_med0 = bb_med0[p_idx]
 
                             x_cen = np.sum(p_med0 * p_idx)/np.sum(p_med0)
                             #p0 = [0.0, y0_max, x0_max, 2.0]
