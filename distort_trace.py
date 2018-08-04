@@ -167,8 +167,8 @@ def main(rawdir, silent=False, verbose=True):
 
             mylogger.info('Number of files found : %i ' % n_files)
             if n_files > 0:
-                hdr0      = fits.getheader(files[0], extname='SCI')
-                n_bins    = np.int(np.ceil(np.float(hdr0['NAXIS2']))/bin_size)
+                hdr0   = fits.getheader(files[0], extname='SCI')
+                n_bins = np.int(np.ceil(np.float(hdr0['NAXIS2']))/bin_size)
 
                 x0 = np.arange(hdr0['NAXIS1'])
                 y0 = bin_size/2.0 + bin_size * np.arange(n_bins)
@@ -206,7 +206,7 @@ def main(rawdir, silent=False, verbose=True):
                     peak_ctr = np.zeros(n_peaks)
                     for pp in range(n_peaks):
                         i1, i2 = list_peak[pp][0], list_peak[pp][1]
-                        peak_ctr[pp] = list_peak[pp][0] + np.argmax(c_med0[i1:i2])
+                        peak_ctr[pp] = i1 + np.argmax(c_med0[i1:i2])
 
                 trace_arr = np.zeros((n_peaks,n_files,n_bins))
                 xcen_arr  = np.zeros((n_peaks,n_files))
@@ -242,7 +242,9 @@ def main(rawdir, silent=False, verbose=True):
                                 p_idx = np.arange(list_peak[pp][0]-x0_diff,
                                                   list_peak[pp][1]-x0_diff)
                                 p_med0 = bb_med0[p_idx]
-                                x0_max, y0_max = p_idx[0]+np.argmax(p_med0), np.max(p_med0)
+                                x0_max = p_idx[0]+np.argmax(p_med0)
+                                y0_max = np.max(p_med0)
+
                             p0 = [0.0, y0_max, x0_max, 2.0]
                             try:
                                 popt, pcov = curve_fit(gauss1d, x0, bb_med0, p0=p0)
