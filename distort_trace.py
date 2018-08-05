@@ -309,8 +309,8 @@ def main(rawdir, silent=False, verbose=True):
                         ax.scatter(trace_arr[pp,ff,:], y0, marker=mtype[pp,ff],
                                    alpha=0.5, edgecolor=ctype[pp,ff],
                                    facecolor=fc, label=labels[pp,ff])
-                        #ax.scatter(trace_arr[pp,ff,flag0[pp,ff] == 1],
-                        #           y0[flag0[pp,ff]==1], marker='x', color='r')
+                        ax.scatter(trace_arr[pp,ff,flag0[pp,ff] == 1],
+                                   y0[flag0[pp,ff]==1], marker='x', color='r')
 
                         pd = np.poly1d(fit_arr[pp,ff])
                         ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75,
