@@ -320,7 +320,7 @@ def main(rawdir, silent=False, verbose=True):
 
             ax.set_ylabel('Y [pixels]', fontsize=14)
             ax.set_xlabel('X relative to center [pixels]', fontsize=14)
-            ax.set_xlim([-100,100])
+            #ax.set_xlim([-100,100])
             ax.set_ylim([-10,1050])
             fig.suptitle(path)
             ax.minorticks_on()
