@@ -153,6 +153,7 @@ def main(rawdir, silent=False, verbose=True):
      - Use DQ array to masked bad pixels and edges
      - Limit weighted computation within expected location
      - Shift x0_max1 for sub-indexing
+     - Force x-limit range (zoom-in)
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -348,7 +349,7 @@ def main(rawdir, silent=False, verbose=True):
 
             ax.set_ylabel('Y [pixels]', fontsize=14)
             ax.set_xlabel('X relative to center [pixels]', fontsize=14)
-            #ax.set_xlim([-100,100])
+            ax.set_xlim(xlim) #[-100,100])
             ax.set_ylim([-10,1050])
             fig.suptitle(path)
             ax.minorticks_on()
