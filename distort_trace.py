@@ -154,6 +154,7 @@ def main(rawdir, silent=False, verbose=True):
      - Limit weighted computation within expected location
      - Shift x0_max1 for sub-indexing
      - Force x-limit range (zoom-in)
+     - Plot aesthetics: ax annotation
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -345,6 +346,14 @@ def main(rawdir, silent=False, verbose=True):
                         ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75,
                                 alpha=0.5)
 
+            out_plt   = np.where((trace_arr > xlim[1]) or (trace_arr < xlim[0]))
+            n_out_plt = len(out_plt[0])
+            flagged   = np.where(flag0 == 1)
+            n_flagged = len(flagged[0])
+
+            a_txt = 'N(exclude) = '+str(n_out_plt)+'\nN(flagged) = '+str(n_flagged)
+            ax.annotate(a_txt, xy=(0.95,0.95), xycoords='axes fraction', ha='right',
+                        va='top')
             ax.legend(loc='lower right')
 
             ax.set_ylabel('Y [pixels]', fontsize=14)
