@@ -148,6 +148,7 @@ def main(rawdir, silent=False, verbose=True):
      - Bug fix: Incorrect x0_diff
      - Handle case when not all skysubtracted frames are used
        (check for obj_rev.lis file)
+     - Force integer for index
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -260,8 +261,8 @@ def main(rawdir, silent=False, verbose=True):
                             else:
                                 x0_max = np.argmax(bb_med0)
 
-                                p_idx = np.arange(list_peak[pp][0]-x0_diff,
-                                                  list_peak[pp][1]-x0_diff)
+                                p_idx = np.arange(np.int(list_peak[pp][0]-x0_diff),
+                                                  np.int(list_peak[pp][1]-x0_diff))
 
                             p_med0 = bb_med0[p_idx]
 
