@@ -346,7 +346,7 @@ def main(rawdir, silent=False, verbose=True):
                         ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75,
                                 alpha=0.5)
 
-            out_plt   = np.where((trace_arr > xlim[1]) or (trace_arr < xlim[0]))
+            out_plt   = np.where((trace_arr > xlim[1]) | (trace_arr < xlim[0]))
             n_out_plt = len(out_plt[0])
             flagged   = np.where(flag0 == 1)
             n_flagged = len(flagged[0])
