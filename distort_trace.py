@@ -149,6 +149,7 @@ def main(rawdir, silent=False, verbose=True):
      - Handle case when not all skysubtracted frames are used
        (check for obj_rev.lis file)
      - Force integer for index
+     - Avoid right edge issue (specific hack for one target)
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -217,7 +218,8 @@ def main(rawdir, silent=False, verbose=True):
 
                     list_peak = np.array(list(group_index(idx_det)))
                     peak_idx  = [xx for xx in range(len(list_peak)) if
-                                 list_peak[xx][1]-list_peak[xx][0] >= 5]
+                                 (list_peak[xx][1]-list_peak[xx][0] >= 5 and
+                                  list_peak[xx][0] < 625)] # Avoid right edge issues
                     list_peak = list_peak[peak_idx]
 
                     n_peaks = len(peak_idx)
