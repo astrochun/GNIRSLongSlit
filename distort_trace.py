@@ -150,6 +150,7 @@ def main(rawdir, silent=False, verbose=True):
        (check for obj_rev.lis file)
      - Force integer for index
      - Avoid right edge issue (specific hack for one target)
+     - Use DQ array to masked bad pixels and edges
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -235,11 +236,14 @@ def main(rawdir, silent=False, verbose=True):
                 fit_arr   = np.zeros((n_peaks,n_files,3))
 
                 for ff in range(n_files):
-                    t_im, t_hdr = fits.getdata(files[ff], extname='SCI',
+                    t_im0, t_hdr = fits.getdata(files[ff], extname='SCI',
                                                header=True)
-                    med0 = np.median(t_im, axis=0)
+                    t_dq = fits.getdata(files[ff], extname='DQ')
 
-                    x0_max = np.argmax(med0)
+                    t_im = np.ma.array(t_im0, mask=t_dq)
+                    med0 = np.ma.median(t_im, axis=0)
+
+                    x0_max = np.ma.argmax(med0)
 
                     h_obj = t_hdr['OBJECT']
                     if no_c_file or ('HIP' in h_obj or 'HD' in h_obj):
@@ -253,15 +257,15 @@ def main(rawdir, silent=False, verbose=True):
 
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
-                        bb_med0 = np.median(t_im[ty1:ty2], axis=0)
+                        bb_med0 = np.ma.median(t_im[ty1:ty2], axis=0)
 
                         for pp in range(n_peak):
                             if use_peak == 1:
-                                x0_max, y0_max = np.argmax(bb_med0), np.max(bb_med0)
+                                x0_max, y0_max = np.ma.argmax(bb_med0), np.ma.max(bb_med0)
 
                                 p_idx = np.arange(x0_max-10,x0_max+10)
                             else:
-                                x0_max = np.argmax(bb_med0)
+                                x0_max = np.ma.argmax(bb_med0)
 
                                 p_idx = np.arange(np.int(list_peak[pp][0]-x0_diff),
                                                   np.int(list_peak[pp][1]-x0_diff))
