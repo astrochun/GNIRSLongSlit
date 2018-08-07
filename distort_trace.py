@@ -144,6 +144,8 @@ def main(rawdir, silent=False, verbose=True):
      - Use peak when combine stack has single line
      - Switch from curve_fit to weighted centering
      - Define p_idx for single peak
+    Modified by Chun Ly,  7 August 2018
+     - Bug fix: Incorrect x0_diff
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -229,7 +231,7 @@ def main(rawdir, silent=False, verbose=True):
                         use_peak = 1 if n_peaks == 1 else 0
 
                         if not use_peak:
-                            x0_diff = list_peak[0][0] - x0_max
+                            x0_diff = peak_ctr[0] - x0_max
 
                     for bb in range(n_bins):
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
