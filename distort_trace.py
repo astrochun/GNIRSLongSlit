@@ -152,6 +152,7 @@ def main(rawdir, silent=False, verbose=True):
      - Avoid right edge issue (specific hack for one target)
      - Use DQ array to masked bad pixels and edges
      - Limit weighted computation within expected location
+     - Shift x0_max1 for sub-indexing
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -263,12 +264,12 @@ def main(rawdir, silent=False, verbose=True):
                         for pp in range(n_peak):
                             if use_peak == 1:
                                 if no_c_file:
-                                    x0_max = np.ma.argmax(bb_med0)
+                                    x0_max1 = np.ma.argmax(bb_med0)
                                 else:
                                     v1, v2 = list_peak[0][0]-15, list_peak[0][1]+15
-                                    x0_max = np.ma.argmax(bb_med0[v1:v2])
+                                    x0_max1 = v1+np.ma.argmax(bb_med0[v1:v2])
 
-                                p_idx = np.arange(x0_max-10,x0_max+10)
+                                p_idx = np.arange(x0_max1-10,x0_max1+10)
                             else:
                                 p_idx = np.arange(np.int(list_peak[pp][0]-x0_diff),
                                                   np.int(list_peak[pp][1]-x0_diff))
