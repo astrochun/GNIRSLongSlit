@@ -146,6 +146,8 @@ def main(rawdir, silent=False, verbose=True):
      - Define p_idx for single peak
     Modified by Chun Ly,  7 August 2018
      - Bug fix: Incorrect x0_diff
+     - Handle case when not all skysubtracted frames are used
+       (check for obj_rev.lis file)
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -164,9 +166,22 @@ def main(rawdir, silent=False, verbose=True):
         mylogger.info('Working on : '+path.split('/')[-2])
         out_pdf = path+'distort_trace.pdf'
         npz_file = path+'distort_trace.npz'
+        obj_file = path+'obj_rev.lis'
 
         if not exists(npz_file):
-            files = glob(path+'tfrbncN????????S????.fits')
+            if not exists(obj_file):
+                files = glob(path+'tfrbncN????????S????.fits')
+            else:
+                mylogger.info('File found : '+obj_file)
+                npfiles = np.loadtxt(obj_file, dtype=type(str))
+                files   = [path+'tfrbnc'+t_file for t_file in npfiles]
+
+                npfilesT = np.loadtxt(path+'telluric.lis', dtype=type(str))
+                filesT = [path+'tfrbnc'+t_file for t_file in npfilesT]
+
+                files += filesT
+                files.sort()
+
             n_files = len(files)
 
             mylogger.info('Number of files found : %i ' % n_files)
