@@ -159,6 +159,7 @@ def main(rawdir, silent=False, verbose=True):
      - Force x-limit range (zoom-in)
      - Plot aesthetics: ax annotation
      - Plot fitting results
+     - Bug fix with savefig location, change labeling
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -302,9 +303,13 @@ def main(rawdir, silent=False, verbose=True):
 
                             ax[row,col].plot(p_idx, p_med0/max(p_med0))
                             ax[row,col].axvline(x=x_cen)
+                            if row != nrows-1:
+                                ax[row,col].set_xticklabels([])
+                            if col != 0:
+                                ax[row,col].set_yticklabels([])
                         #endfor
-                        fig.savefig(pdf_pp, format='pdf')
                     #endfor
+                    fig.savefig(pdf_pp, format='pdf')
                 #endfor
                 mylogger.info('Writing : '+out_pdf1)
                 pdf_pp.close()
