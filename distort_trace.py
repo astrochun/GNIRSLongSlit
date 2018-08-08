@@ -36,6 +36,9 @@ import dir_check
 from IQ_plot import gauss1d
 import glog
 
+nrows = 8
+ncols = 5
+
 def group(x_cen):
     t_x_cen = x_cen[np.where(x_cen != 0)] # Exclude those without peaks
 
@@ -155,6 +158,7 @@ def main(rawdir, silent=False, verbose=True):
      - Shift x0_max1 for sub-indexing
      - Force x-limit range (zoom-in)
      - Plot aesthetics: ax annotation
+     - Plot fitting results
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -171,7 +175,8 @@ def main(rawdir, silent=False, verbose=True):
 
     for path in list_path:
         mylogger.info('Working on : '+path.split('/')[-2])
-        out_pdf = path+'distort_trace.pdf'
+        out_pdf  = path+'distort_trace.pdf'
+        out_pdf1 = path+'distort_trace_fit.pdf'
         npz_file = path+'distort_trace.npz'
         obj_file = path+'obj_rev.lis'
 
@@ -193,6 +198,8 @@ def main(rawdir, silent=False, verbose=True):
 
             mylogger.info('Number of files found : %i ' % n_files)
             if n_files > 0:
+                pdf_pp = PdfPages(out_pdf1)
+
                 hdr0   = fits.getheader(files[0], extname='SCI')
                 n_bins = np.int(np.ceil(np.float(hdr0['NAXIS2']))/bin_size)
 
@@ -240,6 +247,8 @@ def main(rawdir, silent=False, verbose=True):
                 fit_arr   = np.zeros((n_peaks,n_files,3))
 
                 for ff in range(n_files):
+                    fig, ax = plt.subplots(nrows=nrows, ncols=ncols)
+
                     t_im0, t_hdr = fits.getdata(files[ff], extname='SCI',
                                                header=True)
                     t_dq = fits.getdata(files[ff], extname='DQ')
@@ -260,6 +269,8 @@ def main(rawdir, silent=False, verbose=True):
                             x0_diff = peak_ctr[0] - x0_max
 
                     for bb in range(n_bins):
+                        row, col = bb / nrows, bb % ncols
+
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
                         bb_med0 = np.ma.median(t_im[ty1:ty2], axis=0)
 
@@ -276,6 +287,7 @@ def main(rawdir, silent=False, verbose=True):
                                 p_idx = np.arange(np.int(list_peak[pp][0]-x0_diff),
                                                   np.int(list_peak[pp][1]-x0_diff))
 
+                            # print ff, bb, pp, p_idx[0], p_idx[-1]
                             p_med0 = bb_med0[p_idx]
 
                             x_cen = np.sum(p_med0 * p_idx)/np.sum(p_med0)
@@ -287,9 +299,15 @@ def main(rawdir, silent=False, verbose=True):
                             #    print 'Runtime error'
                             #    x_cen = p0[2]
                             trace_arr[pp,ff,bb] = x_cen
+
+                            ax[row,col].plot(p_idx, p_med0/max(p_med0))
+                            ax[row,col].axvline(x=x_cen)
                         #endfor
+                        fig.savefig(pdf_pp, format='pdf')
                     #endfor
                 #endfor
+                mylogger.info('Writing : '+out_pdf1)
+                pdf_pp.close()
 
                 flag0 = np.ones((n_peaks,n_files,n_bins))
 
