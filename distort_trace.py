@@ -390,7 +390,7 @@ def main(rawdir, silent=False, verbose=True):
             n_flagged = len(flagged[0])
 
             a_txt = 'N(exclude) = '+str(n_out_plt)+'\nN(flagged) = '+str(n_flagged)
-            ax.annotate(a_txt, xy=(0.95,0.95), xycoords='axes fraction', ha='right',
+            ax.annotate(a_txt, xy=(0.05,0.95), xycoords='axes fraction', ha='left',
                         va='top')
             ax.legend(loc='lower right')
 
