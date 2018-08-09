@@ -164,6 +164,7 @@ def main(rawdir, silent=False, verbose=True):
      - Annotate plot with center
      - Plot aesthetics: toplabel, white space, ylim
      - Changes for right center for telluric and single peak science data cases
+     - Adjust ax.plot xrange
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -294,7 +295,6 @@ def main(rawdir, silent=False, verbose=True):
                                 p_idx = np.arange(np.int(list_peak[pp][0]-x0_diff),
                                                   np.int(list_peak[pp][1]-x0_diff))
 
-
                             p_med0 = bb_med0[p_idx]
 
                             x_cen = np.sum(p_med0 * p_idx)/np.sum(p_med0)
@@ -307,8 +307,9 @@ def main(rawdir, silent=False, verbose=True):
                             #    x_cen = p0[2]
                             trace_arr[pp,ff,bb] = x_cen
 
-                            ax[row,col].plot(p_idx, p_med0/max(p_med0))
-                            ax[row,col].axvline(x=x_cen)
+                            x_off = p_idx[len(p_idx)/2]
+                            ax[row,col].plot(p_idx-x_off, p_med0/max(p_med0))
+                            ax[row,col].axvline(x=x_cen-x_off)
                             ax[row,col].annotate('%.1f' % x_cen, xy=[0.95,0.95],
                                                  ha='right', va='top', fontsize=9,
                                                  xycoords='axes fraction')
