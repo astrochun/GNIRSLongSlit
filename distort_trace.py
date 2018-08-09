@@ -163,6 +163,7 @@ def main(rawdir, silent=False, verbose=True):
      - Fix typo with wrong ax subplots use (row determination)
      - Annotate plot with center
      - Plot aesthetics: toplabel, white space, ylim
+     - Changes for right center for telluric and single peak science data cases
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -260,7 +261,7 @@ def main(rawdir, silent=False, verbose=True):
                     t_im = np.ma.array(t_im0, mask=t_dq)
                     med0 = np.ma.median(t_im, axis=0)
 
-                    x0_max = np.ma.argmax(med0)
+                    x0_max0 = np.ma.argmax(med0)
 
                     h_obj = t_hdr['OBJECT']
                     if no_c_file or ('HIP' in h_obj or 'HD' in h_obj):
@@ -268,9 +269,7 @@ def main(rawdir, silent=False, verbose=True):
                     else:
                         n_peak = n_peaks
                         use_peak = 1 if n_peaks == 1 else 0
-
-                        if not use_peak:
-                            x0_diff = peak_ctr[0] - x0_max
+                        x0_diff = peak_ctr[0] - x0_max0
 
                     for bb in range(n_bins):
                         row, col = bb / ncols, bb % ncols
@@ -280,18 +279,22 @@ def main(rawdir, silent=False, verbose=True):
 
                         for pp in range(n_peak):
                             if use_peak == 1:
-                                if no_c_file:
-                                    x0_max1 = np.ma.argmax(bb_med0)
+                                if no_c_file or ('HIP' in h_obj or 'HD' in h_obj):
+                                    v1, v2 = x0_max0-15, x0_max0+15
                                 else:
-                                    v1, v2 = list_peak[0][0]-15, list_peak[0][1]+15
-                                    x0_max1 = v1+np.ma.argmax(bb_med0[v1:v2])
+                                    v1 = np.int(list_peak[0][0]-x0_diff-15)
+                                    v2 = np.int(list_peak[0][1]-x0_diff+15)
 
+                                # print ff, bb, pp, v1, v2, x0_max0
+
+                                x0_max1 = v1+np.ma.argmax(bb_med0[v1:v2])
                                 p_idx = np.arange(x0_max1-10,x0_max1+10)
+                                # print ff, bb, pp, x0_max0, x0_max1, p_idx[0], p_idx[-1]
                             else:
                                 p_idx = np.arange(np.int(list_peak[pp][0]-x0_diff),
                                                   np.int(list_peak[pp][1]-x0_diff))
 
-                            # print ff, bb, pp, p_idx[0], p_idx[-1]
+
                             p_med0 = bb_med0[p_idx]
 
                             x_cen = np.sum(p_med0 * p_idx)/np.sum(p_med0)
