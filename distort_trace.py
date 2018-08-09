@@ -160,6 +160,8 @@ def main(rawdir, silent=False, verbose=True):
      - Plot aesthetics: ax annotation
      - Plot fitting results
      - Bug fix with savefig location, change labeling
+     - Fix typo with wrong ax subplots use (row determination)
+     - Annotate plot with center
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -270,7 +272,7 @@ def main(rawdir, silent=False, verbose=True):
                             x0_diff = peak_ctr[0] - x0_max
 
                     for bb in range(n_bins):
-                        row, col = bb / nrows, bb % ncols
+                        row, col = bb / ncols, bb % ncols
 
                         ty1, ty2 = (0+bb)*bin_size, (1+bb)*bin_size
                         bb_med0 = np.ma.median(t_im[ty1:ty2], axis=0)
@@ -303,6 +305,9 @@ def main(rawdir, silent=False, verbose=True):
 
                             ax[row,col].plot(p_idx, p_med0/max(p_med0))
                             ax[row,col].axvline(x=x_cen)
+                            ax[row,col].annotate('%.1f' % x_cen, xy=[0.95,0.95],
+                                                 ha='right', va='top', fontsize=9,
+                                                 xycoords='axes fraction')
                             if row != nrows-1:
                                 ax[row,col].set_xticklabels([])
                             if col != 0:
