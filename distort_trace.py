@@ -162,6 +162,7 @@ def main(rawdir, silent=False, verbose=True):
      - Bug fix with savefig location, change labeling
      - Fix typo with wrong ax subplots use (row determination)
      - Annotate plot with center
+     - Plot aesthetics: toplabel, white space, ylim
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -312,8 +313,13 @@ def main(rawdir, silent=False, verbose=True):
                                 ax[row,col].set_xticklabels([])
                             if col != 0:
                                 ax[row,col].set_yticklabels([])
+
+                            ax[row,col].set_ylim([-0.05,1.05])
                         #endfor
                     #endfor
+                    plt.subplots_adjust(left=0.08, right=0.99, bottom=0.05, top=0.95,
+                                        hspace=0.02, wspace=0.02)
+                    fig.suptitle(files[ff], fontsize=12)
                     fig.savefig(pdf_pp, format='pdf')
                 #endfor
                 mylogger.info('Writing : '+out_pdf1)
