@@ -171,6 +171,7 @@ def main(rawdir, silent=False, verbose=True):
      - Compute median of trace_arr in each bin, best fit polynomial fit
      - Plot best fit to median of trace_arr
      - Update npz savefile with best_fit results
+     - Annotate plot with best fit
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -381,6 +382,8 @@ def main(rawdir, silent=False, verbose=True):
                 use        = np.where(flag0[:,:,bb] == 0)
                 x_fit0[bb] = np.median(trace_arr[use[0],use[1],bb])
             best_fit = np.polyfit(y0, x_fit0, 2)
+            mylogger.info('Best fit : [%f, %f, %f]', best_fit[0],
+                          best_fit[1], best_fit[2])
 
             for pp in range(n_peaks):
                 for ff in range(n_files):
@@ -400,6 +403,11 @@ def main(rawdir, silent=False, verbose=True):
                        facecolor='black', linewidth=2.0, alpha=0.9)
             best_pd = np.poly1d(best_fit)
             ax.plot(best_pd(y0), y0, color='black', linewidth=2.0, alpha=0.9)
+            b_txt = r'x = A y$^2$ + B y + C'+\
+                    '\nA = %.3e\nB = %.3e\nC = %.3f' % (best_fit[0],best_fit[1],
+                                                        best_fit[2])
+            ax.annotate(b_txt, xy=(0.05,0.75), xycoords='axes fraction',
+                        ha='left', va='top')
 
             out_plt   = np.where((trace_arr > xlim[1]) | (trace_arr < xlim[0]))
             n_out_plt = len(out_plt[0])
