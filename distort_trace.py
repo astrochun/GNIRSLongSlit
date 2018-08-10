@@ -158,13 +158,18 @@ def main(rawdir, silent=False, verbose=True):
      - Shift x0_max1 for sub-indexing
      - Force x-limit range (zoom-in)
      - Plot aesthetics: ax annotation
+    Modified by Chun Ly,  8 August 2018
      - Plot fitting results
      - Bug fix with savefig location, change labeling
+    Modified by Chun Ly,  9 August 2018
      - Fix typo with wrong ax subplots use (row determination)
      - Annotate plot with center
      - Plot aesthetics: toplabel, white space, ylim
      - Changes for right center for telluric and single peak science data cases
      - Adjust ax.plot xrange
+    Modified by Chun Ly, 10 August 2018
+     - Compute median of trace_arr in each bin, best fit polynomial fit
+     - Plot best fit to median of trace_arr
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -370,6 +375,12 @@ def main(rawdir, silent=False, verbose=True):
 
             ctype, mtype, labels = group(xcen_arr)
 
+            x_fit0 = np.zeros(len(y0))
+            for bb in range(len(y0)):
+                use        = np.where(flag0[:,:,bb] == 0)
+                x_fit0[bb] = np.median(trace_arr[use[0],use[1],bb])
+            best_fit = np.polyfit(y0, x_fit0, 2)
+
             for pp in range(n_peaks):
                 for ff in range(n_files):
                     if labels[pp,ff] != '':
@@ -383,6 +394,11 @@ def main(rawdir, silent=False, verbose=True):
                         pd = np.poly1d(fit_arr[pp,ff])
                         ax.plot(pd(y0), y0, color=ctype[pp,ff], linewidth=0.75,
                                 alpha=0.5)
+
+            ax.scatter(x_fit0, y0, marker='o', edgecolor='none',
+                       facecolor='black', linewidth=2.0, alpha=0.9)
+            best_pd = np.poly1d(best_fit)
+            ax.plot(best_pd(y0), y0, color='black', linewidth=2.0, alpha=0.9)
 
             out_plt   = np.where((trace_arr > xlim[1]) | (trace_arr < xlim[0]))
             n_out_plt = len(out_plt[0])
