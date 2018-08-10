@@ -486,6 +486,9 @@ def create_distort_grid():
     Notes
     -----
     Created by Chun Ly, 29 June 2018
+
+    Modified by Chun Ly, 10 August 2018
+     - Plot best fit
     '''
 
     path0 = '/Users/cly/data/Observing/Gemini/Data/'
@@ -510,16 +513,19 @@ def create_distort_grid():
                 npz = np.load(n_file)
                 xcen_arr = npz['xcen_arr']
                 fit_arr  = npz['fit_arr']
+                best_fit = npz['best_fit']
             ax[0].scatter(xcen_arr, fit_arr[:,2], marker='o', edgecolor='k',
                           facecolor='none')
+            ax[0].axhline(y=best_fit[2], color='b')
             ax[1].scatter(xcen_arr, fit_arr[:,1], marker='o', edgecolor='k',
                           facecolor='none')
+            ax[0].axhline(y=best_fit[1], color='b')
             ax[2].scatter(xcen_arr, fit_arr[:,0], marker='o', edgecolor='k',
                           facecolor='none')
+            ax[0].axhline(y=best_fit[0], color='b')
 
     ax[0].annotate(r'x = A y$^2$ + B y + C', xy=(0.02,0.95), xycoords='axes fraction',
                    ha='left', va='top')
-    ax[0].set_ylabel('C')
     ax[1].set_ylabel('B')
     ax[2].set_ylabel('A')
 
