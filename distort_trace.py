@@ -170,6 +170,7 @@ def main(rawdir, silent=False, verbose=True):
     Modified by Chun Ly, 10 August 2018
      - Compute median of trace_arr in each bin, best fit polynomial fit
      - Plot best fit to median of trace_arr
+     - Update npz savefile with best_fit results
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -421,6 +422,10 @@ def main(rawdir, silent=False, verbose=True):
             plt.subplots_adjust(left=0.1, right=0.98, bottom=0.07, top=0.98)
             mylogger.info('Writing : '+out_pdf)
             fig.savefig(out_pdf, format='pdf')
+
+            mylogger.info('Updating : '+npz_file)
+            np.savez(npz_file, trace_arr=trace_arr, xcen_arr=xcen_arr,
+                     fit_arr=fit_arr, y0=y0, flag0=flag0, best_fit=best_fit)
     #endfor
 
     if silent == False: mylogger.info('### End ! ')
