@@ -172,6 +172,7 @@ def main(rawdir, silent=False, verbose=True):
      - Plot best fit to median of trace_arr
      - Update npz savefile with best_fit results
      - Annotate plot with best fit
+     - Fix IndexError issue (limit v1 >= 0)
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -290,7 +291,7 @@ def main(rawdir, silent=False, verbose=True):
                                 if no_c_file or ('HIP' in h_obj or 'HD' in h_obj):
                                     v1, v2 = x0_max0-15, x0_max0+15
                                 else:
-                                    v1 = np.int(list_peak[0][0]-x0_diff-15)
+                                    v1 = np.max([np.int(list_peak[0][0]-x0_diff-15),0])
                                     v2 = np.int(list_peak[0][1]-x0_diff+15)
 
                                 # print ff, bb, pp, v1, v2, x0_max0
