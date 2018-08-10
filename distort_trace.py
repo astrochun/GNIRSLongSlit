@@ -173,6 +173,7 @@ def main(rawdir, silent=False, verbose=True):
      - Update npz savefile with best_fit results
      - Annotate plot with best fit
      - Fix IndexError issue (limit v1 >= 0)
+     - Change fig suptitle (just the filename)
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -331,7 +332,7 @@ def main(rawdir, silent=False, verbose=True):
                     #endfor
                     plt.subplots_adjust(left=0.08, right=0.99, bottom=0.05, top=0.95,
                                         hspace=0.02, wspace=0.02)
-                    fig.suptitle(files[ff], fontsize=12)
+                    fig.suptitle(os.path.basename(files[ff]), fontsize=12)
                     fig.savefig(pdf_pp, format='pdf')
                 #endfor
                 mylogger.info('Writing : '+out_pdf1)
