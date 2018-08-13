@@ -493,7 +493,8 @@ def create_distort_grid(rawdir, silent=False, verbose=True):
     Modified by Chun Ly, 13 August 2018
      - Rewrite to work for specified rawdir path (instead of all)
      - Fix typo with ax.axhline indexing
-     - Re-organize code (handle only one distort_trace.npz filenpz file)
+     - Re-organize code (handle only one distort_trace.npz file)
+     - Minor bug fix: array name
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -516,7 +517,7 @@ def create_distort_grid(rawdir, silent=False, verbose=True):
         else:
             fig, ax = plt.subplots(nrows=3)
 
-            npz = np.load(n_file[0])
+            npz = np.load(npz_files[0])
             xcen_arr = npz['xcen_arr']
             fit_arr  = npz['fit_arr']
             best_fit = npz['best_fit']
