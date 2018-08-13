@@ -493,6 +493,7 @@ def create_distort_grid(rawdir, silent=False, verbose=True):
     Modified by Chun Ly, 13 August 2018
      - Rewrite to work for specified rawdir path (instead of all)
      - Fix typo with ax.axhline indexing
+     - Re-organize code (handle only one distort_trace.npz filenpz file)
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -508,32 +509,29 @@ def create_distort_grid(rawdir, silent=False, verbose=True):
     for path in list_path:
         mylogger.info('Working on : '+path.split('/')[-2])
 
-        fig, ax = plt.subplots(nrows=3)
-
-        npz_files = glob(path+'/????????/distort_trace.npz')
-        if len(npz_files) == 0:
-            npz_files = glob(path+'distort_trace.npz')
+        npz_files = glob(path+'/distort_trace.npz')
 
         if len(npz_files) == 0:
             log.warn('No files found!!!')
         else:
-            for n_file in npz_files:
-                npz = np.load(n_file)
-                xcen_arr = npz['xcen_arr']
-                fit_arr  = npz['fit_arr']
-                best_fit = npz['best_fit']
-                n_peaks  = xcen_arr.shape[0]
+            fig, ax = plt.subplots(nrows=3)
 
-                for pp in range(n_peaks):
-                    ax[0].scatter(xcen_arr[pp], fit_arr[pp,:,2], marker='o',
-                                  edgecolor='k', facecolor='none')
-                    ax[0].axhline(y=best_fit[2], color='b')
-                    ax[1].scatter(xcen_arr[pp], fit_arr[pp,:,1], marker='o',
-                                  edgecolor='k', facecolor='none')
-                    ax[1].axhline(y=best_fit[1], color='b')
-                    ax[2].scatter(xcen_arr[pp], fit_arr[pp,:,0], marker='o',
-                                  edgecolor='k', facecolor='none')
-                    ax[2].axhline(y=best_fit[0], color='b')
+            npz = np.load(n_file[0])
+            xcen_arr = npz['xcen_arr']
+            fit_arr  = npz['fit_arr']
+            best_fit = npz['best_fit']
+            n_peaks  = xcen_arr.shape[0]
+
+            for pp in range(n_peaks):
+                ax[0].scatter(xcen_arr[pp], fit_arr[pp,:,2], marker='o',
+                              edgecolor='k', facecolor='none')
+                ax[0].axhline(y=best_fit[2], color='b')
+                ax[1].scatter(xcen_arr[pp], fit_arr[pp,:,1], marker='o',
+                              edgecolor='k', facecolor='none')
+                ax[1].axhline(y=best_fit[1], color='b')
+                ax[2].scatter(xcen_arr[pp], fit_arr[pp,:,0], marker='o',
+                              edgecolor='k', facecolor='none')
+                ax[2].axhline(y=best_fit[0], color='b')
 
             ax[0].annotate(r'x = A y$^2$ + B y + C', xy=(0.02,0.95),
                            xycoords='axes fraction', ha='left', va='top')
@@ -550,7 +548,7 @@ def create_distort_grid(rawdir, silent=False, verbose=True):
             ax[2].set_xlabel('X [pix]')
             plt.subplots_adjust(left=0.15, right=0.99, top=0.99, bottom=0.1)
 
-        out_pdf = path+'distort_grid.pdf'
-        log.info('Writing : '+out_pdf)
-        fig.savefig(out_pdf)
+            out_pdf = path+'distort_grid.pdf'
+            log.info('Writing : '+out_pdf)
+            fig.savefig(out_pdf)
 #enddef
