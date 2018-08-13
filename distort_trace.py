@@ -495,6 +495,7 @@ def create_distort_grid(rawdir, silent=False, verbose=True):
      - Fix typo with ax.axhline indexing
      - Re-organize code (handle only one distort_trace.npz file)
      - Minor bug fix: array name
+     - Plot aesthetics
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -536,12 +537,13 @@ def create_distort_grid(rawdir, silent=False, verbose=True):
 
             ax[0].annotate(r'x = A y$^2$ + B y + C', xy=(0.02,0.95),
                            xycoords='axes fraction', ha='left', va='top')
+            ax[0].set_ylabel('C')
             ax[1].set_ylabel('B')
             ax[2].set_ylabel('A')
 
             ax[0].set_ylim([-10,0])
-            ax[1].set_ylim([-0.05,0.05])
-            ax[2].set_ylim([-0.01,0.01])
+            ax[1].set_ylim([-0.025,0.025])
+            ax[2].set_ylim([-0.001,0.001])
 
             ax[0].set_xticklabels([])
             ax[1].set_xticklabels([])
