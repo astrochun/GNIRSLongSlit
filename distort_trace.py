@@ -492,6 +492,7 @@ def create_distort_grid(rawdir, silent=False, verbose=True):
 
     Modified by Chun Ly, 13 August 2018
      - Rewrite to work for specified rawdir path (instead of all)
+     - Fix typo with ax.axhline indexing
     '''
 
     if rawdir[-1] != '/': rawdir += '/'
@@ -529,10 +530,10 @@ def create_distort_grid(rawdir, silent=False, verbose=True):
                     ax[0].axhline(y=best_fit[2], color='b')
                     ax[1].scatter(xcen_arr[pp], fit_arr[pp,:,1], marker='o',
                                   edgecolor='k', facecolor='none')
-                    ax[0].axhline(y=best_fit[1], color='b')
+                    ax[1].axhline(y=best_fit[1], color='b')
                     ax[2].scatter(xcen_arr[pp], fit_arr[pp,:,0], marker='o',
                                   edgecolor='k', facecolor='none')
-                    ax[0].axhline(y=best_fit[0], color='b')
+                    ax[2].axhline(y=best_fit[0], color='b')
 
             ax[0].annotate(r'x = A y$^2$ + B y + C', xy=(0.02,0.95),
                            xycoords='axes fraction', ha='left', va='top')
