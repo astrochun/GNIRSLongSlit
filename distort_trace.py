@@ -471,7 +471,7 @@ def zcalbase_gal_gemini_all():
 
 #enddef
 
-def create_distort_grid():
+def create_distort_grid(rawdir, silent=False, verbose=True):
     '''
     Create grid (and plot) of distortion for extraction
 
@@ -489,22 +489,29 @@ def create_distort_grid():
 
     Modified by Chun Ly, 10 August 2018
      - Plot best fit
+
+    Modified by Chun Ly, 13 August 2018
+     - Rewrite to work for specified rawdir path (instead of all)
     '''
 
-    path0 = '/Users/cly/data/Observing/Gemini/Data/'
+    if rawdir[-1] != '/': rawdir += '/'
 
-    targets0 = gnirs_2017a + gnirs_2017b
-    targets0.sort()
+    logfile  = rawdir+'distort_trace.log'
+    mylogger = glog.log0(logfile)._get_logger()
 
-    fig, ax = plt.subplots(nrows=3)
+    if silent == False: mylogger.info('### Begin ! ')
 
-    for target in targets0:
-        log.info('Working on : '+target)
+    dir_list, list_path = dir_check.main(rawdir, mylogger=mylogger,
+                                         silent=silent, verbose=verbose)
 
-        t_path = path0 + target
-        npz_files = glob(t_path+'/????????/distort_trace.npz')
+    for path in list_path:
+        mylogger.info('Working on : '+path.split('/')[-2])
+
+        fig, ax = plt.subplots(nrows=3)
+
+        npz_files = glob(path+'/????????/distort_trace.npz')
         if len(npz_files) == 0:
-            npz_files = glob(t_path+'distort_trace.npz')
+            npz_files = glob(path+'distort_trace.npz')
 
         if len(npz_files) == 0:
             log.warn('No files found!!!')
@@ -514,32 +521,35 @@ def create_distort_grid():
                 xcen_arr = npz['xcen_arr']
                 fit_arr  = npz['fit_arr']
                 best_fit = npz['best_fit']
-            ax[0].scatter(xcen_arr, fit_arr[:,2], marker='o', edgecolor='k',
-                          facecolor='none')
-            ax[0].axhline(y=best_fit[2], color='b')
-            ax[1].scatter(xcen_arr, fit_arr[:,1], marker='o', edgecolor='k',
-                          facecolor='none')
-            ax[0].axhline(y=best_fit[1], color='b')
-            ax[2].scatter(xcen_arr, fit_arr[:,0], marker='o', edgecolor='k',
-                          facecolor='none')
-            ax[0].axhline(y=best_fit[0], color='b')
+                n_peaks  = xcen_arr.shape[0]
 
-    ax[0].annotate(r'x = A y$^2$ + B y + C', xy=(0.02,0.95), xycoords='axes fraction',
-                   ha='left', va='top')
-    ax[1].set_ylabel('B')
-    ax[2].set_ylabel('A')
+                for pp in range(n_peaks):
+                    ax[0].scatter(xcen_arr[pp], fit_arr[pp,:,2], marker='o',
+                                  edgecolor='k', facecolor='none')
+                    ax[0].axhline(y=best_fit[2], color='b')
+                    ax[1].scatter(xcen_arr[pp], fit_arr[pp,:,1], marker='o',
+                                  edgecolor='k', facecolor='none')
+                    ax[0].axhline(y=best_fit[1], color='b')
+                    ax[2].scatter(xcen_arr[pp], fit_arr[pp,:,0], marker='o',
+                                  edgecolor='k', facecolor='none')
+                    ax[0].axhline(y=best_fit[0], color='b')
 
-    ax[0].set_ylim([-10,0])
-    ax[1].set_ylim([-0.05,0.05])
-    ax[2].set_ylim([-0.01,0.01])
+            ax[0].annotate(r'x = A y$^2$ + B y + C', xy=(0.02,0.95),
+                           xycoords='axes fraction', ha='left', va='top')
+            ax[1].set_ylabel('B')
+            ax[2].set_ylabel('A')
 
-    ax[0].set_xticklabels([])
-    ax[1].set_xticklabels([])
+            ax[0].set_ylim([-10,0])
+            ax[1].set_ylim([-0.05,0.05])
+            ax[2].set_ylim([-0.01,0.01])
 
-    ax[2].set_xlabel('X [pix]')
-    plt.subplots_adjust(left=0.15, right=0.99, top=0.99, bottom=0.1)
+            ax[0].set_xticklabels([])
+            ax[1].set_xticklabels([])
 
-    out_pdf = path0+'distort_grid.pdf'
-    log.info('Writing : '+out_pdf)
-    fig.savefig(out_pdf)
+            ax[2].set_xlabel('X [pix]')
+            plt.subplots_adjust(left=0.15, right=0.99, top=0.99, bottom=0.1)
+
+        out_pdf = path+'distort_grid.pdf'
+        log.info('Writing : '+out_pdf)
+        fig.savefig(out_pdf)
 #enddef
