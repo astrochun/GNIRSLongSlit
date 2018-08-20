@@ -493,6 +493,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
     Modified by Chun Ly, 11 July 2018
      - Call image_stats.main in combine step
      - Import Extract1D.extract, call in extract step
+     - Interactive function for extraction coordinate
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1080,7 +1081,20 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             mylogger.warn('File not found! : '+rawdir+'distort_trace.npz')
             mylogger.warn('Need to run distort_trace')
         else:
-            extract_func.main(path0=rawdir, Instr='GNIRS',
+            coord_file = rawdir + 'coords.txt'
+            if not exists(coord_file):
+                mylogger.info('coord_file not found.')
+                mylogger.info('Interactive identification is needed.')
+                n_aper = raw_input("## Enter the number of apertures : ")
+
+                coord_arr = []
+                for aa in range(n_aper):
+                    t_val = raw_input('## Enter continuum center (x value) or emission line center [x,y] : ')
+                    coord_arr.append(t_val.split(','))
+
+            else:
+                # Need to read in file
+            extract_func.main(path0=rawdir, Instr='GNIRS', coords=coord_arr,
                               dbfile='distort_trace.npz')
 
         iraf.chdir(cdir)
