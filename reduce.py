@@ -28,7 +28,7 @@ from pyraf import iraf
 
 iraf.gemini(_doprint=0)
 iraf.gemini.gnirs(_doprint=0)
-
+e
 log.info("Unlearning tasks")
 iraf.gemini.unlearn()
 iraf.gemini.gemtools.unlearn()
@@ -47,6 +47,8 @@ import image_stats # + on 11/07/2018
 # + on 14/09/2017
 import remove_bias_level
 import examine_median
+
+from Extract1D import extract as extract_func
 
 # + on 20/09/2017
 from check_path import main as check_path
@@ -490,6 +492,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Add interact keyword for interactive combine step
     Modified by Chun Ly, 11 July 2018
      - Call image_stats.main in combine step
+     - Import Extract1D.extract, call in extract step
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1072,6 +1075,13 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                         mylogger.warn('Will not run nsextract on '+_list)
             else:
                 mylogger.warn('Telluric file does NOT exist : '+_list)
+
+        if not exists(rawdir+'distort_trace.npz'):
+            mylogger.warn('File not found! : '+rawdir+'distort_trace.npz')
+            mylogger.warn('Need to run distort_trace')
+        else:
+            extract_func.main(path0=rawdir, Instr='GNIRS',
+                              dbfile='distort_trace.npz')
 
         iraf.chdir(cdir)
 
