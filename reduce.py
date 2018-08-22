@@ -28,7 +28,7 @@ from pyraf import iraf
 
 iraf.gemini(_doprint=0)
 iraf.gemini.gnirs(_doprint=0)
-e
+
 log.info("Unlearning tasks")
 iraf.gemini.unlearn()
 iraf.gemini.gemtools.unlearn()
