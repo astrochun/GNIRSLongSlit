@@ -492,8 +492,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Add interact keyword for interactive combine step
     Modified by Chun Ly, 11 July 2018
      - Call image_stats.main in combine step
+    Modified by Chun Ly, 20 August 2018
      - Import Extract1D.extract, call in extract step
      - Interactive function for extraction coordinate
+    Modified by Chun Ly, 22 August 2018
+     - Change coord file to npz format. Force coord_arr to be float (not string)
+     - Save coords.npz file
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1081,7 +1085,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
             mylogger.warn('File not found! : '+rawdir+'distort_trace.npz')
             mylogger.warn('Need to run distort_trace')
         else:
-            coord_file = rawdir + 'coords.txt'
+            coord_file = rawdir + 'coords.npz'
             if not exists(coord_file):
                 mylogger.info('coord_file not found.')
                 mylogger.info('Interactive identification is needed.')
@@ -1090,8 +1094,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 coord_arr = []
                 for aa in range(n_aper):
                     t_val = raw_input('## Enter continuum center (x value) or emission line center [x,y] : ')
-                    coord_arr.append(t_val.split(','))
+                    coord_arr.append(np.float_(t_val.split(',')).tolist())
 
+                mylogger.info('Writing : '+coord_file)
+                np.savez(coord_file, coord_arr=coord_arr)
             else:
                 # Need to read in file
             extract_func.main(path0=rawdir, Instr='GNIRS', coords=coord_arr,
