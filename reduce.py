@@ -499,6 +499,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Change coord file to npz format. Force coord_arr to be float (not string)
      - Save coords.npz file
      - Read in coords.npz file
+     - Bug fix: n_aper to integer (not string)
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1091,6 +1092,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 mylogger.info('coord_file not found.')
                 mylogger.info('Interactive identification is needed.')
                 n_aper = raw_input("## Enter the number of apertures : ")
+                n_aper = np.int(n_aper)
 
                 coord_arr = []
                 for aa in range(n_aper):
