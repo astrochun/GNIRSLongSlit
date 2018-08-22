@@ -500,6 +500,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Save coords.npz file
      - Read in coords.npz file
      - Bug fix: n_aper to integer (not string)
+     - Bug fix: to np.load call
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1103,7 +1104,7 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 np.savez(coord_file, coord_arr=coord_arr)
             else:
                 mylogger.info('File found! Reading : '+coord_file)
-                t_npz = np.load(coord_file, coord_arr=coord_arr)
+                t_npz = np.load(coord_file)
                 coord_arr = t_npz['coord_arr'].tolist()
 
             extract_func.main(path0=rawdir, Instr='GNIRS', coords=coord_arr,
