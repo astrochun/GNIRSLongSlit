@@ -501,6 +501,8 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Read in coords.npz file
      - Bug fix: n_aper to integer (not string)
      - Bug fix: to np.load call
+    Modified by Chun Ly, 22 August 2018
+     - mylogger call to provide number of apertures and values
     '''
     
     rawdir = check_path(rawdir) # + on 20/09/2017
@@ -1093,11 +1095,14 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 mylogger.info('coord_file not found.')
                 mylogger.info('Interactive identification is needed.')
                 n_aper = raw_input("## Enter the number of apertures : ")
+                mylogger.info('Number of apertures : '+n_aper)
                 n_aper = np.int(n_aper)
 
                 coord_arr = []
                 for aa in range(n_aper):
                     t_val = raw_input('## Enter continuum center (x value) or emission line center [x,y] : ')
+                    mylogger.info('Aper #'+str(aa+1)+' : ['+t_val+']')
+
                     coord_arr.append(np.float_(t_val.split(',')).tolist())
 
                 mylogger.info('Writing : '+coord_file)
