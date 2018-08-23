@@ -502,9 +502,10 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
      - Bug fix: n_aper to integer (not string)
      - Bug fix: to np.load call
     Modified by Chun Ly, 22 August 2018
-     - mylogger call to provide number of apertures and values
+     - mylogger call to provide no. of apertures, values
+     - mylogger call to provide no. of apertures, values (when npz file exists)
     '''
-    
+
     rawdir = check_path(rawdir) # + on 20/09/2017
 
     # + on 10/12/2017
@@ -1111,6 +1112,12 @@ def run(rawdir, bpm="gnirs$data/gnirsn_2012dec05_bpm.fits",
                 mylogger.info('File found! Reading : '+coord_file)
                 t_npz = np.load(coord_file)
                 coord_arr = t_npz['coord_arr'].tolist()
+
+                n_aper = len(coord_arr)
+                mylogger.info('Number of apertures : '+str(n_aper))
+                for aa in range(n_aper):
+                    mylogger.info('Aper #'+str(aa+1)+' : ['+\
+                                  ','.join([str(test) for test in coord_arr[aa]]))
 
             extract_func.main(path0=rawdir, Instr='GNIRS', coords=coord_arr,
                               dbfile='distort_trace.npz')
